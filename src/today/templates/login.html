@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Sign in · today{% endblock %}
+{% block body %}
+<main class="login">
+  <p class="eyebrow">TODAY</p>
+  <h1 class="login-title">Sign in</h1>
+  <form method="post" action="/login" class="login-form">
+    <label for="passphrase" class="label">PASSPHRASE</label>
+    <input id="passphrase" name="passphrase" type="password" autocomplete="current-password" required autofocus>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit" class="btn-accent">SIGN IN</button>
+  </form>
+</main>
+{% endblock %}

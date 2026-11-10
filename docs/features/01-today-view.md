@@ -26,9 +26,10 @@ recurrence, offline mode (the service worker only makes the app installable).
 # POST /items/{id}/reopen     → HTMX fragment of the row; 404 if missing
 # GET  /healthz → 200 {"status":"ok"} · GET /manifest.webmanifest · GET /sw.js (no auth)
 
+
 class ItemIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)
-    due_at: AwareDatetime          # form sends local time; converted to UTC
+    due_at: AwareDatetime  # form sends local time; converted to UTC
     remind_at: AwareDatetime | None = None
     notes: str | None = Field(default=None, max_length=2000)
 ```
