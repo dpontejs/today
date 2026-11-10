@@ -1,3 +1,4 @@
+import threading
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -56,14 +57,55 @@ def test_login_rate_limited_after_5_failures(client: TestClient):
     assert login(client).status_code == 429
 
 
+T0 = datetime(2026, 11, 10, 12, 0, tzinfo=UTC)
+
+
 def test_limiter_window_expires():
     limiter = LoginLimiter()
-    t0 = datetime(2026, 11, 10, 12, 0, tzinfo=UTC)
     for _ in range(5):
-        limiter.record_failure("1.2.3.4", t0)
-    assert limiter.is_blocked("1.2.3.4", t0 + timedelta(minutes=9))
-    assert not limiter.is_blocked("1.2.3.4", t0 + timedelta(minutes=11))
-    assert not limiter.is_blocked("5.6.7.8", t0)
+        assert limiter.attempt("1.2.3.4", T0)
+    assert not limiter.attempt("1.2.3.4", T0 + timedelta(minutes=9))
+    assert limiter.attempt("1.2.3.4", T0 + timedelta(minutes=11))
+    assert limiter.attempt("5.6.7.8", T0)
+
+
+def test_limiter_counts_attempt_before_verification():
+    """Parallel requests must not all pass the check before any failure is recorded."""
+    limiter = LoginLimiter()
+    results = [limiter.attempt("1.2.3.4", T0) for _ in range(8)]
+    assert results == [True] * 5 + [False] * 3
+
+
+def test_limiter_is_atomic_across_threads():
+    limiter = LoginLimiter()
+    barrier = threading.Barrier(16)
+    results: list[bool] = []
+
+    def worker():
+        barrier.wait()
+        results.append(limiter.attempt("1.2.3.4", T0))
+
+    threads = [threading.Thread(target=worker) for _ in range(16)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert results.count(True) == 5
+
+
+def test_limiter_global_cap_stops_ip_rotation():
+    limiter = LoginLimiter(global_max_failures=20)
+    for i in range(20):
+        assert limiter.attempt(f"10.0.0.{i}", T0)
+    assert not limiter.attempt("10.0.1.1", T0)
+
+
+def test_limiter_success_clears_that_ip():
+    limiter = LoginLimiter()
+    for _ in range(4):
+        limiter.attempt("1.2.3.4", T0)
+    limiter.succeed("1.2.3.4")
+    assert all(limiter.attempt("1.2.3.4", T0) for _ in range(5))
 
 
 def test_session_cookie_flags(client: TestClient):

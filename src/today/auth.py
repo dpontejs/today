@@ -1,6 +1,6 @@
 """Single-user passphrase login with a signed session cookie (ADR 0004)."""
 
-from collections import defaultdict
+import threading
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
@@ -25,26 +25,39 @@ class LoginRequired(Exception):
 
 
 class LoginLimiter:
-    """In-memory failed-login counter per client IP. Enough for one process (ADR 0001)."""
+    """In-memory login attempt counter (ADR 0001: one process).
 
-    def __init__(self, max_failures: int = 5, window: timedelta = timedelta(minutes=10)) -> None:
+    An attempt is counted *before* the passphrase is checked, under a lock, so parallel requests cannot all
+    slip past the limit while Argon2 runs. Besides the per-IP limit there is a global one: with a single user,
+    many failures from many IPs is an attack (or a spoofed X-Forwarded-For), never normal traffic.
+    """
+
+    def __init__(
+        self,
+        max_failures: int = 5,
+        window: timedelta = timedelta(minutes=10),
+        global_max_failures: int = 20,
+    ) -> None:
         self.max_failures = max_failures
         self.window = window
-        self._failures: dict[str, list[datetime]] = defaultdict(list)
+        self.global_max_failures = global_max_failures
+        self._attempts: list[tuple[datetime, str]] = []
+        self._lock = threading.Lock()
 
-    def _recent(self, ip: str, now: datetime) -> list[datetime]:
-        recent = [t for t in self._failures[ip] if now - t < self.window]
-        self._failures[ip] = recent
-        return recent
+    def attempt(self, ip: str, now: datetime) -> bool:
+        """Record an attempt from `ip`; False if it is over a limit (and then nothing is recorded)."""
+        with self._lock:
+            self._attempts = [(t, a) for t, a in self._attempts if now - t < self.window]
+            per_ip = sum(1 for _, a in self._attempts if a == ip)
+            if per_ip >= self.max_failures or len(self._attempts) >= self.global_max_failures:
+                return False
+            self._attempts.append((now, ip))
+            return True
 
-    def is_blocked(self, ip: str, now: datetime) -> bool:
-        return len(self._recent(ip, now)) >= self.max_failures
-
-    def record_failure(self, ip: str, now: datetime) -> None:
-        self._recent(ip, now).append(now)
-
-    def reset(self, ip: str) -> None:
-        self._failures.pop(ip, None)
+    def succeed(self, ip: str) -> None:
+        """A correct passphrase: forget this IP's attempts."""
+        with self._lock:
+            self._attempts = [(t, a) for t, a in self._attempts if a != ip]
 
 
 def _signer(settings: Settings) -> TimestampSigner:
@@ -103,13 +116,12 @@ def login(request: Request, passphrase: Annotated[str, Form()]) -> Response:
     limiter: LoginLimiter = request.app.state.login_limiter
     ip, now = _client_ip(request), datetime.now(UTC)
 
-    if limiter.is_blocked(ip, now):
+    if not limiter.attempt(ip, now):
         return _login_page(request, 429, "Too many attempts. Try again in a few minutes.")
     if not verify_passphrase(settings, passphrase):
-        limiter.record_failure(ip, now)
         return _login_page(request, 401, "Wrong passphrase.")
 
-    limiter.reset(ip)
+    limiter.succeed(ip)
     response = RedirectResponse("/", status_code=303)
     response.set_cookie(
         COOKIE_NAME,

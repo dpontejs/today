@@ -143,8 +143,7 @@ COOKIE_SECURE=false PASSPHRASE_HASH='...' SESSION_SECRET=dev uv run uvicorn --fa
 
 ### Pitfalls
 
-- Behind Caddy every request comes from Caddy's IP, so the rate limiter would block everyone at once. Uvicorn
-  must run with `--proxy-headers --forwarded-allow-ips` set to the proxy network (done in the Dockerfile).
+- Behind Caddy every request comes from Caddy's IP, so uvicorn runs with `--proxy-headers` to read the real client IP from `X-Forwarded-For`. That header can be forged if anything other than Caddy reaches the app, which is why the limiter also has a global cap (20 attempts per 10 min from all IPs together).
 - `TestClient` talks plain HTTP by default and httpx refuses to send `Secure` cookies over it: the tests use
   `base_url="https://testserver"`.
 
