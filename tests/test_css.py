@@ -17,7 +17,11 @@ def test_datetime_input_cannot_overflow_on_ios():
     body = rule('input[type="datetime-local"]')
     assert "-webkit-appearance: none" in body
     assert "min-width: 0" in body
+    assert "white-space: nowrap" in body  # wrapped, the 50px line-height doubled the field's height
 
 
-def test_add_fields_column_can_shrink():
-    assert "min-width: 0" in rule(".add-fields")
+def test_add_form_gives_title_its_own_row():
+    """Only the date shares a row with ADD, so it gets enough width for "10 Nov 2026 at 21:00"."""
+    assert "grid-column: 1 / -1" in rule(".add-title")
+    template = (Path(__file__).parents[1] / "src/today/templates/today.html").read_text()
+    assert 'class="add-title"' in template
