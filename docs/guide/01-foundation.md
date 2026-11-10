@@ -102,3 +102,53 @@ print(datetime(2026,11,11,1,0,tzinfo=UTC).astimezone(ZoneInfo('America/Fortaleza
   SQL; other modules (`notify`, `importers`) will call `create_item`, never `INSERT INTO items`.
 - *Software Architecture: The Hard Parts*: ch. 6, data ownership (one owner per table, even inside a
   monolith).
+
+## 3. Login and session
+
+### Concepts
+
+- **Password hashing with Argon2.** The passphrase never lives in the repo or the environment; only its
+  Argon2 hash does (`PASSPHRASE_HASH`). Argon2 is deliberately slow and memory-hungry, so a leaked hash is
+  expensive to brute-force.
+- **Signed cookie session.** After login the server sets `today_session = sign("owner")` with
+  `itsdangerous.TimestampSigner`. No session table: the signature proves the server issued it, the timestamp
+  enforces 90 days. Changing `SESSION_SECRET` logs every device out.
+- **Cookie flags.** `HttpOnly` (JavaScript cannot read it), `Secure` (HTTPS only), `SameSite=Lax` (not sent
+  on cross-site POSTs, which blocks basic CSRF on our forms).
+- **HTMX and redirects.** HTMX follows a 303 silently and would swap the login page into a list row. For
+  HTMX requests the server answers `200` + `HX-Redirect: /login`, and HTMX reloads the whole page.
+
+### Why
+
+One user does not justify OAuth or a users table ([ADR 0004](../adr/0004-single-user-passphrase-auth.md)).
+Basic auth in Caddy would have been zero code, but installed iOS PWAs handle its prompt badly.
+
+### Commands
+
+```bash
+# create the hash for the VPS secret (prompts, never echoes)
+uv run python -c "import getpass; from argon2 import PasswordHasher; print(PasswordHasher().hash(getpass.getpass()))"
+# a random session secret
+openssl rand -hex 32
+# local dev over http
+COOKIE_SECURE=false PASSPHRASE_HASH='...' SESSION_SECRET=dev uv run uvicorn --factory today.app:from_env --reload
+```
+
+### Exercises
+
+1. Log in, copy the cookie value from the browser devtools, change one character and reload. What happens and
+   which line of `auth.py` decides it?
+2. The rate limiter lives in memory. What happens to it on a restart, and with two app instances? Which ADR
+   makes that acceptable?
+
+### Pitfalls
+
+- Behind Caddy every request comes from Caddy's IP, so the rate limiter would block everyone at once. Uvicorn
+  must run with `--proxy-headers --forwarded-allow-ips` set to the proxy network (done in the Dockerfile).
+- `TestClient` talks plain HTTP by default and httpx refuses to send `Secure` cookies over it: the tests use
+  `base_url="https://testserver"`.
+
+### Read next
+
+- *Fundamentals of Software Architecture*: architecture characteristics: security as an explicit
+  characteristic and the trade-off against simplicity; architecture decision records.

@@ -1,0 +1,84 @@
+/* "Departure board" identity: tokens from docs/design.md. No colors outside these custom properties. */
+:root {
+  --bg: #0E0F11;
+  --panel: #1A1C1F;
+  --rule: #2A2C30;
+  --rule-soft: #24262A;
+  --ink: #EDE6D6;
+  --ink-2: #B9B4A8;
+  --muted: #8C8A84;
+  --accent: #FFB000;
+  --late: #FF6A3D;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --gutter: 18px;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+
+body {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.eyebrow, .label {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+input[type="text"], input[type="password"], input[type="datetime-local"], textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  font-size: 16px; /* below 16px iOS Safari zooms into the field */
+}
+
+.btn-accent {
+  min-height: 52px;
+  padding: 0 20px;
+  border: 0;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.error { margin: 0; color: var(--late); }
+
+/* Login */
+.login {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 48px) var(--gutter) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-title {
+  margin: 0 0 32px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 0.9;
+  color: var(--accent);
+}
+
+.login-form { display: flex; flex-direction: column; gap: 12px; }

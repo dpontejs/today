@@ -23,6 +23,8 @@ packages = ["src/today"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# Starlette suggests httpx2; httpx stays until the stack allows the swap (ledgered ruling).
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
 
 [tool.ruff]
 line-length = 110
