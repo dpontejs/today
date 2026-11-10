@@ -41,14 +41,12 @@
   </section>
 
   <form class="add" method="post" action="/items" novalidate>
-    <div class="add-fields">
-      <label for="title" class="visually-hidden">What</label>
-      <input id="title" name="title" type="text" placeholder="review chapter 3" value="{{ form.title }}"
-             maxlength="200" autocomplete="off" {% if errors.title %}aria-invalid="true" aria-describedby="err-title"{% endif %}>
-      <label for="due_at" class="visually-hidden">When</label>
-      <input id="due_at" name="due_at" type="datetime-local" value="{{ form.due_at }}"
-             {% if errors.due_at %}aria-invalid="true" aria-describedby="err-due"{% endif %}>
-    </div>
+    <label for="title" class="visually-hidden">What</label>
+    <input id="title" name="title" type="text" class="add-title" placeholder="review chapter 3" value="{{ form.title }}"
+           maxlength="200" autocomplete="off" {% if errors.title %}aria-invalid="true" aria-describedby="err-title"{% endif %}>
+    <label for="due_at" class="visually-hidden">When</label>
+    <input id="due_at" name="due_at" type="datetime-local" value="{{ form.due_at }}"
+           {% if errors.due_at %}aria-invalid="true" aria-describedby="err-due"{% endif %}>
     <button type="submit" class="btn-accent add-button">ADD</button>
     {% if errors.title %}<p class="error" id="err-title" role="alert">{{ errors.title }}</p>{% endif %}
     {% if errors.due_at %}<p class="error" id="err-due" role="alert">{{ errors.due_at }}</p>{% endif %}
