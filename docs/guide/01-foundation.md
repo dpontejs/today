@@ -55,3 +55,50 @@ sqlite3 data/today.db 'SELECT * FROM schema_version'
   favours (simplicity, cost, deployability) and which it gives up (scalability, elasticity).
 - *Software Architecture: The Hard Parts*: ch. 6 "Pulling Apart Operational Data", the section on choosing
   a database type.
+
+## 2. Items and the Today buckets
+
+### Concepts
+
+- **Pure time.** `build_today(conn, now, tz)` receives `now` instead of reading the clock. Tests pin any
+  instant (23:30 local, 22:00 local that is already tomorrow in UTC) without mocking.
+- **Local day, UTC storage.** The user's day starts at local midnight in `America/Fortaleza`.
+  `local_day_bounds` builds that midnight in the local zone, converts it to UTC, and the SQL compares UTC
+  strings. The conversion happens once, at the edge, never inside SQL.
+- **Idempotent status changes.** `mark_done` only updates rows still `open`, so pressing "done" twice (a double
+  tap, an HTMX retry) keeps the first `done_at`.
+
+### Why
+
+The bucket rules are the product: "what is late" must match what the user sees on the wall clock. Keeping
+them in one pure function with exhaustive boundary tests is cheaper than discovering a midnight bug on the
+phone at 00:30.
+
+### Commands
+
+```bash
+uv run pytest tests/test_items.py -v
+uv run python -c "from datetime import datetime, UTC; from zoneinfo import ZoneInfo; \
+print(datetime(2026,11,11,1,0,tzinfo=UTC).astimezone(ZoneInfo('America/Fortaleza')))"
+```
+
+### Exercises
+
+1. Change `local_day_bounds` to use `now.date()` instead of `now.astimezone(tz).date()`. Which tests fail
+   and why?
+2. Add a "someday" bucket for items without a date. What would change in the schema (`due_at NOT NULL`) and
+   in the migration?
+
+### Pitfalls
+
+- `datetime.combine(date, time.min, tzinfo=tz)` is fine for Fortaleza (no DST). In a zone with DST, local
+  midnight can be ambiguous or missing; `zoneinfo` resolves it with `fold`, and tests would need a DST case.
+- Comparing ISO strings only works when every value has the same offset. That is why `to_db` always converts
+  to UTC.
+
+### Read next
+
+- *Fundamentals of Software Architecture*: modularity. `items` owns its table and exposes functions, not
+  SQL; other modules (`notify`, `importers`) will call `create_item`, never `INSERT INTO items`.
+- *Software Architecture: The Hard Parts*: ch. 6, data ownership (one owner per table, even inside a
+  monolith).
