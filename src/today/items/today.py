@@ -48,3 +48,12 @@ def build_today(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo) -> TodayV
         done_today=done_today,
         next_item_id=today[0].id if today else None,
     )
+
+
+def row_kind(item: Item, now: datetime, tz: ZoneInfo) -> str:
+    """Which bucket a single item belongs to now: 'done', 'late', 'today' or 'next'."""
+    if item.status == "done":
+        return "done"
+    if item.due_at < now:
+        return "late"
+    return "today" if item.due_at < local_day_bounds(now, tz)[1] else "next"

@@ -1,5 +1,6 @@
 """Application factory. Run with: uvicorn --factory today.app:from_env"""
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -9,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from today import auth
 from today.config import Settings, load_settings
 from today.db import connect, migrate
+from today.items import routes as item_routes
 
 PACKAGE_DIR = Path(__file__).parent
 
@@ -20,7 +22,11 @@ def create_app(settings: Settings) -> FastAPI:
     migrate(conn)
     app.state.settings = settings
     app.state.conn = conn
-    app.state.templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
+    app.state.clock = lambda: datetime.now(UTC)
+    templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
+    templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
+    templates.env.filters["local_day"] = lambda dt: dt.astimezone(settings.tz).strftime("%a %d").upper()
+    app.state.templates = templates
     app.state.login_limiter = auth.LoginLimiter()
 
     @app.exception_handler(auth.LoginRequired)
@@ -33,6 +39,7 @@ def create_app(settings: Settings) -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
     app.include_router(auth.router)
+    app.include_router(item_routes.router)
     return app
 
 

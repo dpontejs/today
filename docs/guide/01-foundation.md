@@ -152,3 +152,51 @@ COOKIE_SECURE=false PASSPHRASE_HASH='...' SESSION_SECRET=dev uv run uvicorn --fa
 
 - *Fundamentals of Software Architecture*: architecture characteristics: security as an explicit
   characteristic and the trade-off against simplicity; architecture decision records.
+
+## 4. The Today page: server-rendered HTML with HTMX
+
+### Concepts
+
+- **Server-side rendering.** The server builds the whole page with Jinja templates; the browser gets HTML,
+  not JSON. One language (Python) owns the bucket rules and the markup.
+- **HTMX for the small dynamic bits.** Finishing an item is `hx-post="/items/7/done"` on a button; the
+  server answers with the new `<li>` and HTMX swaps it in place (`hx-swap="outerHTML"`). No client-side
+  state, no build step, about 50 KB of JavaScript vendored as a file.
+- **Forms and local time.** `<input type="datetime-local">` sends `2026-11-11T09:00` with no zone. The server
+  attaches `America/Fortaleza` before converting to UTC (`parse_local_datetime`). Attaching UTC instead would
+  shift every item by three hours.
+- **Autoescaping.** Jinja escapes `{{ item.title }}`, so a title like `<script>` is shown, not executed.
+
+### Why
+
+The UI is one screen with a list and a form. A SPA (React, a JSON API, a bundler) would double the code
+and the moving parts for no visible gain. HTMX keeps the architecture a single deployable unit
+([ADR 0001](../adr/0001-modular-monolith-with-in-process-scheduler.md)).
+
+### Commands
+
+```bash
+uv run pytest tests/test_pages.py -v
+COOKIE_SECURE=false PASSPHRASE_HASH="$(uv run python -c "from argon2 import PasswordHasher; print(PasswordHasher().hash('dev'))")" \
+  SESSION_SECRET=dev uv run uvicorn --factory today.app:from_env --reload
+# open http://127.0.0.1:8000 with the browser's device toolbar at 390 px wide
+```
+
+### Exercises
+
+1. Open the network tab, finish an item, and look at the response body. What is the smallest change to make
+   the item move to the "done" group at the bottom instead of being styled in place? (Hint: `hx-target`
+   and `hx-select`.)
+2. Submit the form with an empty title. Why is the status 422 and not 400, and why does the page re-render
+   instead of redirecting?
+
+### Pitfalls
+
+- Inputs below 16px make iOS Safari zoom into the field on focus. All inputs use 16px.
+- `datetime-local` renders with the device locale (24 h in pt-BR, AM/PM in en-US); the value sent is always
+  ISO, so the server does not care.
+
+### Read next
+
+- *Fundamentals of Software Architecture*: the layered architecture style (presentation → domain →
+  persistence) and why a small modular monolith can still keep those layers inside each module.
