@@ -40,7 +40,7 @@ class ItemIn(BaseModel):
 - Buckets (in `America/Fortaleza`): **late** = open and `due_at < now`; **today** = open and
   `now ≤ due_at < end of local day`; **next** = open and due within the following 7 local days. Done items of
   today show struck through at the bottom.
-- Visual identity: the direction chosen on the identity canvas, written down as tokens in `docs/design.md`.
+- Visual identity: "Departure board", tokens and rules in [`docs/design.md`](../design.md); dark only.
 
 ## Acceptance criteria (as tests)
 
