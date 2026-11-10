@@ -4,11 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0E0F11">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="today">
   <title>{% block title %}today{% endblock %}</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+  <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg">
+  <link rel="preload" href="/static/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/app.css">
   {% block head %}{% endblock %}
 </head>
 <body>
   {% block body %}{% endblock %}
+  <script>
+    if ("serviceWorker" in navigator) { navigator.serviceWorker.register('/sw.js'); }
+  </script>
 </body>
 </html>

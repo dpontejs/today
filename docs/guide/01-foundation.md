@@ -200,3 +200,51 @@ COOKIE_SECURE=false PASSPHRASE_HASH="$(uv run python -c "from argon2 import Pass
 
 - *Fundamentals of Software Architecture*: the layered architecture style (presentation → domain →
   persistence) and why a small modular monolith can still keep those layers inside each module.
+
+## 5. The PWA shell: manifest, service worker, icons, fonts
+
+### Concepts
+
+- **Web app manifest** (`/manifest.webmanifest`): name, icons, colors and `display: standalone`. It is what
+  turns "a website" into "an app" when added to the home screen: own icon, no browser bars.
+- **Service worker** (`/sw.js`): a script the browser keeps running in the background for this origin. In
+  slice 1 it does nothing but exist (installability). In slice 2 it receives push messages even when the app
+  is closed. It is served from `/`, not `/static/`, because a worker only controls URLs under its own path.
+- **iOS specifics.** Safari ignores most of the manifest for the home-screen icon and reads
+  `<link rel="apple-touch-icon">` (180 px) and the `apple-mobile-web-app-*` meta tags instead.
+- **Maskable icons.** Android crops icons into circles or squircles. A maskable icon is full-bleed with the
+  important part inside the central 80 %, so nothing gets cut.
+
+### Why
+
+- Self-hosted fonts: no request to Google at runtime (privacy, and the app works on a flaky connection once
+  cached), and the exact files are versioned with the code.
+- One SVG as the source of every icon size: change the drawing, re-run the command below, commit the PNGs.
+
+### Commands
+
+```bash
+cd src/today/static/icons
+for s in 180 192 512; do rsvg-convert -w $s -h $s icon.svg -o icon-$s.png; done
+cp icon-512.png icon-maskable-512.png
+# Chrome DevTools → Application → Manifest shows parse errors and installability
+```
+
+### Exercises
+
+1. Move `sw.js` to `/static/sw.js` and register it from there. What does DevTools say about its scope, and
+   why would push still work but page control not?
+2. Open <https://maskable.app> and load `icon-maskable-512.png`. Does the tile survive the circle mask?
+
+### Pitfalls
+
+- A service worker is cached aggressively. `Cache-Control: no-cache` on `/sw.js` makes the browser
+  revalidate it, so a new version reaches the phone on the next launch.
+- iOS only allows push for apps added to the home screen, and the "Add to Home Screen" prompt is never shown
+  automatically: the user does it from the Share sheet.
+
+### Read next
+
+- *Fundamentals of Software Architecture*: architecture characteristics: deployability and the "-ilities"
+  of the client (installability, availability on the phone) that shaped the choice of a PWA over a native
+  app.
