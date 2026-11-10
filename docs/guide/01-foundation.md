@@ -248,3 +248,45 @@ cp icon-512.png icon-maskable-512.png
 - *Fundamentals of Software Architecture*: architecture characteristics: deployability and the "-ilities"
   of the client (installability, availability on the phone) that shaped the choice of a PWA over a native
   app.
+
+## 6. The container image
+
+### Concepts
+
+- **Multi-stage build.** The `build` stage has `uv` and resolves dependencies from `uv.lock`; the runtime
+  stage only copies the finished `.venv`. The final image has no compiler, no uv, no test code.
+- **Layer caching.** `pyproject.toml` and `uv.lock` are copied before the code, so changing a template does
+  not reinstall FastAPI.
+- **Least privilege.** Non-root user (uid 10001), `read_only` root filesystem, `/tmp` as tmpfs, no Linux
+  capabilities, `no-new-privileges`. The only writable place is the `/data` volume with the SQLite file.
+- **Healthcheck.** Docker marks the container `healthy` only when `/healthz` answers; the VPS deploy agent
+  waits for that and rolls back otherwise.
+- **Immutable and moving tags.** CI pushes `:sha-<commit>` (never changes, rollback target) and `:main` (moves,
+  what the VPS follows).
+
+### Commands
+
+```bash
+cp .env.example .env            # fill PASSPHRASE_HASH (single-quoted) and SESSION_SECRET
+docker compose up -d --build
+curl -fsS 127.0.0.1:8000/healthz
+docker compose exec today id    # uid=10001(app)
+docker compose down             # the today_data volume (and the items) survive
+```
+
+### Exercises
+
+1. Remove `read_only: true`, run `docker compose exec today touch /app/x`, then put it back and try again.
+   What class of attack does a read-only root filesystem make harder?
+2. Change one line in `today.html` and rebuild. Which build steps are `CACHED`, and why?
+
+### Pitfalls
+
+- Argon2 hashes contain `$`. Compose interpolates `$` in `.env` unless the value is single-quoted.
+- `--forwarded-allow-ips "*"` trusts `X-Forwarded-For` from anyone who can reach port 8000. That is safe
+  only because the port is not published on the VPS: Caddy is the only client.
+
+### Read next
+
+- *Fundamentals of Software Architecture*: deployability and the operational characteristics; the
+  "architecture quantum" idea: this image is the whole quantum, deployed as one unit.

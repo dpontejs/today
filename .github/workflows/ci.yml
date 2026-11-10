@@ -18,3 +18,49 @@ jobs:
       - run: uv run ruff check
       - run: uv run ruff format --check
       - run: uv run pytest
+
+  # Builds the image on every PR (catches Dockerfile breakage) and publishes it from main.
+  # The VPS follows :main (infra repo, same auto-deploy as flamengo-news).
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/dpontejs/today
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t $IMAGE:sha-$GITHUB_SHA .
+
+      - name: Smoke test (healthy, login page, PWA files)
+        run: |
+          docker run -d --name smoke -e PASSPHRASE_HASH=x -e SESSION_SECRET=ci -p 8000:8000 \
+            --read-only --tmpfs /tmp --cap-drop ALL $IMAGE:sha-$GITHUB_SHA
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' smoke)" = healthy ] && break
+            sleep 1
+          done
+          docker inspect -f '{{.State.Health.Status}}' smoke | grep -qx healthy
+          curl -fsS http://127.0.0.1:8000/login | grep -q 'name="passphrase"'
+          curl -fsS http://127.0.0.1:8000/manifest.webmanifest | grep -q '"standalone"'
+          curl -fsS -o /dev/null http://127.0.0.1:8000/static/icons/icon-180.png
+
+      - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # :sha-<commit> is immutable (rollback target); :main moves and is what the VPS follows.
+      - name: Push image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag $IMAGE:sha-$GITHUB_SHA $IMAGE:main
+          docker push $IMAGE:sha-$GITHUB_SHA
+          docker push $IMAGE:main

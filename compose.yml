@@ -1,0 +1,25 @@
+# Local run of the production image: docker compose up -d --build, then http://127.0.0.1:8000
+services:
+  today:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    # PASSPHRASE_HASH and SESSION_SECRET (see .env.example). Single-quote the hash: it contains `$`.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      COOKIE_SECURE: "false" # plain http on localhost; the VPS keeps the default (true)
+    volumes:
+      - today_data:/data
+    # Same hardening as the VPS stack: the app only writes to /data and /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  today_data:
