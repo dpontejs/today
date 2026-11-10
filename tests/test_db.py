@@ -2,6 +2,7 @@ import sqlite3
 from pathlib import Path
 
 import pytest
+
 from today.config import load_settings
 from today.db import MIGRATIONS_DIR, connect, migrate
 

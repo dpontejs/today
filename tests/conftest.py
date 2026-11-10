@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 from argon2 import PasswordHasher
+
 from today.config import Settings
 from today.db import connect, migrate
 
