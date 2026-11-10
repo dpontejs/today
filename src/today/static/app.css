@@ -217,7 +217,19 @@ input[type="text"], input[type="password"], input[type="datetime-local"], textar
   gap: 10px;
   align-items: end;
 }
-.add-fields { display: flex; flex-direction: column; gap: 8px; }
+.add-fields { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* iOS Safari gives datetime-local an intrinsic min width (the native label, e.g. "10 Nov 2026 at 21:00")
+   that ignores width: 100% and pushes the field under the ADD button. Dropping the native appearance
+   keeps the picker but lets the box shrink to its column. */
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  display: block;
+  line-height: 50px;
+  text-align: left;
+}
+input[type="datetime-local"]::-webkit-date-and-time-value { text-align: left; }
 .add-button { min-width: 72px; }
 .add .error { grid-column: 1 / -1; }
 input[aria-invalid="true"] { border-color: var(--late); }
