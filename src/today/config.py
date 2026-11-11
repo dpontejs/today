@@ -15,6 +15,7 @@ class Settings:
     session_secret: str
     tz: ZoneInfo
     cookie_secure: bool = True
+    api_token: str | None = None  # enables /mcp (ADR 0005)
 
 
 def _required(name: str) -> str:
@@ -31,4 +32,12 @@ def load_settings() -> Settings:
         session_secret=_required("SESSION_SECRET"),
         tz=ZoneInfo(USER_TZ),
         cookie_secure=os.environ.get("COOKIE_SECURE", "true").lower() != "false",
+        api_token=_api_token(),
     )
+
+
+def _api_token() -> str | None:
+    token = os.environ.get("API_TOKEN") or None
+    if token is not None and len(token) < 32:
+        raise RuntimeError("environment variable API_TOKEN must have at least 32 characters")
+    return token

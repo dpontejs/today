@@ -16,18 +16,19 @@ iPhone / browser (installed PWA)
 FastAPI app — one process, one container          (ADR 0001)
    ├─ items      CRUD + Today view (Jinja + HTMX)
    ├─ notify     push subscriptions + 60 s reminder loop → Web Push (VAPID)
-   ├─ capture    text/audio → item drafts (Gemini)  (ADR 0003)
-   └─ importers  ROADMAP.md → items (deterministic)
+   ├─ mcp        /mcp tools for Claude & other MCP clients (ADR 0005)
+   └─ capture    audio on the phone → item drafts (Gemini)  (ADR 0003)
 SQLite on a Docker volume                          (ADR 0002)
 ```
 
 ## Delivery slices (one PR each, deployed after each)
 
-1. Skeleton, items, Today view, login, deploy — [docs/features/01-today-view.md](docs/features/01-today-view.md)
-2. Web push + reminder loop + notification status
-3. ROADMAP import
-4. Text capture
-5. Audio capture
+1. Skeleton, items, Today view, login, deploy — [docs/features/01-today-view.md](docs/features/01-today-view.md) ✓
+2. MCP server: manage items from Claude sessions — [docs/features/02-mcp-server.md](docs/features/02-mcp-server.md)
+3. Web push + reminder loop + notification status
+4. Audio capture on the phone
+
+ROADMAP import and text capture on the desktop are done through Claude + MCP (slice 2).
 
 Out of the MVP: recurrence, writing back to ROADMAP.md, chat agent, e-mail, multi-user, Postgres, native app, Google Calendar.
 
@@ -39,6 +40,7 @@ Out of the MVP: recurrence, writing back to ROADMAP.md, chat agent, e-mail, mult
 | [0002](docs/adr/0002-sqlite-on-a-volume.md) | SQLite on a Docker volume |
 | [0003](docs/adr/0003-gemini-for-capture.md) | Gemini Flash-Lite for capture, behind `extract_items` |
 | [0004](docs/adr/0004-single-user-passphrase-auth.md) | Single-user passphrase auth with a session cookie |
+| [0005](docs/adr/0005-mcp-api-with-bearer-token.md) | MCP server at `/mcp` behind a bearer token |
 
 ## Docs
 

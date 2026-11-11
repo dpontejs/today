@@ -48,3 +48,18 @@ def test_load_settings_defaults(monkeypatch: pytest.MonkeyPatch):
     assert s.cookie_secure is True
     assert s.tz.key == "America/Fortaleza"
     assert s.db_path == Path("data/today.db")
+
+
+def test_load_settings_rejects_short_api_token(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("PASSPHRASE_HASH", "h")
+    monkeypatch.setenv("SESSION_SECRET", "s")
+    monkeypatch.setenv("API_TOKEN", "short")
+    with pytest.raises(RuntimeError, match="API_TOKEN"):
+        load_settings()
+
+
+def test_load_settings_api_token_optional(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("PASSPHRASE_HASH", "h")
+    monkeypatch.setenv("SESSION_SECRET", "s")
+    monkeypatch.delenv("API_TOKEN", raising=False)
+    assert load_settings().api_token is None

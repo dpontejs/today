@@ -1,7 +1,7 @@
 # 01 · Items, Today view, login, deploy
 
 - **Date:** 2026-11-10
-- **Status:** proposed
+- **Status:** delivered (PR #1, fixes #2 #3)
 - **ADRs:** 0001, 0002, 0004
 
 ## Goal
@@ -45,17 +45,17 @@ class ItemIn(BaseModel):
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_buckets_split_late_today_next`: given items due yesterday, in 1 h and in 3 days, when Today is built at a fixed `now`, then each lands in its bucket.
-- [ ] `test_bucket_boundary_uses_local_midnight`: given `now` 23:30 Fortaleza and an item due 00:30 local tomorrow, then it is in next, not today.
-- [ ] `test_due_at_stored_as_utc`: given a form with 09:00 local, when posted, then the row holds `12:00:00+00:00`.
-- [ ] `test_create_rejects_empty_title`: given an empty title, when posted, then 422 and no row.
-- [ ] `test_done_then_reopen_round_trip`: given an open item, when done then reopen, then status is open and `done_at` is null.
-- [ ] `test_done_is_idempotent`: given a done item, when done again, then 200 and `done_at` unchanged.
-- [ ] `test_unknown_item_returns_404`: when done on a missing id, then 404.
-- [ ] `test_routes_require_session`: given no cookie, when GET / or POST /items, then 303 to /login; `/healthz`, manifest and `sw.js` stay public.
-- [ ] `test_login_wrong_passphrase_401`, `test_login_rate_limited_after_5_failures`.
-- [ ] `test_session_cookie_flags`: cookie is HttpOnly, Secure, SameSite=Lax, 90 days.
-- [ ] `test_migrations_apply_once`: starting twice leaves one `schema_version` row per migration.
+- [x] `test_buckets_split_late_today_next`: given items due yesterday, in 1 h and in 3 days, when Today is built at a fixed `now`, then each lands in its bucket.
+- [x] `test_bucket_boundary_uses_local_midnight`: given `now` 23:30 Fortaleza and an item due 00:30 local tomorrow, then it is in next, not today.
+- [x] `test_due_at_stored_as_utc`: given a form with 09:00 local, when posted, then the row holds `12:00:00+00:00`.
+- [x] `test_create_rejects_empty_title`: given an empty title, when posted, then 422 and no row.
+- [x] `test_done_then_reopen_round_trip`: given an open item, when done then reopen, then status is open and `done_at` is null.
+- [x] `test_done_is_idempotent`: given a done item, when done again, then 200 and `done_at` unchanged.
+- [x] `test_unknown_item_returns_404`: when done on a missing id, then 404.
+- [x] `test_routes_require_session`: given no cookie, when GET / or POST /items, then 303 to /login; `/healthz`, manifest and `sw.js` stay public.
+- [x] `test_login_wrong_passphrase_401`, `test_login_rate_limited_after_5_failures`.
+- [x] `test_session_cookie_flags`: cookie is HttpOnly, Secure, SameSite=Lax, 90 days.
+- [x] `test_migrations_apply_once`: starting twice leaves one `schema_version` row per migration.
 
 ## End-to-end check
 
