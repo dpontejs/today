@@ -289,3 +289,31 @@ docker compose down             # the today_data volume (and the items) survive
 
 - *Fundamentals of Software Architecture*: deployability and the operational characteristics; the
   "architecture quantum" idea: this image is the whole quantum, deployed as one unit.
+
+## 7. Two languages without a framework
+
+### Concepts
+
+- **Content negotiation.** Browsers send `Accept-Language: pt-BR,pt;q=0.9,en;q=0.8`. `pick_lang` takes the
+  supported language with the highest `q`; a `today_lang` cookie (set by the PT/EN link) wins over it.
+- **Context processor.** `Jinja2Templates(context_processors=[i18n_context])` adds `t()`, `lang` and date
+  helpers to every template, so routes keep passing only their own data. Routes return message *keys*
+  (`"error_title_required"`), and the template translates them.
+- **No locale dependency.** Day and month names come from tables in `i18n.py`. `strftime("%A")` would follow
+  the container's C locale and print English whatever the user reads.
+
+### Why
+
+Two languages and ~30 strings do not justify gettext, `.po` files and a compile step. A dict per language, plus a
+test that both have the same keys, gives the same guarantee for this size.
+
+### Exercises
+
+1. Add Spanish. Which test fails first, and what is the minimum to make it pass?
+2. The switch redirects back to the `Referer` only when it is on the same host. Remove that check and explain
+   how the link could be abused (open redirect).
+
+### Read next
+
+- *Software Architecture: The Hard Parts*: ch. 8 "Reuse Patterns": a shared library vs. a copy, and why
+  this small dict is fine inside one deployable.

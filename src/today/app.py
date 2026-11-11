@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from today import auth
+from today import auth, i18n
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
@@ -25,9 +25,8 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.settings = settings
     app.state.conn = conn
     app.state.clock = lambda: datetime.now(UTC)
-    templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
+    templates = Jinja2Templates(directory=PACKAGE_DIR / "templates", context_processors=[i18n.i18n_context])
     templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
-    templates.env.filters["local_day"] = lambda dt: dt.astimezone(settings.tz).strftime("%a %d").upper()
     app.state.templates = templates
     app.state.login_limiter = auth.LoginLimiter()
 
@@ -54,6 +53,7 @@ def create_app(settings: Settings) -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(auth.router)
+    app.include_router(i18n.router)
     app.include_router(item_routes.router)
     return app
 

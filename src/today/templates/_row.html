@@ -1,27 +1,27 @@
 <li class="row row-{{ kind }}" id="item-{{ item.id }}">
   {% if kind == "done" %}
   <button class="check is-checked" type="button" hx-post="/items/{{ item.id }}/reopen" hx-target="#item-{{ item.id }}"
-          hx-swap="outerHTML" aria-label="Reopen {{ item.title }}">
+          hx-swap="outerHTML" aria-label="{{ t('reopen', title=item.title) }}">
     <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M5 12l5 5L19 7"/></svg>
   </button>
   {% else %}
   <button class="check" type="button" hx-post="/items/{{ item.id }}/done" hx-target="#item-{{ item.id }}"
-          hx-swap="outerHTML" aria-label="Mark {{ item.title }} as finished"></button>
+          hx-swap="outerHTML" aria-label="{{ t('mark_done', title=item.title) }}"></button>
   {% endif %}
   {% if kind in ("today", "done") %}
   <span class="time {% if is_next %}time-next{% endif %}">{{ item.due_at | local_time }}</span>
   {% else %}
-  <span class="day {% if kind == 'late' %}day-late{% endif %}">{{ item.due_at | local_day }}</span>
+  <span class="day {% if kind == 'late' %}day-late{% endif %}">{{ day_label(item.due_at) }}</span>
   {% endif %}
   <span class="title">{{ item.title }}</span>
   {% if kind == "late" %}
-  <span class="pill pill-late">LATE</span>
+  <span class="pill pill-late">{{ t("pill_late") }}</span>
   {% elif is_next %}
-  <span class="pill pill-next">NEXT</span>
+  <span class="pill pill-next">{{ t("pill_next") }}</span>
   {% elif kind == "today" %}
-  <span class="status">ON TIME</span>
+  <span class="status">{{ t("status_on_time") }}</span>
   {% elif kind == "done" %}
-  <span class="status">DONE</span>
+  <span class="status">{{ t("status_done") }}</span>
   {% else %}
   <span></span>
   {% endif %}
