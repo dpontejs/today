@@ -129,7 +129,12 @@ input[type="text"], input[type="password"], input[type="datetime-local"], textar
   padding: 4px 8px;
 }
 .clock { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.header-links { display: flex; gap: 16px; align-items: center; }
+.login-top { display: flex; justify-content: space-between; align-items: center; }
 .link-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   min-height: 44px;
   padding: 0;
   border: 0;
@@ -209,16 +214,20 @@ input[type="text"], input[type="password"], input[type="datetime-local"], textar
 .row-done .title { text-decoration: line-through; color: var(--muted); }
 .row-done .time { color: var(--muted); }
 
-/* Add form, pinned to the bottom of the board: title on top, then date + ADD. */
+/* Add form, pinned to the bottom of the board: title + submit, then the date on its own row. */
 .add {
   margin-top: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title add" "date date";
   gap: 8px 10px;
-  align-items: end;
+  align-items: stretch;
 }
-/* Title gets its own row; only the date shares a row with ADD, so it has room for its native label. */
-.add-title { grid-column: 1 / -1; }
+/* The date gets the whole width: its native iOS label ("10 Nov 2026 at 21:00") is the widest thing here,
+   and the submit label is longer in Portuguese (CRIAR). */
+.add-title { grid-area: title; }
+.add-button { grid-area: add; }
+.add-date { grid-area: date; }
 /* iOS Safari gives datetime-local an intrinsic min width (the native label, e.g. "10 Nov 2026 at 21:00")
    that ignores width: 100% and pushes the field under the ADD button. Dropping the native appearance
    keeps the picker but lets the box shrink to its column. */
@@ -234,6 +243,6 @@ input[type="datetime-local"] {
   text-align: left;
 }
 input[type="datetime-local"]::-webkit-date-and-time-value { text-align: left; }
-.add-button { min-width: 72px; }
+.add-button { min-width: 72px; padding: 0 16px; }
 .add .error { grid-column: 1 / -1; }
 input[aria-invalid="true"] { border-color: var(--late); }

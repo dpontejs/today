@@ -117,9 +117,9 @@ def login(request: Request, passphrase: Annotated[str, Form()]) -> Response:
     ip, now = _client_ip(request), datetime.now(UTC)
 
     if not limiter.attempt(ip, now):
-        return _login_page(request, 429, "Too many attempts. Try again in a few minutes.")
+        return _login_page(request, 429, "error_too_many_attempts")
     if not verify_passphrase(settings, passphrase):
-        return _login_page(request, 401, "Wrong passphrase.")
+        return _login_page(request, 401, "error_wrong_passphrase")
 
     limiter.succeed(ip)
     response = RedirectResponse("/", status_code=303)

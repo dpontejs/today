@@ -4,19 +4,22 @@
 <main class="board">
   <header class="board-header">
     <div class="date">
-      <p class="eyebrow">{{ now.strftime("%A").upper() }} · {{ now.strftime("%b").upper() }}</p>
+      <p class="eyebrow">{{ weekday_long(now) }} · {{ month_short(now) }}</p>
       <p class="date-numeral">{{ now.day }}</p>
     </div>
     <div class="header-side">
-      <span class="badge">TODAY</span>
+      <span class="badge">{{ t("badge_today") }}</span>
       <span class="clock">{{ now.strftime("%H:%M") }}</span>
-      <form method="post" action="/logout"><button type="submit" class="link-button">SIGN OUT</button></form>
+      <div class="header-links">
+        {% include "_lang_switch.html" %}
+        <form method="post" action="/logout"><button type="submit" class="link-button">{{ t("sign_out") }}</button></form>
+      </div>
     </div>
   </header>
 
   {% if view.late %}
   <section class="section" aria-labelledby="h-late">
-    <h2 class="section-head section-head-late" id="h-late"><span>LATE</span><span>{{ view.late | length }}</span></h2>
+    <h2 class="section-head section-head-late" id="h-late"><span>{{ t("section_late") }}</span><span>{{ view.late | length }}</span></h2>
     <ul class="rows">
       {% for item in view.late %}{% with kind="late", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
     </ul>
@@ -24,32 +27,32 @@
   {% endif %}
 
   <section class="section" aria-labelledby="h-today">
-    <h2 class="section-head" id="h-today"><span>TODAY</span><span>{{ view.today | length }}</span></h2>
+    <h2 class="section-head" id="h-today"><span>{{ t("section_today") }}</span><span>{{ view.today | length }}</span></h2>
     <ul class="rows">
       {% for item in view.today %}{% with kind="today", is_next=(item.id == view.next_item_id) %}{% include "_row.html" %}{% endwith %}{% endfor %}
       {% for item in view.done_today %}{% with kind="done", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
     </ul>
-    {% if not view.today and not view.done_today %}<p class="empty">Nothing else today.</p>{% endif %}
+    {% if not view.today and not view.done_today %}<p class="empty">{{ t("empty_today") }}</p>{% endif %}
   </section>
 
   <section class="section" aria-labelledby="h-next">
-    <h2 class="section-head" id="h-next"><span>NEXT 7 DAYS</span><span>{{ view.next | length }}</span></h2>
+    <h2 class="section-head" id="h-next"><span>{{ t("section_next") }}</span><span>{{ view.next | length }}</span></h2>
     <ul class="rows rows-quiet">
       {% for item in view.next %}{% with kind="next", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
     </ul>
-    {% if not view.next %}<p class="empty">Clear week.</p>{% endif %}
+    {% if not view.next %}<p class="empty">{{ t("empty_week") }}</p>{% endif %}
   </section>
 
   <form class="add" method="post" action="/items" novalidate>
-    <label for="title" class="visually-hidden">What</label>
-    <input id="title" name="title" type="text" class="add-title" placeholder="review chapter 3" value="{{ form.title }}"
+    <label for="title" class="visually-hidden">{{ t("label_what") }}</label>
+    <input id="title" name="title" type="text" class="add-title" placeholder="{{ t('placeholder_title') }}" value="{{ form.title }}"
            maxlength="200" autocomplete="off" {% if errors.title %}aria-invalid="true" aria-describedby="err-title"{% endif %}>
-    <label for="due_at" class="visually-hidden">When</label>
-    <input id="due_at" name="due_at" type="datetime-local" value="{{ form.due_at }}"
+    <label for="due_at" class="visually-hidden">{{ t("label_when") }}</label>
+    <input id="due_at" name="due_at" type="datetime-local" class="add-date" value="{{ form.due_at }}"
            {% if errors.due_at %}aria-invalid="true" aria-describedby="err-due"{% endif %}>
-    <button type="submit" class="btn-accent add-button">ADD</button>
-    {% if errors.title %}<p class="error" id="err-title" role="alert">{{ errors.title }}</p>{% endif %}
-    {% if errors.due_at %}<p class="error" id="err-due" role="alert">{{ errors.due_at }}</p>{% endif %}
+    <button type="submit" class="btn-accent add-button">{{ t("add") }}</button>
+    {% if errors.title %}<p class="error" id="err-title" role="alert">{{ t(errors.title) }}</p>{% endif %}
+    {% if errors.due_at %}<p class="error" id="err-due" role="alert">{{ t(errors.due_at) }}</p>{% endif %}
   </form>
 </main>
 {% endblock %}

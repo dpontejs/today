@@ -1,0 +1,2 @@
+{% set other = "en" if lang == "pt" else "pt" %}
+<a class="link-button" href="/lang/{{ other }}" hreflang="{{ 'pt-BR' if other == 'pt' else 'en' }}" aria-label="{{ t('switch_lang_label') }}">{{ t("switch_lang") }}</a>

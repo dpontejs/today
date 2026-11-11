@@ -73,17 +73,17 @@ def create(
     form = {"title": title, "due_at": due_at}
     errors = {}
     if not title.strip():
-        errors["title"] = "Title is required."
+        errors["title"] = "error_title_required"
     due = parse_local_datetime(due_at, settings.tz)
     if due is None:
-        errors["due_at"] = "Pick a date and time."
+        errors["due_at"] = "error_pick_date"
     if errors:
         return _render_page(request, 422, errors, form)
 
     try:
         data = ItemIn(title=title.strip(), due_at=due, notes=notes.strip() or None)
     except ValidationError:
-        return _render_page(request, 422, {"title": "Title is too long (200 characters max)."}, form)
+        return _render_page(request, 422, {"title": "error_title_too_long"}, form)
     create_item(request.app.state.conn, data, request.app.state.clock())
     return RedirectResponse("/", status_code=303)
 

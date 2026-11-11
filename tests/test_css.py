@@ -20,8 +20,10 @@ def test_datetime_input_cannot_overflow_on_ios():
     assert "white-space: nowrap" in body  # wrapped, the 50px line-height doubled the field's height
 
 
-def test_add_form_gives_title_its_own_row():
-    """Only the date shares a row with ADD, so it gets enough width for "10 Nov 2026 at 21:00"."""
-    assert "grid-column: 1 / -1" in rule(".add-title")
+def test_add_form_gives_date_a_full_row():
+    """The date gets the whole width: its iOS label ("10 Nov 2026 at 21:00") is the widest thing in the form,
+    and the submit label is longer in Portuguese (CRIAR)."""
+    assert '"date date"' in rule(".add")
+    assert "grid-area: date" in rule(".add-date")
     template = (Path(__file__).parents[1] / "src/today/templates/today.html").read_text()
-    assert 'class="add-title"' in template
+    assert 'class="add-date"' in template
