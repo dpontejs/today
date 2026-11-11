@@ -51,19 +51,35 @@ def row_to_item(row: sqlite3.Row) -> Item:
     )
 
 
-def create_item(conn: sqlite3.Connection, data: ItemIn, now: datetime) -> Item:
-    cursor = conn.execute(
-        "INSERT INTO items (title, notes, due_at, remind_at, created_at) VALUES (?, ?, ?, ?, ?)",
+def insert_item(
+    conn: sqlite3.Connection,
+    data: ItemIn,
+    now: datetime,
+    source: str = "manual",
+    source_key: str | None = None,
+) -> Item | None:
+    """Insert one item. With a `source_key` that already exists, nothing is inserted and None is returned."""
+    row = conn.execute(
+        """INSERT INTO items (title, notes, due_at, remind_at, source, source_key, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT (source_key) DO NOTHING
+           RETURNING *""",
         (
             data.title,
             data.notes,
             to_db(data.due_at),
             to_db(data.remind_at) if data.remind_at else None,
+            source,
+            source_key,
             to_db(now),
         ),
-    )
-    item = get_item(conn, cursor.lastrowid)
-    assert item is not None
+    ).fetchone()
+    return row_to_item(row) if row else None
+
+
+def create_item(conn: sqlite3.Connection, data: ItemIn, now: datetime) -> Item:
+    item = insert_item(conn, data, now)
+    assert item is not None  # no source_key, so no conflict is possible
     return item
 
 

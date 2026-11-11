@@ -30,9 +30,11 @@ def _select(conn: sqlite3.Connection, where: str, params: tuple, order: str = "d
     return [row_to_item(r) for r in rows]
 
 
-def build_today(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo) -> TodayView:
+def build_today(
+    conn: sqlite3.Connection, now: datetime, tz: ZoneInfo, next_days: int = NEXT_DAYS
+) -> TodayView:
     day_start, day_end = local_day_bounds(now, tz)
-    next_end = day_end + timedelta(days=NEXT_DAYS)
+    next_end = day_end + timedelta(days=next_days)
     now_s, end_s = to_db(now), to_db(day_end)
 
     late = _select(conn, "status = 'open' AND due_at < ?", (now_s,))

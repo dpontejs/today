@@ -1,5 +1,6 @@
 """Application factory. Run with: uvicorn --factory today.app:from_env"""
 
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,13 +13,25 @@ from today import auth, i18n
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
+from today.mcp_server import mount_mcp
 
 PACKAGE_DIR = Path(__file__).parent
 STATIC_DIR = PACKAGE_DIR / "static"
 
 
 def create_app(settings: Settings) -> FastAPI:
-    app = FastAPI(title="today", docs_url=None, redoc_url=None, openapi_url=None)
+    mcp = None
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        # A mounted sub-app's lifespan never runs, so the MCP session manager is started here.
+        if mcp is None:
+            yield
+            return
+        async with mcp.session_manager.run():
+            yield
+
+    app = FastAPI(title="today", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 
     conn = connect(settings.db_path)
     migrate(conn)
@@ -55,6 +68,8 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(auth.router)
     app.include_router(i18n.router)
     app.include_router(item_routes.router)
+    if settings.api_token:
+        mcp = mount_mcp(app, settings.api_token)
     return app
 
 
