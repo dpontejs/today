@@ -19,6 +19,9 @@ class Settings:
     api_token: str | None = None  # enables /mcp (ADR 0005)
     gemini_api_key: str | None = None  # enables natural-language capture (ADR 0003)
     gemini_model: str = DEFAULT_GEMINI_MODEL
+    vapid_private_key: str | None = None  # enables web push (feature 05)
+    vapid_public_key: str | None = None
+    vapid_subject: str | None = None  # mailto: or https URL the push services can contact
 
 
 def _required(name: str) -> str:
@@ -38,6 +41,7 @@ def load_settings() -> Settings:
         api_token=_api_token(),
         gemini_api_key=os.environ.get("GEMINI_API_KEY") or None,
         gemini_model=os.environ.get("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL,
+        **_vapid(),
     )
 
 
@@ -46,3 +50,14 @@ def _api_token() -> str | None:
     if token is not None and len(token) < 32:
         raise RuntimeError("environment variable API_TOKEN must have at least 32 characters")
     return token
+
+
+def _vapid() -> dict:
+    private = os.environ.get("VAPID_PRIVATE_KEY") or None
+    if private is None:
+        return {}
+    return {
+        "vapid_private_key": private,
+        "vapid_public_key": _required("VAPID_PUBLIC_KEY"),
+        "vapid_subject": _required("VAPID_SUBJECT"),
+    }

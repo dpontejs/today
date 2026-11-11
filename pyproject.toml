@@ -12,6 +12,7 @@ dependencies = [
     "jinja2>=3.1.6",
     "mcp>=2.3,<3",
     "python-multipart>=0.0.33",
+    "pywebpush>=2.5,<3",
     "uvicorn[standard]>=0.54.0",
 ]
 
