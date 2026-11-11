@@ -27,7 +27,7 @@ SQLite on a Docker volume                          (ADR 0002)
 2. MCP server: manage items from Claude sessions — [docs/features/02-mcp-server.md](docs/features/02-mcp-server.md) ✓
 3. Natural-language capture by text or voice, with suggested reminders — [docs/features/03-natural-language-capture.md](docs/features/03-natural-language-capture.md) ✓
 4. Calendar tab, 7/14/30 days, pinned capture bar ✓
-5. Web push + reminder loop + daily summary — [docs/features/05-web-push.md](docs/features/05-web-push.md)
+5. Web push + reminder loop + daily summary — [docs/features/05-web-push.md](docs/features/05-web-push.md) ✓
 
 ROADMAP import from the desktop is done through Claude + MCP (slice 2).
 
