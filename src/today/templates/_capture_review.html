@@ -1,0 +1,29 @@
+{% if error %}<p class="capture-error" role="alert">{{ t(error) }}</p>{% endif %}
+{% if drafts %}
+<form class="review" method="post" action="/capture/confirm">
+  <p class="eyebrow">{{ t("review_title") }}</p>
+  {% for d in drafts %}{% set i = loop.index0 %}
+  <fieldset class="draft">
+    <legend class="visually-hidden">{{ d.title }}</legend>
+    <label for="draft-title-{{ i }}" class="visually-hidden">{{ t("label_what") }}</label>
+    <input id="draft-title-{{ i }}" name="title" type="text" value="{{ d.title }}" maxlength="200" required class="draft-title">
+    <label for="draft-due-{{ i }}" class="visually-hidden">{{ t("label_when") }}</label>
+    <input id="draft-due-{{ i }}" name="due_at" type="datetime-local" value="{{ d.due_at }}" required>
+    <input type="hidden" name="notes" value="{{ d.notes or '' }}">
+    {% if d.notes %}<p class="draft-notes">{{ d.notes }}</p>{% endif %}
+    <p class="label">{{ t("reminders_label") }}</p>
+    <ul class="reminders">
+      {% for r in d.reminders %}
+      <li><label class="reminder"><input type="checkbox" name="reminders-{{ i }}" value="{{ r.value }}" checked><span>{{ r.label }}</span></label></li>
+      {% else %}
+      <li class="empty">{{ t("no_reminders") }}</li>
+      {% endfor %}
+    </ul>
+  </fieldset>
+  {% endfor %}
+  <div class="review-actions">
+    <button type="button" class="link-button" data-discard>{{ t("discard") }}</button>
+    <button type="submit" class="btn-accent">{{ t("confirm") }}</button>
+  </div>
+</form>
+{% endif %}

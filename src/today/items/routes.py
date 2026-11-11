@@ -44,6 +44,7 @@ def _render_page(
             "now": now.astimezone(settings.tz),
             "errors": errors or {},
             "form": form or {"title": "", "due_at": _default_due(now, settings.tz)},
+            "capture_enabled": request.app.state.extractor is not None,
         },
         status_code=status_code,
     )
