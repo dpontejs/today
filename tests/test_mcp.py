@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from today import mcp_server
 from today.app import create_app
 from today.config import Settings
+from today.items.reminders import add_reminders
 from today.items.repo import ItemIn, create_item, get_item
 
 TZ = ZoneInfo("America/Fortaleza")
@@ -137,7 +138,14 @@ def test_mcp_lists_tools(client: TestClient):
 
     assert response.status_code == 200
     names = {tool["name"] for tool in response.json()["result"]["tools"]}
-    assert names == {"list_items", "create_items", "complete_item", "reopen_item"}
+    assert names == {
+        "list_items",
+        "create_items",
+        "complete_item",
+        "reopen_item",
+        "update_item",
+        "delete_item",
+    }
 
 
 def test_mcp_over_http_end_to_end(client: TestClient):
@@ -160,3 +168,79 @@ def test_mcp_tool_error_is_reported(client: TestClient):
     result = response.json()["result"]
     assert result["isError"] is True
     assert "item 999 not found" in result["content"][0]["text"]
+
+
+# --- edit, delete and reminders -------------------------------------------------------------------
+
+
+def test_update_item_changes_only_given_fields(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="old", due_at=NOW + timedelta(days=2), notes="keep"), NOW)
+
+    out = mcp_server.update_item(conn, item.id, NOW, TZ, title="new", due_at="2026-11-20T09:00")
+
+    assert (out["title"], out["due_at"], out["notes"]) == ("new", "2026-11-20T09:00:00-03:00", "keep")
+    row = conn.execute("SELECT title, due_at, notes FROM items WHERE id = ?", (item.id,)).fetchone()
+    assert tuple(row) == ("new", "2026-11-20T12:00:00+00:00", "keep")
+
+
+def test_update_item_can_clear_notes(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="a", due_at=NOW + timedelta(days=2), notes="x"), NOW)
+    assert mcp_server.update_item(conn, item.id, NOW, TZ, notes="")["notes"] is None
+
+
+def test_update_item_validates(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="a", due_at=NOW + timedelta(days=2)), NOW)
+    with pytest.raises(ValueError, match="nothing to update"):
+        mcp_server.update_item(conn, item.id, NOW, TZ)
+    with pytest.raises(ValueError, match="title"):
+        mcp_server.update_item(conn, item.id, NOW, TZ, title="  ")
+    with pytest.raises(ValueError, match="due_at"):
+        mcp_server.update_item(conn, item.id, NOW, TZ, due_at="friday")
+    with pytest.raises(ValueError, match="item 999 not found"):
+        mcp_server.update_item(conn, 999, NOW, TZ, title="x")
+
+
+def test_update_item_replaces_unsent_reminders_only(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="exam", due_at=datetime(2026, 11, 20, 12, 0, tzinfo=UTC)), NOW)
+    add_reminders(
+        conn, item.id, [datetime(2026, 11, 13, 12, 0, tzinfo=UTC), datetime(2026, 11, 19, 22, 0, tzinfo=UTC)]
+    )
+    conn.execute("UPDATE reminders SET sent_at = ? WHERE remind_at LIKE '2026-11-13%'", (NOW.isoformat(),))
+
+    out = mcp_server.update_item(conn, item.id, NOW, TZ, reminders=["2026-11-20T08:00", "2026-11-01T09:00"])
+
+    # the sent one stays (history), the unsent one is replaced, the past one is dropped
+    assert out["reminders"] == ["2026-11-13T09:00:00-03:00", "2026-11-20T08:00:00-03:00"]
+
+
+def test_delete_item_removes_item_and_reminders(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="a", due_at=NOW + timedelta(days=2)), NOW)
+    add_reminders(conn, item.id, [NOW + timedelta(days=1)])
+
+    assert mcp_server.delete_item(conn, item.id) == {"deleted": item.id}
+    assert get_item(conn, item.id) is None
+    assert conn.execute("SELECT COUNT(*) FROM reminders").fetchone()[0] == 0
+    with pytest.raises(ValueError, match="item 999 not found"):
+        mcp_server.delete_item(conn, 999)
+
+
+def test_create_items_with_reminders(conn: sqlite3.Connection):
+    batch = [draft("exam", "2026-11-20T09:00", reminders=["2026-11-19T19:00", "2026-11-25T09:00"])]
+
+    (created,) = mcp_server.create_items(conn, batch, NOW, TZ)["created"]
+
+    assert created["reminders"] == ["2026-11-19T19:00:00-03:00"]  # after the event: dropped
+
+
+def test_list_items_shows_reminders(conn: sqlite3.Connection):
+    item = create_item(conn, ItemIn(title="a", due_at=NOW + timedelta(hours=5)), NOW)
+    add_reminders(conn, item.id, [NOW + timedelta(hours=4)])
+
+    (listed,) = mcp_server.list_items(conn, NOW, TZ)["today"]
+
+    assert listed["reminders"] == ["2026-11-10T13:00:00-03:00"]
+
+
+def test_mcp_lists_edit_and_delete_tools(client: TestClient):
+    names = {tool["name"] for tool in rpc(client, "tools/list").json()["result"]["tools"]}
+    assert {"update_item", "delete_item"} <= names

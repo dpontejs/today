@@ -11,7 +11,7 @@ into today", "mark the Docker course as done". Claude parses the natural languag
 
 ## Out of scope
 
-Editing or deleting items, OAuth, per-client tokens, MCP resources/prompts, push (slice 3 now).
+OAuth, per-client tokens, MCP resources/prompts, push (slice 3 now).
 
 ## Contracts
 
@@ -33,6 +33,10 @@ list_items(days: int = 7) -> {"late": [ItemOut], "today": [ItemOut], "next": [It
 create_items(items: list[DraftIn]) -> {"created": [ItemOut], "skipped_source_keys": [str]}   # max 100 per call
 complete_item(id: int) -> ItemOut       # unknown id → tool error "item <id> not found"
 reopen_item(id: int) -> ItemOut
+# Added in PR #7 (after the reminders table, ADR 0006):
+update_item(id, title?, due_at?, notes?, reminders?) -> ItemOut   # only given fields; reminders replace unsent ones
+delete_item(id) -> {"deleted": id}                                  # reminders cascade
+# DraftIn and ItemOut gained `reminders` (ISO 8601, local if no offset).
 ```
 
 - Database: no migration. MCP rows get `source = 'mcp'`; `source_key` (already `UNIQUE`) makes imports idempotent.

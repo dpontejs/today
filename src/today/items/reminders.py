@@ -27,3 +27,9 @@ def list_reminders(conn: sqlite3.Connection, item_id: int) -> list[datetime]:
         "SELECT remind_at FROM reminders WHERE item_id = ? ORDER BY remind_at", (item_id,)
     ).fetchall()
     return [datetime.fromisoformat(r["remind_at"]) for r in rows]
+
+
+def replace_unsent_reminders(conn: sqlite3.Connection, item_id: int, times: Iterable[datetime]) -> None:
+    """Swap the reminders not sent yet; sent ones stay as history."""
+    conn.execute("DELETE FROM reminders WHERE item_id = ? AND sent_at IS NULL", (item_id,))
+    add_reminders(conn, item_id, times)
