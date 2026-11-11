@@ -100,3 +100,23 @@ def mark_done(conn: sqlite3.Connection, item_id: int, now: datetime) -> Item | N
 def reopen(conn: sqlite3.Connection, item_id: int) -> Item | None:
     conn.execute("UPDATE items SET status = 'open', done_at = NULL WHERE id = ?", (item_id,))
     return get_item(conn, item_id)
+
+
+UPDATABLE = ("title", "due_at", "notes")
+
+
+def update_item(conn: sqlite3.Connection, item_id: int, changes: dict) -> Item | None:
+    """Set only the given columns (`title`, `due_at` aware datetime, `notes` str or None)."""
+    unknown = set(changes) - set(UPDATABLE)
+    if unknown:
+        raise ValueError(f"cannot update {sorted(unknown)}")
+    if changes:
+        values = {k: to_db(v) if k == "due_at" else v for k, v in changes.items()}
+        assignments = ", ".join(f"{column} = ?" for column in values)  # names come from UPDATABLE only
+        conn.execute(f"UPDATE items SET {assignments} WHERE id = ?", (*values.values(), item_id))
+    return get_item(conn, item_id)
+
+
+def delete_item(conn: sqlite3.Connection, item_id: int) -> bool:
+    """Delete an item; its reminders go with it (ON DELETE CASCADE)."""
+    return conn.execute("DELETE FROM items WHERE id = ?", (item_id,)).rowcount > 0
