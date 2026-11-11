@@ -1,7 +1,7 @@
 # 02 · MCP server: manage items from Claude sessions
 
 - **Date:** 2026-11-10
-- **Status:** proposed
+- **Status:** delivered (PR #5)
 - **ADRs:** [0005](../adr/0005-mcp-api-with-bearer-token.md)
 
 ## Goal
@@ -43,14 +43,14 @@ reopen_item(id: int) -> ItemOut
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_mcp_requires_token`: no header / wrong token → 401; `API_TOKEN` unset → 404.
-- [ ] `test_mcp_lists_tools`: `tools/list` returns the four tool names.
-- [ ] `test_create_items_naive_due_is_local`: `due_at` "2026-11-11T09:00" → stored `12:00:00+00:00`.
-- [ ] `test_create_items_is_idempotent_by_source_key`: same batch twice → second call creates 0, skips all keys.
-- [ ] `test_create_items_rejects_more_than_100`: 101 drafts → tool error, nothing stored.
-- [ ] `test_list_items_buckets_in_local_time`: late/today/next match `build_today`; `due_at` has `-03:00`.
-- [ ] `test_complete_and_reopen_item`: status changes; unknown id → tool error.
-- [ ] `test_mcp_over_http_end_to_end`: JSON-RPC `tools/call create_items` through `/mcp` with the token, then
+- [x] `test_mcp_requires_token`: no header / wrong token → 401; `API_TOKEN` unset → 404.
+- [x] `test_mcp_lists_tools`: `tools/list` returns the four tool names.
+- [x] `test_create_items_naive_due_is_local`: `due_at` "2026-11-11T09:00" → stored `12:00:00+00:00`.
+- [x] `test_create_items_is_idempotent_by_source_key`: same batch twice → second call creates 0, skips all keys.
+- [x] `test_create_items_rejects_more_than_100`: 101 drafts → tool error, nothing stored.
+- [x] `test_list_items_buckets_in_local_time`: late/today/next match `build_today`; `due_at` has `-03:00`.
+- [x] `test_complete_and_reopen_item`: status changes; unknown id → tool error.
+- [x] `test_mcp_over_http_end_to_end`: JSON-RPC `tools/call create_items` through `/mcp` with the token, then
       the item appears on the Today page.
 
 ## End-to-end check

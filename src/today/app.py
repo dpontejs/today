@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from today import auth, i18n
+from today import auth, capture, i18n
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
@@ -42,6 +42,11 @@ def create_app(settings: Settings) -> FastAPI:
     templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
     app.state.templates = templates
     app.state.login_limiter = auth.LoginLimiter()
+    app.state.extractor = (
+        capture.GeminiExtractor(settings.gemini_api_key, settings.gemini_model)
+        if settings.gemini_api_key
+        else None
+    )
 
     @app.exception_handler(auth.LoginRequired)
     def _login_required(_request: Request, exc: auth.LoginRequired):
@@ -68,6 +73,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(auth.router)
     app.include_router(i18n.router)
     app.include_router(item_routes.router)
+    app.include_router(capture.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)
     return app
