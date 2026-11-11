@@ -8,10 +8,10 @@
   <button class="check" type="button" hx-post="/items/{{ item.id }}/done" hx-target="#item-{{ item.id }}"
           hx-swap="outerHTML" aria-label="{{ t('mark_done', title=item.title) }}"></button>
   {% endif %}
-  {% if kind in ("today", "done") %}
+  {% if kind in ("today", "done") or compact %}
   <span class="time {% if is_next %}time-next{% endif %}">{{ item.due_at | local_time }}</span>
   {% else %}
-  <span class="day {% if kind == 'late' %}day-late{% endif %}">{{ day_label(item.due_at) }}</span>
+  <span class="when {% if kind == 'late' %}when-late{% endif %}"><span class="day">{{ day_label(item.due_at) }}</span><span class="when-time">{{ item.due_at | local_time }}</span></span>
   {% endif %}
   <span class="title">{{ item.title }}</span>
   {% if kind == "late" %}

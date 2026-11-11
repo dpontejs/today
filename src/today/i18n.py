@@ -5,7 +5,7 @@ The language comes from the `today_lang` cookie (set by the PT/EN switch) or, fa
 installed in the container.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
@@ -24,7 +24,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "sign_out": "SIGN OUT",
         "section_late": "LATE",
         "section_today": "TODAY",
-        "section_next": "NEXT 7 DAYS",
+        "section_next": "NEXT {n} DAYS",
         "pill_late": "LATE",
         "pill_next": "NEXT",
         "status_on_time": "ON TIME",
@@ -64,6 +64,19 @@ STRINGS: dict[str, dict[str, str]] = {
         "capture_nothing": "Didn't find anything to remind you of.",
         "capture_audio_too_large": "Recording too long. Keep it under a minute.",
         "capture_not_audio": "That file is not audio.",
+        "tab_today": "TODAY",
+        "tab_calendar": "CALENDAR",
+        "tabs_label": "Sections",
+        "show_more": "SHOW MORE ({n})",
+        "days_choice": "Show the next {n} days",
+        "prev_month": "Previous month",
+        "next_month": "Next month",
+        "month_items": "{n} ITEMS",
+        "pick_day": "Tap a day to see its items.",
+        "day_empty": "Nothing on this day.",
+        "legend_items": "ITEMS",
+        "legend_late": "LATE",
+        "legend_today": "TODAY",
         "switch_lang": "PT",
         "switch_lang_label": "Ver em português",
     },
@@ -72,7 +85,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "sign_out": "SAIR",
         "section_late": "ATRASADOS",
         "section_today": "HOJE",
-        "section_next": "PRÓXIMOS 7 DIAS",
+        "section_next": "PRÓXIMOS {n} DIAS",
         "pill_late": "ATRASADO",
         "pill_next": "PRÓXIMO",
         "status_on_time": "NO HORÁRIO",
@@ -112,6 +125,19 @@ STRINGS: dict[str, dict[str, str]] = {
         "capture_nothing": "Não encontrei nada para lembrar.",
         "capture_audio_too_large": "Gravação longa demais. Fale em menos de um minuto.",
         "capture_not_audio": "Esse arquivo não é áudio.",
+        "tab_today": "HOJE",
+        "tab_calendar": "CALENDÁRIO",
+        "tabs_label": "Seções",
+        "show_more": "VER MAIS ({n})",
+        "days_choice": "Mostrar os próximos {n} dias",
+        "prev_month": "Mês anterior",
+        "next_month": "Próximo mês",
+        "month_items": "{n} ITENS",
+        "pick_day": "Toque num dia para ver os itens.",
+        "day_empty": "Nada neste dia.",
+        "legend_items": "ITENS",
+        "legend_late": "ATRASADO",
+        "legend_today": "HOJE",
         "switch_lang": "EN",
         "switch_lang_label": "View in English",
     },
@@ -124,6 +150,36 @@ WEEKDAYS_LONG = {
 WEEKDAYS_SHORT = {
     "en": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
     "pt": ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"],
+}
+MONTHS_LONG = {
+    "en": [
+        "JANUARY",
+        "FEBRUARY",
+        "MARCH",
+        "APRIL",
+        "MAY",
+        "JUNE",
+        "JULY",
+        "AUGUST",
+        "SEPTEMBER",
+        "OCTOBER",
+        "NOVEMBER",
+        "DECEMBER",
+    ],
+    "pt": [
+        "JANEIRO",
+        "FEVEREIRO",
+        "MARÇO",
+        "ABRIL",
+        "MAIO",
+        "JUNHO",
+        "JULHO",
+        "AGOSTO",
+        "SETEMBRO",
+        "OUTUBRO",
+        "NOVEMBRO",
+        "DEZEMBRO",
+    ],
 }
 MONTHS_SHORT = {
     "en": ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
@@ -160,6 +216,14 @@ def month_short(dt: datetime, lang: str) -> str:
     return MONTHS_SHORT[lang][dt.month - 1]
 
 
+def month_long(d: date, lang: str) -> str:
+    return MONTHS_LONG[lang][d.month - 1]
+
+
+def weekday_short(d: date, lang: str) -> str:
+    return WEEKDAYS_SHORT[lang][d.weekday()]
+
+
 def day_label(dt: datetime, lang: str) -> str:
     return f"{WEEKDAYS_SHORT[lang][dt.weekday()]} {dt.day:02d}"
 
@@ -184,6 +248,10 @@ def i18n_context(request: Request) -> dict:
         "weekday_long": lambda dt: weekday_long(dt.astimezone(tz), lang),
         "month_short": lambda dt: month_short(dt.astimezone(tz), lang),
         "day_label": lambda dt: day_label(dt.astimezone(tz), lang),
+        "month_long": lambda d: month_long(d, lang),
+        "weekday_short": lambda d: weekday_short(d, lang),
+        "weekday_headers": WEEKDAYS_SHORT[lang],
+        "date_heading": lambda d: f"{weekday_short(d, lang)} {d.day:02d} {MONTHS_SHORT[lang][d.month - 1]}",
     }
 
 

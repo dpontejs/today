@@ -31,23 +31,53 @@ def _default_due(now: datetime, tz: ZoneInfo) -> str:
     return next_hour.strftime(FORM_DATETIME)
 
 
+DAY_CHOICES = (7, 14, 30)
+DAYS_COOKIE = "today_days"
+
+
+def _days(request: Request) -> int:
+    for raw in (request.query_params.get("days"), request.cookies.get(DAYS_COOKIE)):
+        if raw and raw.isdigit() and int(raw) in DAY_CHOICES:
+            return int(raw)
+    return DAY_CHOICES[0]
+
+
 def _render_page(
     request: Request, status_code: int = 200, errors: dict | None = None, form: dict | None = None
 ) -> HTMLResponse:
     settings, conn = request.app.state.settings, request.app.state.conn
     now = request.app.state.clock()
-    return request.app.state.templates.TemplateResponse(
+    days = _days(request)
+    view = build_today(conn, now, settings.tz, next_days=days)
+    response = request.app.state.templates.TemplateResponse(
         request,
         "today.html",
         {
-            "view": build_today(conn, now, settings.tz),
+            "active_tab": "today",
+            "view": view,
             "now": now.astimezone(settings.tz),
+            "days": days,
+            "day_choices": DAY_CHOICES,
+            "late_rows": [(i, "late", False) for i in view.late],
+            "today_rows": [(i, "today", i.id == view.next_item_id) for i in view.today]
+            + [(i, "done", False) for i in view.done_today],
+            "next_rows": [(i, "next", False) for i in view.next],
             "errors": errors or {},
             "form": form or {"title": "", "due_at": _default_due(now, settings.tz)},
             "capture_enabled": request.app.state.extractor is not None,
         },
         status_code=status_code,
     )
+    if request.query_params.get("days") == str(days):
+        response.set_cookie(
+            DAYS_COOKIE,
+            str(days),
+            max_age=365 * 24 * 3600,
+            httponly=True,
+            secure=settings.cookie_secure,
+            samesite="lax",
+        )
+    return response
 
 
 def _render_row(request: Request, item: Item) -> HTMLResponse:

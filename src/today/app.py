@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from today import auth, capture, i18n
+from today import auth, calendar_view, capture, i18n
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
@@ -74,6 +74,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(i18n.router)
     app.include_router(item_routes.router)
     app.include_router(capture.router)
+    app.include_router(calendar_view.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)
     return app

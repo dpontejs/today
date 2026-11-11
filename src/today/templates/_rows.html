@@ -1,0 +1,11 @@
+<ul class="rows {{ list_class or '' }}">
+  {% for item, kind, is_next in rows[:5] %}{% include "_row.html" %}{% endfor %}
+</ul>
+{% if rows | length > 5 %}
+<details class="more">
+  <summary class="link-button">{{ t("show_more", n=(rows | length) - 5) }}</summary>
+  <ul class="rows {{ list_class or '' }}">
+    {% for item, kind, is_next in rows[5:] %}{% include "_row.html" %}{% endfor %}
+  </ul>
+</details>
+{% endif %}
