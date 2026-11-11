@@ -17,8 +17,7 @@ FastAPI app — one process, one container          (ADR 0001)
    ├─ items      CRUD + Today view (Jinja + HTMX)
    ├─ notify     push subscriptions + 60 s reminder loop → Web Push (VAPID)
    ├─ mcp        /mcp tools for Claude & other MCP clients (ADR 0005)
-   ├─ capture    text/audio → item drafts (Gemini)  (ADR 0003)
-   └─ importers  ROADMAP.md → items (deterministic)
+   └─ capture    audio on the phone → item drafts (Gemini)  (ADR 0003)
 SQLite on a Docker volume                          (ADR 0002)
 ```
 
