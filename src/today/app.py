@@ -1,6 +1,7 @@
 """Application factory. Run with: uvicorn --factory today.app:from_env"""
 
-from contextlib import asynccontextmanager
+import asyncio
+from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -9,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from today import auth, calendar_view, capture, i18n
+from today import auth, calendar_view, capture, i18n, notify, push_routes
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
@@ -23,13 +24,21 @@ def create_app(settings: Settings) -> FastAPI:
     mcp = None
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI):
-        # A mounted sub-app's lifespan never runs, so the MCP session manager is started here.
-        if mcp is None:
-            yield
-            return
-        async with mcp.session_manager.run():
-            yield
+    async def lifespan(app: FastAPI):
+        # The reminder loop (ADR 0001) runs only when push is configured.
+        loop = asyncio.create_task(notify.run_loop(app)) if app.state.push_sender else None
+        try:
+            # A mounted sub-app's lifespan never runs, so the MCP session manager is started here.
+            if mcp is None:
+                yield
+            else:
+                async with mcp.session_manager.run():
+                    yield
+        finally:
+            if loop:
+                loop.cancel()
+                with suppress(asyncio.CancelledError):
+                    await loop
 
     app = FastAPI(title="today", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 
@@ -42,6 +51,11 @@ def create_app(settings: Settings) -> FastAPI:
     templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
     app.state.templates = templates
     app.state.login_limiter = auth.LoginLimiter()
+    app.state.push_sender = (
+        notify.make_sender(settings.vapid_private_key, settings.vapid_subject)
+        if settings.vapid_private_key
+        else None
+    )
     app.state.extractor = (
         capture.GeminiExtractor(settings.gemini_api_key, settings.gemini_model)
         if settings.gemini_api_key
@@ -75,6 +89,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(item_routes.router)
     app.include_router(capture.router)
     app.include_router(calendar_view.router)
+    app.include_router(push_routes.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)
     return app

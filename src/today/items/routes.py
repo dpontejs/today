@@ -8,7 +8,9 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import ValidationError
 
+from today import notify
 from today.auth import require_session
+from today.items.reminders import add_reminders, clean_reminders
 from today.items.repo import Item, ItemIn, create_item, mark_done, reopen
 from today.items.today import build_today, row_kind
 
@@ -65,6 +67,7 @@ def _render_page(
             "errors": errors or {},
             "form": form or {"title": "", "due_at": _default_due(now, settings.tz)},
             "capture_enabled": request.app.state.extractor is not None,
+            "push": notify.status(conn) if request.app.state.push_sender else None,
         },
         status_code=status_code,
     )
@@ -115,7 +118,11 @@ def create(
         data = ItemIn(title=title.strip(), due_at=due, notes=notes.strip() or None)
     except ValidationError:
         return _render_page(request, 422, {"title": "error_title_too_long"}, form)
-    create_item(request.app.state.conn, data, request.app.state.clock())
+    now = request.app.state.clock()
+    item = create_item(request.app.state.conn, data, now)
+    add_reminders(
+        request.app.state.conn, item.id, clean_reminders([item.due_at], due_at=item.due_at, now=now)
+    )
     return RedirectResponse("/", status_code=303)
 
 

@@ -1,7 +1,7 @@
 # 03 · Natural-language capture: type or say it, confirm, done
 
 - **Date:** 2026-11-10
-- **Status:** proposed
+- **Status:** delivered (PR #6)
 - **ADRs:** [0003](../adr/0003-gemini-for-capture.md) (Gemini behind `extract_items`), [0006](../adr/0006-reminders-table.md)
 
 ## Goal
@@ -41,15 +41,15 @@ def extract_items(text: str | None, audio: bytes | None, mime: str | None,
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_capture_text_shows_review_card`: fake extractor → card with title, local date and reminder checkboxes.
-- [ ] `test_capture_passes_now_tz_and_lang`: the extractor gets `now`, `America/Fortaleza` and the request language.
-- [ ] `test_capture_audio_passes_bytes_and_mime`; `test_capture_rejects_large_audio_413`; `test_capture_rejects_non_audio_415`.
-- [ ] `test_capture_empty_is_422`; `test_capture_model_error_shows_message`.
-- [ ] `test_confirm_creates_item_and_reminders_in_utc`; `test_confirm_only_checked_reminders`.
-- [ ] `test_clean_reminders_drops_past_after_due_dupes_and_caps`.
-- [ ] `test_migration_copies_remind_at`; `test_deleting_item_deletes_reminders`.
-- [ ] `test_build_prompt_states_now_zone_language_and_rules`; `test_parse_model_json_to_drafts` (bad JSON → CaptureError).
-- [ ] `test_capture_hidden_without_gemini_key`.
+- [x] `test_capture_text_shows_review_card`: fake extractor → card with title, local date and reminder checkboxes.
+- [x] `test_capture_passes_now_tz_and_lang`: the extractor gets `now`, `America/Fortaleza` and the request language.
+- [x] `test_capture_audio_passes_bytes_and_mime`; `test_capture_rejects_large_audio_413`; `test_capture_rejects_non_audio_415`.
+- [x] `test_capture_empty_is_422`; `test_capture_model_error_shows_message`.
+- [x] `test_confirm_creates_item_and_reminders_in_utc`; `test_confirm_only_checked_reminders`.
+- [x] `test_clean_reminders_drops_past_after_due_dupes_and_caps`.
+- [x] `test_migration_copies_remind_at`; `test_deleting_item_deletes_reminders`.
+- [x] `test_build_prompt_states_now_zone_language_and_rules`; `test_parse_model_json_to_drafts` (bad JSON → CaptureError).
+- [x] `test_capture_hidden_without_gemini_key`.
 
 ## End-to-end check
 

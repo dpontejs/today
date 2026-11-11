@@ -19,7 +19,7 @@ def test_migration_copies_remind_at(tmp_path: Path):
         ("2026-11-20T12:00:00+00:00", "2026-11-19T22:00:00+00:00", NOW.isoformat()),
     )
 
-    assert migrate(conn) == ["002_reminders.sql"]
+    assert migrate(conn)[0] == "002_reminders.sql"  # later migrations may follow
 
     rows = conn.execute("SELECT item_id, remind_at, sent_at FROM reminders").fetchall()
     assert [tuple(r) for r in rows] == [(1, "2026-11-19T22:00:00+00:00", None)]

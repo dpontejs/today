@@ -1,0 +1,15 @@
+<div class="push-status" id="push-status" data-badge="{{ (late_rows or []) | length + (view.today if view is defined else []) | length }}">
+  {% if push.devices %}
+  <p class="push-line"><span class="dot dot-on" aria-hidden="true"></span>
+    {{ t("push_devices_one") if push.devices == 1 else t("push_devices_many", n=push.devices) }}{% if push.last_success_at %} · {{ t("push_last", time=push.last_success_at | local_time) }}{% endif %}</p>
+  {% else %}
+  <p class="push-line"><span class="dot" aria-hidden="true"></span>{{ t("push_off") }}</p>
+  {% endif %}
+  {% if push.last_error %}<p class="push-error">{{ t("push_error") }}</p>{% endif %}
+  {% if test_result is defined %}<p class="push-result" role="status">{{ t("push_test_sent", n=test_result) if test_result else t("push_test_none") }}</p>{% endif %}
+  <div class="push-actions">
+    <button type="button" class="link-button" id="push-enable" data-denied="{{ t('push_denied') }}" hidden>{{ t("push_enable") }}</button>
+    <button type="button" class="link-button" hx-post="/push/test" hx-target="#push-status" hx-swap="outerHTML">{{ t("push_test") }}</button>
+  </div>
+  <p class="push-hint" id="push-hint" hidden>{{ t("push_install_hint") }}</p>
+</div>

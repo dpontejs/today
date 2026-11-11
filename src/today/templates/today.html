@@ -4,6 +4,7 @@
 <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"41[35]|422","swap":true,"error":false},{"code":"...","swap":false}]}'>
 <script src="/static/htmx.min.js" defer></script>
 <script src="/static/capture.js" defer></script>
+<script src="/static/push.js" defer></script>
 {% endblock %}
 {% block body %}
 <main class="board">
@@ -22,6 +23,7 @@
       </div>
     </div>
   </header>
+  {% if push %}{% include "_push_status.html" %}{% endif %}
 
   {% if late_rows %}
   <section class="section" aria-labelledby="h-late">

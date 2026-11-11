@@ -37,9 +37,9 @@ class DraftIn(BaseModel):
         max_length=200,
         description="Stable id for imports, e.g. 'roadmap:M0:book-ch-1-2'. An existing key is skipped.",
     )
-    reminders: list[datetime] = Field(
-        default=[],
-        description="When to notify (ISO 8601, local if no offset). Past and after-due_at ones are dropped.",
+    reminders: list[datetime] | None = Field(
+        default=None,
+        description="When to notify (ISO 8601, local if no offset). Omitted: once at due_at. []: never.",
     )
 
 
@@ -120,7 +120,8 @@ def create_items(conn: sqlite3.Connection, drafts: list[DraftIn], now: datetime,
         if item is None:
             skipped.append(d.source_key)
             continue
-        times = clean_reminders([_local(r, tz) for r in d.reminders], due_at=due, now=now)
+        wanted = [due] if d.reminders is None else [_local(r, tz) for r in d.reminders]
+        times = clean_reminders(wanted, due_at=due, now=now)
         add_reminders(conn, item.id, times)
         created.append(_out(conn, item, tz))
     return {"created": created, "skipped_source_keys": skipped}
