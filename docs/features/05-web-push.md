@@ -1,7 +1,7 @@
 # 05 · Web push: reminders that actually ring on the phone
 
 - **Date:** 2026-11-10
-- **Status:** proposed
+- **Status:** delivered (PR #9; confirmed on the iPhone 2026-11-11)
 - **ADRs:** [0001](../adr/0001-modular-monolith-with-in-process-scheduler.md) (in-process loop), [0006](../adr/0006-reminders-table.md)
 
 ## Goal
@@ -42,14 +42,14 @@ def daily_summary(conn, now, tz, send) -> bool            # at or after 08:00 lo
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_single_due_reminder_sent_and_marked`; `test_several_due_grouped_in_one_notification`.
-- [ ] `test_future_reminder_not_sent`; `test_done_item_reminder_marked_without_sending`.
-- [ ] `test_gone_subscription_deleted`; `test_error_retries_then_gives_up_after_one_hour`.
-- [ ] `test_no_subscription_marks_sent`; `test_payload_language_follows_subscription`.
-- [ ] `test_daily_summary_once_after_8_and_only_with_items`.
-- [ ] `test_subscribe_upserts_and_unsubscribe_removes`; `test_push_routes_require_session`; `test_push_disabled_without_vapid`.
-- [ ] `test_test_push_reports_device_count`; `test_status_shows_last_delivery`.
-- [ ] `test_default_reminder_at_due_for_manual_and_mcp`; `test_vapid_keys_roundtrip`.
+- [x] `test_single_due_reminder_sent_and_marked`; `test_several_due_grouped_in_one_notification`.
+- [x] `test_future_reminder_not_sent`; `test_done_item_reminder_marked_without_sending`.
+- [x] `test_gone_subscription_deleted`; `test_error_retries_then_gives_up_after_one_hour`.
+- [x] `test_no_subscription_marks_sent`; `test_payload_language_follows_subscription`.
+- [x] `test_daily_summary_once_after_8_and_only_with_items`.
+- [x] `test_subscribe_upserts_and_unsubscribe_removes`; `test_push_routes_require_session`; `test_push_disabled_without_vapid`.
+- [x] `test_test_push_reports_device_count`; `test_status_shows_last_delivery`.
+- [x] `test_default_reminder_at_due_for_manual_and_mcp`; `test_vapid_keys_roundtrip`.
 
 ## End-to-end check
 
