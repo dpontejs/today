@@ -7,6 +7,7 @@
 {% endblock %}
 {% block body %}
 <main class="board">
+  {% include "_tabs.html" %}
   <header class="board-header">
     <div class="date">
       <p class="eyebrow">{{ weekday_long(now) }} · {{ month_short(now) }}</p>
@@ -22,31 +23,42 @@
     </div>
   </header>
 
-  {% if view.late %}
+  {% if late_rows %}
   <section class="section" aria-labelledby="h-late">
-    <h2 class="section-head section-head-late" id="h-late"><span>{{ t("section_late") }}</span><span>{{ view.late | length }}</span></h2>
-    <ul class="rows">
-      {% for item in view.late %}{% with kind="late", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
-    </ul>
+    <h2 class="section-head section-head-late" id="h-late"><span>{{ t("section_late") }}</span><span>{{ late_rows | length }}</span></h2>
+    {% with rows=late_rows, list_class="" %}{% include "_rows.html" %}{% endwith %}
   </section>
   {% endif %}
 
   <section class="section" aria-labelledby="h-today">
     <h2 class="section-head" id="h-today"><span>{{ t("section_today") }}</span><span>{{ view.today | length }}</span></h2>
-    <ul class="rows">
-      {% for item in view.today %}{% with kind="today", is_next=(item.id == view.next_item_id) %}{% include "_row.html" %}{% endwith %}{% endfor %}
-      {% for item in view.done_today %}{% with kind="done", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
-    </ul>
-    {% if not view.today and not view.done_today %}<p class="empty">{{ t("empty_today") }}</p>{% endif %}
+    {% with rows=today_rows, list_class="" %}{% include "_rows.html" %}{% endwith %}
+    {% if not today_rows %}<p class="empty">{{ t("empty_today") }}</p>{% endif %}
   </section>
 
   <section class="section" aria-labelledby="h-next">
-    <h2 class="section-head" id="h-next"><span>{{ t("section_next") }}</span><span>{{ view.next | length }}</span></h2>
-    <ul class="rows rows-quiet">
-      {% for item in view.next %}{% with kind="next", is_next=False %}{% include "_row.html" %}{% endwith %}{% endfor %}
-    </ul>
-    {% if not view.next %}<p class="empty">{{ t("empty_week") }}</p>{% endif %}
+    <h2 class="section-head" id="h-next"><span>{{ t("section_next", n=days) }}</span><span>{{ view.next | length }}</span></h2>
+    <nav class="range" aria-label="{{ t('days_choice', n=days) }}">
+      {% for n in day_choices %}<a href="/?days={{ n }}" aria-label="{{ t('days_choice', n=n) }}"{% if n == days %} aria-current="true"{% endif %}>{{ n }}</a>{% endfor %}
+    </nav>
+    {% with rows=next_rows, list_class="rows-quiet" %}{% include "_rows.html" %}{% endwith %}
+    {% if not next_rows %}<p class="empty">{{ t("empty_week") }}</p>{% endif %}
   </section>
+
+  <details class="manual"{% if errors or not capture_enabled %} open{% endif %}>
+    <summary class="link-button">{{ t("manual") }}</summary>
+  <form class="add" method="post" action="/items" novalidate>
+    <label for="title" class="visually-hidden">{{ t("label_what") }}</label>
+    <input id="title" name="title" type="text" class="add-title" placeholder="{{ t('placeholder_title') }}" value="{{ form.title }}"
+           maxlength="200" autocomplete="off" {% if errors.title %}aria-invalid="true" aria-describedby="err-title"{% endif %}>
+    <label for="due_at" class="visually-hidden">{{ t("label_when") }}</label>
+    <input id="due_at" name="due_at" type="datetime-local" class="add-date" value="{{ form.due_at }}"
+           {% if errors.due_at %}aria-invalid="true" aria-describedby="err-due"{% endif %}>
+    <button type="submit" class="btn-accent add-button">{{ t("add") }}</button>
+    {% if errors.title %}<p class="error" id="err-title" role="alert">{{ t(errors.title) }}</p>{% endif %}
+    {% if errors.due_at %}<p class="error" id="err-due" role="alert">{{ t(errors.due_at) }}</p>{% endif %}
+  </form>
+  </details>
 
   <section class="capture" aria-label="{{ t('capture_label') }}">
     <div id="capture-review" aria-live="polite"></div>
@@ -67,20 +79,6 @@
     </form>
     <p class="capture-status" id="capture-status" aria-live="polite"></p>
     {% endif %}
-    <details class="manual"{% if errors or not capture_enabled %} open{% endif %}>
-      <summary class="link-button">{{ t("manual") }}</summary>
-    <form class="add" method="post" action="/items" novalidate>
-      <label for="title" class="visually-hidden">{{ t("label_what") }}</label>
-      <input id="title" name="title" type="text" class="add-title" placeholder="{{ t('placeholder_title') }}" value="{{ form.title }}"
-             maxlength="200" autocomplete="off" {% if errors.title %}aria-invalid="true" aria-describedby="err-title"{% endif %}>
-      <label for="due_at" class="visually-hidden">{{ t("label_when") }}</label>
-      <input id="due_at" name="due_at" type="datetime-local" class="add-date" value="{{ form.due_at }}"
-             {% if errors.due_at %}aria-invalid="true" aria-describedby="err-due"{% endif %}>
-      <button type="submit" class="btn-accent add-button">{{ t("add") }}</button>
-      {% if errors.title %}<p class="error" id="err-title" role="alert">{{ t(errors.title) }}</p>{% endif %}
-      {% if errors.due_at %}<p class="error" id="err-due" role="alert">{{ t(errors.due_at) }}</p>{% endif %}
-    </form>
-    </details>
   </section>
 </main>
 {% endblock %}

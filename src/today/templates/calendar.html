@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block head %}<script src="/static/htmx.min.js" defer></script>{% endblock %}
+{% block body %}
+<main class="board">
+  {% include "_tabs.html" %}
+
+  <header class="month-header">
+    <a class="month-nav" href="{{ prev_url }}" aria-label="{{ t('prev_month') }}">‹</a>
+    <div class="month-title">
+      <h1 class="month-name">{{ month_long(month) }}</h1>
+      <p class="eyebrow">{{ month.year }} · {{ t("month_items", n=month_total) }}</p>
+    </div>
+    <a class="month-nav" href="{{ next_url }}" aria-label="{{ t('next_month') }}">›</a>
+  </header>
+
+  <table class="month-grid">
+    <thead><tr>{% for w in weekday_headers %}<th scope="col">{{ w }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for week in weeks %}
+      <tr>
+        {% for c in week %}
+        <td>
+          {% if c.in_month %}
+          <a href="{{ cell_url(c.day) }}" class="cell{% if c.is_today %} cell-today{% endif %}{% if c.day == selected %} cell-selected{% endif %}"
+             {% if c.day == selected %}aria-current="date"{% endif %}
+             aria-label="{{ date_heading(c.day) }}{% if c.count %}, {{ c.count }}{% endif %}">
+            <span class="cell-n">{{ c.day.day }}</span>
+            {% if c.late %}<span class="cell-bar cell-bar-late"></span>
+            {% elif c.count %}<span class="cell-bar" style="width: {{ [6 + c.count * 5, 30] | min }}px"></span>
+            {% else %}<span class="cell-bar cell-bar-empty"></span>{% endif %}
+          </a>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="legend">
+    <span><span class="legend-bar"></span>{{ t("legend_items") }}</span>
+    <span><span class="legend-bar legend-bar-late"></span>{{ t("legend_late") }}</span>
+    <span><span class="legend-box"></span>{{ t("legend_today") }}</span>
+  </p>
+
+  <section class="section" aria-labelledby="h-day">
+    {% if selected %}
+    <h2 class="section-head" id="h-day"><span>{{ date_heading(selected) }}</span><span>{{ rows | length }}</span></h2>
+    <ul class="rows">
+      {% for item, kind in rows %}{% with is_next=False, compact=True %}{% include "_row.html" %}{% endwith %}{% endfor %}
+    </ul>
+    {% if not rows %}<p class="empty">{{ t("day_empty") }}</p>{% endif %}
+    {% else %}
+    <p class="empty" id="h-day">{{ t("pick_day") }}</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
