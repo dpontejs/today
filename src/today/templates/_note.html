@@ -1,0 +1,12 @@
+<article class="note{% if note.pinned %} note-pinned{% endif %}" id="note-{{ note.id }}">
+  {% if note.pinned %}<p class="eyebrow note-pin-label">{{ t("note_pinned") }}</p>{% endif %}
+  <p class="note-body">{{ note.body }}</p>
+  <div class="note-footer">
+    <span class="note-stamp">{{ t("note_edited", when=stamp(note.updated_at)) }}</span>
+    <div class="note-actions">
+      <button type="button" class="link-button" hx-post="/notes/{{ note.id }}/pin" hx-target="#note-{{ note.id }}" hx-swap="outerHTML">{{ t("note_unpin") if note.pinned else t("note_pin") }}</button>
+      <button type="button" class="link-button" hx-get="/notes/{{ note.id }}/edit" hx-target="#note-{{ note.id }}" hx-swap="outerHTML">{{ t("note_edit") }}</button>
+      <button type="button" class="link-button link-danger" hx-post="/notes/{{ note.id }}/delete" hx-target="#note-{{ note.id }}" hx-swap="outerHTML" hx-confirm="{{ t('note_delete_confirm') }}">{{ t("note_delete") }}</button>
+    </div>
+  </div>
+</article>
