@@ -1,4 +1,5 @@
 <nav class="tabs" aria-label="{{ t('tabs_label') }}">
   <a href="/" {% if active_tab == "today" %}aria-current="page"{% endif %}>{{ t("tab_today") }}</a>
+  <a href="/notes" {% if active_tab == "notes" %}aria-current="page"{% endif %}>{{ t("tab_notes") }}</a>
   <a href="/calendar" {% if active_tab == "calendar" %}aria-current="page"{% endif %}>{{ t("tab_calendar") }}</a>
 </nav>

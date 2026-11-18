@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ t("notes_title") }} · today{% endblock %}
+{% block head %}
+<meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"422","swap":true,"error":false},{"code":"...","swap":false}]}'>
+<script src="/static/htmx.min.js" defer></script>
+{% endblock %}
+{% block body %}
+<main class="board">
+  {% include "_tabs.html" %}
+
+  <header class="notes-header">
+    <h1 class="notes-title">{{ t("notes_title") }}</h1>
+    <p class="eyebrow">{{ t("notes_count", n=notes | length) }}</p>
+  </header>
+
+  <form class="note-new" method="post" action="/notes" novalidate>
+    <label for="note-body" class="visually-hidden">{{ t("note_new") }}</label>
+    <textarea id="note-body" name="body" rows="3" maxlength="5000" placeholder="{{ t('note_placeholder') }}"
+              {% if error %}aria-invalid="true" aria-describedby="note-err"{% endif %}>{{ draft or "" }}</textarea>
+    {% if error %}<p class="error" id="note-err" role="alert">{{ t(error) }}</p>{% endif %}
+    <button type="submit" class="btn-accent">{{ t("note_save") }}</button>
+  </form>
+
+  <section class="notes" aria-label="{{ t('notes_title') }}">
+    {% for note in notes %}{% include "_note.html" %}{% endfor %}
+    {% if not notes %}<p class="empty">{{ t("notes_empty") }}</p>{% endif %}
+  </section>
+</main>
+{% endblock %}

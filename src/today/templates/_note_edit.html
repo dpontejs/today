@@ -1,0 +1,10 @@
+<form class="note note-editing" id="note-{{ note.id }}" hx-post="/notes/{{ note.id }}" hx-target="this" hx-swap="outerHTML">
+  <label for="note-edit-{{ note.id }}" class="visually-hidden">{{ t("note_edit") }}</label>
+  <textarea id="note-edit-{{ note.id }}" name="body" rows="5" maxlength="5000" required
+            {% if error %}aria-invalid="true" aria-describedby="note-err-{{ note.id }}"{% endif %}>{{ draft }}</textarea>
+  {% if error %}<p class="error" id="note-err-{{ note.id }}" role="alert">{{ t(error) }}</p>{% endif %}
+  <div class="note-footer">
+    <button type="button" class="link-button" hx-get="/notes/{{ note.id }}" hx-target="#note-{{ note.id }}" hx-swap="outerHTML">{{ t("note_cancel") }}</button>
+    <button type="submit" class="btn-accent">{{ t("note_save") }}</button>
+  </div>
+</form>
