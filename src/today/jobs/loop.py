@@ -10,14 +10,18 @@ import logging
 import sqlite3
 from collections.abc import Mapping
 from datetime import datetime
+from functools import partial
 from zoneinfo import ZoneInfo
 
 from starlette.concurrency import run_in_threadpool
 
+from today import notify
+from today.jobs.analyze import analyze_pending
 from today.jobs.collect import collect
 from today.jobs.models import Fetch
 from today.jobs.repo import SourceReport
 from today.jobs.sources import SOURCES, make_client
+from today.llm.analyst import Analyst
 
 log = logging.getLogger(__name__)
 
@@ -56,11 +60,35 @@ def select_sources(names: frozenset[str] | None) -> dict[str, Fetch]:
     return {name: fetch for name, fetch in SOURCES.items() if name in names}
 
 
-def run_slot(conn: sqlite3.Connection, slot: str, sources: Mapping[str, Fetch], now: datetime) -> None:
+def run_slot(
+    conn: sqlite3.Connection,
+    slot: str,
+    sources: Mapping[str, Fetch],
+    now: datetime,
+    *,
+    analyst: Analyst | None = None,
+    model: str = "sonnet",
+    limit: int = 20,
+    push_score: int = 75,
+    send: notify.Send | None = None,
+) -> None:
+    """Collect, record the slot, then (with an analyst) analyze pending jobs and push the strong ones."""
     with make_client() as client:
         report = collect(conn, client, sources, now)
     record_run(conn, slot, now, report)
     log.info("job slot %s: %s", slot, {name: (r.new, r.error) for name, r in report.items()})
+    if analyst is None:
+        return
+    analysis = analyze_pending(conn, analyst, model, now, limit)
+    pushed = notify.push_strong(conn, analysis.analyzed, push_score, now, send)
+    log.info(
+        "job slot %s analysis: %s analyzed, %s failed, %s pushed%s",
+        slot,
+        len(analysis.analyzed),
+        analysis.failed,
+        pushed,
+        f" (skipped: {analysis.skipped_reason})" if analysis.skipped_reason else "",
+    )
 
 
 async def run_jobs_loop(app) -> None:
@@ -71,7 +99,20 @@ async def run_jobs_loop(app) -> None:
             now = state.clock()
             slot = due_slot(state.conn, now, state.settings.tz)
             if slot:
-                await run_in_threadpool(run_slot, state.conn, slot, state.job_sources, now)
+                settings = state.settings
+                run = partial(
+                    run_slot,
+                    state.conn,
+                    slot,
+                    state.job_sources,
+                    now,
+                    analyst=state.analyst,
+                    model=settings.analyst_model,
+                    limit=settings.analyze_limit,
+                    push_score=settings.jobs_push_score,
+                    send=state.push_sender,
+                )
+                await run_in_threadpool(run)
         except Exception:
             log.exception("jobs loop tick failed")
         await asyncio.sleep(LOOP_SECONDS)

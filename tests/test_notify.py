@@ -240,3 +240,51 @@ def test_make_sender_encrypts_signs_and_maps_status(status, expected):
         assert b"title" not in request["body"]  # the payload travels encrypted
     finally:
         service.close()
+
+
+# --- jobs in the summary (feature 08) ---------------------------------------------------------------
+
+
+def analyzed_job(conn, external_id: str, company: str, score: int, at: datetime) -> None:
+    from today.jobs import analysis_repo, repo
+    from today.jobs.models import JobAnalysis, JobPosting
+
+    posting = JobPosting(
+        source="fake", external_id=external_id, company=company, title="ML Engineer", location=None,
+        workplace="remote", description=None, url="https://example.com", published_at=None,
+    )  # fmt: skip
+    repo.upsert_jobs(conn, [posting], at)
+    job_id = conn.execute("SELECT id FROM jobs WHERE external_id = ?", (external_id,)).fetchone()[0]
+    analysis = JobAnalysis(
+        meets=[], gaps=[], workplace="remote", location=None, company_summary="x",
+        seniority="junior", target_company=False, score=score, verdict="ok",
+    )  # fmt: skip
+    analysis_repo.store_analysis(conn, job_id, analysis, "sonnet", at)
+
+
+def test_daily_summary_mentions_new_jobs(conn: sqlite3.Connection):
+    subscribe(conn)
+    send = FakeSender()
+    eight = datetime(2026, 11, 10, 8, 0, tzinfo=TZ)
+    create_item(conn, ItemIn(title="Prova de SD", due_at=datetime(2026, 11, 10, 10, 0, tzinfo=TZ)), NOW)
+    analyzed_job(conn, "a", "Nubank", 88, eight - timedelta(hours=13))
+    analyzed_job(conn, "b", "iFood", 60, eight - timedelta(hours=1))
+    analyzed_job(conn, "c", "Velha", 99, eight - timedelta(hours=25))  # older than 24 h: not counted
+
+    assert notify.daily_summary(conn, eight, TZ, send)
+
+    ((_, payload),) = send.sent
+    assert payload["body"].splitlines()[-1] == "2 vagas novas, melhor: Nubank · 88"
+    assert "10:00 Prova de SD" in payload["body"]
+
+
+def test_summary_sent_when_only_jobs(conn: sqlite3.Connection):
+    subscribe(conn, lang="en")
+    send = FakeSender()
+    eight = datetime(2026, 11, 10, 8, 0, tzinfo=TZ)
+    analyzed_job(conn, "a", "Nubank", 88, eight - timedelta(hours=2))
+
+    assert notify.daily_summary(conn, eight, TZ, send)
+
+    ((_, payload),) = send.sent
+    assert "1 new job, best: Nubank · 88" in (payload["title"], payload["body"])

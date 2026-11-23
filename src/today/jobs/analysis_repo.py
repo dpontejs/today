@@ -8,7 +8,14 @@ from today.jobs.repo import JobRow, row_to_job, to_db
 
 MAX_ATTEMPTS = 3
 
-__all__ = ["PROMPT_VERSION", "analyses_since", "get_profile", "pending_jobs", "record_failure"]
+__all__ = [
+    "PROMPT_VERSION",
+    "analyses_since",
+    "get_profile",
+    "pending_jobs",
+    "record_failure",
+    "strong_analyses",
+]
 
 
 def get_profile(conn: sqlite3.Connection) -> str:
@@ -70,6 +77,21 @@ def record_failure(conn: sqlite3.Connection, job_id: int) -> int:
     return attempts
 
 
+def strong_analyses(
+    conn: sqlite3.Connection, job_ids: list[int], threshold: int
+) -> list[tuple[JobRow, JobAnalysis]]:
+    """Of `job_ids`, those scoring >= threshold and not dismissed meanwhile, best score first."""
+    marks = ",".join("?" * len(job_ids))
+    return _with_analysis(
+        conn.execute(
+            f"""SELECT j.*, a.analysis_json FROM job_analyses a JOIN jobs j ON j.id = a.job_id
+                WHERE a.job_id IN ({marks}) AND a.score >= ? AND j.status != 'dismissed'
+                ORDER BY a.score DESC, j.id""",
+            (*job_ids, threshold),
+        ).fetchall()
+    )
+
+
 def analyses_since(conn: sqlite3.Connection, since: datetime) -> list[tuple[JobRow, JobAnalysis]]:
     """Jobs analyzed at or after `since`, best score first."""
     rows = conn.execute(
@@ -77,6 +99,10 @@ def analyses_since(conn: sqlite3.Connection, since: datetime) -> list[tuple[JobR
            WHERE a.analyzed_at >= ? ORDER BY a.score DESC, j.id""",
         (to_db(since),),
     ).fetchall()
+    return _with_analysis(rows)
+
+
+def _with_analysis(rows: list[sqlite3.Row]) -> list[tuple[JobRow, JobAnalysis]]:
     out = []
     for r in rows:
         data = dict(r)
