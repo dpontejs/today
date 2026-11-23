@@ -1,7 +1,7 @@
 # 08 · Job pre-analysis: every new role is scored against my profile
 
 - **Date:** 2026-11-23
-- **Status:** proposed
+- **Status:** implemented
 - **ADRs:** [0007](../adr/0007-claude-code-for-analysis-and-writing.md) (Claude Code behind `Analyst`)
 - **Depends on:** [07](07-job-collection.md)
 
@@ -19,7 +19,7 @@ Jobs screen, résumé tailoring, cover letters, interview prep, study topics fro
 
 ```python
 class Analyst(Protocol):                        # today/llm/analyst.py — ClaudeCliAnalyst, AnthropicApiAnalyst
-    def complete(self, *, model: str, prompt: str, schema: type[BaseModel]) -> BaseModel: ...
+    def complete[T: BaseModel](self, *, model: str, system: str, prompt: str, schema: type[T]) -> T: ...
 
 class Gap(BaseModel):
     skill: str
@@ -37,7 +37,7 @@ class JobAnalysis(BaseModel):
     score: int = Field(ge=0, le=100)
     verdict: str                    # one sentence, pt-BR
 
-def analyze_pending(conn, analyst, profile, now, limit=20) -> AnalyzeReport   # status new → analyzed
+def analyze_pending(conn, analyst, model, now, limit=20) -> AnalyzeReport     # profile read from the DB
 ```
 
 - Migration `006_job_analysis.sql`: `job_analyses(job_id PK FK jobs, analysis_json, score, model,
@@ -54,15 +54,15 @@ def analyze_pending(conn, analyst, profile, now, limit=20) -> AnalyzeReport   # 
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_analyze_pending_stores_analysis_and_marks_analyzed` (fake analyst).
-- [ ] `test_analyze_respects_limit_and_oldest_first`.
-- [ ] `test_analyst_error_keeps_job_new`; `test_three_failures_stop_retrying`.
-- [ ] `test_user_status_not_overwritten_by_analysis`.
-- [ ] `test_strong_match_pushes_once_per_slot`; `test_several_strong_matches_grouped`.
-- [ ] `test_daily_summary_mentions_new_jobs`.
-- [ ] `test_claude_cli_builds_args_and_env_without_app_secrets` (fake command).
-- [ ] `test_claude_cli_missing_structured_output_is_error`.
-- [ ] `test_mcp_set_and_get_profile`; `test_mcp_list_jobs_min_score`.
+- [x] `test_analyze_pending_stores_analysis_and_marks_analyzed` (fake analyst).
+- [x] `test_analyze_respects_limit_and_oldest_first`.
+- [x] `test_analyst_error_keeps_job_new`; `test_three_failures_stop_retrying`.
+- [x] `test_user_status_not_overwritten_by_analysis`.
+- [x] `test_strong_match_pushes_once_per_slot`; `test_several_strong_matches_grouped`.
+- [x] `test_daily_summary_mentions_new_jobs`.
+- [x] `test_claude_cli_builds_args_and_env_without_app_secrets` (fake command).
+- [x] `test_claude_cli_missing_structured_output_is_error`.
+- [x] `test_mcp_set_and_get_profile`; `test_mcp_list_jobs_min_score`.
 
 ## End-to-end check
 

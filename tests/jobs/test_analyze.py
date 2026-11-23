@@ -157,3 +157,34 @@ def test_prompt_contains_profile_title_company_location(conn: sqlite3.Connection
 def test_system_prompt_has_the_rubric():
     for text in ("Você avalia vagas para uma pessoa", "+5", "−20", "Natal"):
         assert text in SYSTEM
+
+
+def test_analyze_one_prints_without_writing(conn: sqlite3.Connection):
+    from today.jobs.analyze import analyze_one
+
+    ar.set_profile(conn, PROFILE, NOW)
+    older = add_job(conn, "a", NOW - timedelta(hours=1))
+    newer = add_job(conn, "b", NOW)
+    analyst = FakeAnalyst()
+
+    job, out = analyze_one(conn, analyst, "sonnet")
+    assert job.id == older and out == result()
+    job, _ = analyze_one(conn, analyst, "sonnet", job_id=newer, profile="# Outro perfil")
+    assert job.id == newer and "# Outro perfil" in analyst.calls[-1]["prompt"]
+
+    assert conn.execute("SELECT COUNT(*) FROM job_analyses").fetchone()[0] == 0
+    assert {status(conn, older), status(conn, newer)} == {"new"}
+
+
+def test_analyze_one_needs_a_profile_and_a_job(conn: sqlite3.Connection):
+    import pytest
+
+    from today.jobs.analyze import analyze_one
+
+    with pytest.raises(ValueError, match="profile"):
+        analyze_one(conn, FakeAnalyst(), "sonnet")
+    ar.set_profile(conn, PROFILE, NOW)
+    with pytest.raises(ValueError, match="no job"):
+        analyze_one(conn, FakeAnalyst(), "sonnet")
+    with pytest.raises(ValueError, match="no job"):
+        analyze_one(conn, FakeAnalyst(), "sonnet", job_id=999)

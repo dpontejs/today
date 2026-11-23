@@ -10,7 +10,7 @@ from datetime import datetime
 
 from today.jobs import analysis_repo
 from today.jobs.models import PROMPT_VERSION, Gap, JobAnalysis
-from today.jobs.repo import JobRow
+from today.jobs.repo import JobRow, row_to_job
 from today.llm.analyst import Analyst, AnalystError
 
 log = logging.getLogger(__name__)
@@ -97,3 +97,27 @@ def analyze_pending(
         analysis_repo.store_analysis(conn, job.id, result, model, now)
         analyzed.append(job.id)
     return AnalyzeReport(analyzed=analyzed, failed=failed)
+
+
+def analyze_one(
+    conn: sqlite3.Connection,
+    analyst: Analyst,
+    model: str,
+    job_id: int | None = None,
+    profile: str | None = None,
+) -> tuple[JobRow, JobAnalysis]:
+    """Analyze one job (the given id, or the oldest pending) and return the result. Writes nothing."""
+    profile = analysis_repo.get_profile(conn) if profile is None else profile
+    if not profile.strip():
+        raise ValueError("empty profile: pass --profile or set it with set_profile")
+    if job_id is None:
+        pending = analysis_repo.pending_jobs(conn, 1)
+        job = pending[0] if pending else None
+    else:
+        row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+        job = row_to_job(row) if row else None
+    if job is None:
+        raise ValueError("no job to analyze" if job_id is None else f"no job with id {job_id}")
+    return job, analyst.complete(
+        model=model, system=SYSTEM, prompt=build_prompt(job, profile), schema=JobAnalysis
+    )

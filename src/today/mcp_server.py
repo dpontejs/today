@@ -1,4 +1,5 @@
-"""MCP server: items (list, create, edit, complete, reopen, delete) and collected jobs (ADR 0005).
+"""MCP server: items (list, create, edit, complete, reopen, delete), collected jobs and the profile they are
+analyzed against (ADR 0005, features 07 and 08).
 
 The tool logic lives in plain functions over a connection (easy to test); `build_mcp` wraps them as MCP tools
 and `mount_mcp` serves them at `/mcp` behind a bearer token. Stateless HTTP with JSON responses: every call
@@ -23,10 +24,13 @@ from today.items.repo import Item, ItemIn, insert_item, mark_done, reopen
 from today.items.repo import delete_item as delete_row
 from today.items.repo import update_item as update_row
 from today.items.today import build_today
+from today.jobs import analysis_repo
 from today.jobs import repo as jobs_repo
+from today.jobs.models import JobAnalysis
 
 MAX_DESCRIPTION = 2000
 MAX_JOBS = 100
+MAX_PROFILE = 20_000
 
 MAX_BATCH = 100
 SOURCE = "mcp"
@@ -70,6 +74,13 @@ class JobOut(BaseModel):
     published_at: str | None = Field(description="ISO 8601 in America/Fortaleza")
     first_seen_at: str = Field(description="ISO 8601 in America/Fortaleza")
     status: Literal["new", "analyzed", "dismissed", "interested", "applied"]
+    score: int | None = Field(default=None, description="0-100 fit against the profile; None if not analyzed")
+    analysis: JobAnalysis | None = None
+
+
+class Profile(BaseModel):
+    body_md: str
+    updated: bool = Field(description="False while the profile was never set")
 
 
 class Deleted(BaseModel):
@@ -197,7 +208,7 @@ def delete_item(conn: sqlite3.Connection, item_id: int) -> dict:
     return {"deleted": item_id}
 
 
-def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo) -> dict:
+def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo, analysis: JobAnalysis | None = None) -> dict:
     description = job.description
     if description and len(description) > MAX_DESCRIPTION:
         description = description[:MAX_DESCRIPTION] + "…"
@@ -213,14 +224,39 @@ def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo) -> dict:
         "published_at": job.published_at.astimezone(tz).isoformat() if job.published_at else None,
         "first_seen_at": job.first_seen_at.astimezone(tz).isoformat(),
         "status": job.status,
+        "score": analysis.score if analysis else None,
+        "analysis": analysis.model_dump() if analysis else None,
     }
 
 
-def list_jobs(conn: sqlite3.Connection, tz: ZoneInfo, status: str = "new", limit: int = 30) -> list[dict]:
+def list_jobs(
+    conn: sqlite3.Connection,
+    tz: ZoneInfo,
+    status: str | None = None,
+    limit: int = 30,
+    min_score: int | None = None,
+) -> list[dict]:
+    """status None: `new`, or every status when min_score is given (scored jobs are already `analyzed`)."""
     if not 1 <= limit <= MAX_JOBS:
         raise ValueError(f"limit must be between 1 and {MAX_JOBS}")
-    rows = jobs_repo.list_jobs(conn, None if status == "all" else status, limit)
-    return [_job_out(r, tz) for r in rows]
+    if status is None:
+        status = "all" if min_score is not None else "new"
+    rows = analysis_repo.jobs_with_analysis(conn, None if status == "all" else status, limit, min_score)
+    return [_job_out(job, tz, analysis) for job, analysis in rows]
+
+
+def get_profile(conn: sqlite3.Connection) -> dict:
+    body = analysis_repo.get_profile(conn)
+    return {"body_md": body, "updated": bool(body)}
+
+
+def set_profile(conn: sqlite3.Connection, body_md: str, now: datetime) -> dict:
+    if not body_md.strip():
+        raise ValueError("body_md must not be empty")
+    if len(body_md) > MAX_PROFILE:
+        raise ValueError(f"body_md must have at most {MAX_PROFILE} characters")
+    analysis_repo.set_profile(conn, body_md, now)
+    return {"body_md": body_md, "updated": True}
 
 
 def update_job_status(
@@ -241,7 +277,9 @@ def build_mcp(app: FastAPI) -> MCPServer:
             "Times without an offset are local. Use source_key when importing from a document, "
             "so running the import again does not duplicate items. "
             "Job openings (ML/AI roles) are collected at 07:00, 13:00 and 19:00: read them with list_jobs "
-            "and triage with update_job_status; applying is always done by the user."
+            "and triage with update_job_status; applying is always done by the user. "
+            "After each collection every new role is scored 0-100 against the user's profile "
+            "(get_profile/set_profile): list_jobs(min_score=70) returns the strong ones, best first."
         ),
     )
     state = app.state
@@ -305,12 +343,16 @@ def build_mcp(app: FastAPI) -> MCPServer:
     @server.tool(
         name="list_jobs",
         description=(
-            "Collected job openings, newest first. status: new, analyzed, dismissed, interested, applied "
-            f"or all. limit: 1 to {MAX_JOBS}."
+            "Collected job openings with their analysis (score 0-100, gaps, verdict), newest first. "
+            "status: new, analyzed, dismissed, interested, applied or all; default new, or all when "
+            f"min_score is given. min_score: only analyzed jobs at or above it, best first. limit: 1 to "
+            f"{MAX_JOBS}."
         ),
     )
-    def list_jobs_tool(status: str = "new", limit: int = 30) -> list[JobOut]:
-        return [JobOut(**j) for j in guarded(list_jobs, state.conn, tz(), status, limit)]
+    def list_jobs_tool(
+        status: str | None = None, limit: int = 30, min_score: int | None = None
+    ) -> list[JobOut]:
+        return [JobOut(**j) for j in guarded(list_jobs, state.conn, tz(), status, limit, min_score)]
 
     @server.tool(
         name="update_job_status",
@@ -318,6 +360,23 @@ def build_mcp(app: FastAPI) -> MCPServer:
     )
     def update_job_status_tool(id: int, status: str) -> JobOut:
         return JobOut(**guarded(update_job_status, state.conn, id, status, state.clock(), tz()))
+
+    @server.tool(
+        name="get_profile",
+        description="The user's profile (markdown) that new jobs are scored against. Empty: analysis is off.",
+    )
+    def get_profile_tool() -> Profile:
+        return Profile(**get_profile(state.conn))
+
+    @server.tool(
+        name="set_profile",
+        description=(
+            "Replace the whole profile (markdown): experience, skills, projects, preferences (seniority, "
+            "target companies, remote/onsite cities). Read it with get_profile first and send it back edited."
+        ),
+    )
+    def set_profile_tool(body_md: str) -> Profile:
+        return Profile(**guarded(set_profile, state.conn, body_md, state.clock()))
 
     return server
 

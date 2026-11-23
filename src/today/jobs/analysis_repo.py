@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 
 from today.jobs.models import PROMPT_VERSION, JobAnalysis
-from today.jobs.repo import JobRow, row_to_job, to_db
+from today.jobs.repo import JOB_STATUSES, JobRow, row_to_job, to_db
 
 MAX_ATTEMPTS = 3
 
@@ -92,6 +92,32 @@ def strong_analyses(
     )
 
 
+def jobs_with_analysis(
+    conn: sqlite3.Connection, status: str | None, limit: int, min_score: int | None
+) -> list[tuple[JobRow, JobAnalysis | None]]:
+    """Jobs with their analysis (None when not analyzed). Newest first, or best score first with min_score."""
+    if status is not None and status not in JOB_STATUSES:
+        raise ValueError(f"status must be one of {', '.join(JOB_STATUSES)}")
+    where, args = [], []
+    if status is not None:
+        where.append("j.status = ?")
+        args.append(status)
+    if min_score is not None:
+        where.append("a.score >= ?")
+        args.append(min_score)
+    order = (
+        "a.score DESC, j.first_seen_at DESC, j.id DESC"
+        if min_score is not None
+        else "j.first_seen_at DESC, j.id DESC"
+    )
+    rows = conn.execute(
+        f"""SELECT j.*, a.analysis_json FROM jobs j LEFT JOIN job_analyses a ON a.job_id = j.id
+            {"WHERE " + " AND ".join(where) if where else ""} ORDER BY {order} LIMIT ?""",
+        (*args, limit),
+    ).fetchall()
+    return _with_analysis(rows)
+
+
 def analyses_since(conn: sqlite3.Connection, since: datetime) -> list[tuple[JobRow, JobAnalysis]]:
     """Jobs analyzed at or after `since`, best score first."""
     rows = conn.execute(
@@ -102,10 +128,11 @@ def analyses_since(conn: sqlite3.Connection, since: datetime) -> list[tuple[JobR
     return _with_analysis(rows)
 
 
-def _with_analysis(rows: list[sqlite3.Row]) -> list[tuple[JobRow, JobAnalysis]]:
+def _with_analysis(rows: list[sqlite3.Row]) -> list:
     out = []
     for r in rows:
         data = dict(r)
-        analysis = JobAnalysis.model_validate_json(data.pop("analysis_json"))
+        raw = data.pop("analysis_json")
+        analysis = JobAnalysis.model_validate_json(raw) if raw is not None else None
         out.append((row_to_job(data), analysis))
     return out
