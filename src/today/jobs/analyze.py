@@ -1,6 +1,6 @@
 """Pre-analysis of collected jobs against the owner's profile (feature 08).
 
-`analyze_pending` takes the oldest `new` jobs, asks the analyst for a `JobAnalysis` each, and stores it.
+`analyze_pending` takes the newest `new` jobs, asks the analyst for a `JobAnalysis` each, and stores it.
 An analyst error leaves the job `new` for the next slot; three errors take it out of the queue. An unavailable
 analyst (limit, login, outage) stops the slot without charging any job."""
 
@@ -38,6 +38,9 @@ e uma vaga, e responde só com o JSON pedido, em pt-BR.
 - company_summary: área, porte e maturidade da empresa em uma ou duas frases.
 - target_company: true só se a empresa está na lista de empresas-alvo do perfil.
 - verdict: uma frase dizendo se vale aplicar e por quê.
+- timing: compare modelo de trabalho e cidade com as preferências de local do perfil. "now" se a vaga \
+serve hoje; "after_move" se só serve depois de uma mudança que o perfil planeja (por exemplo, presencial \
+ou híbrido na cidade para onde a pessoa pretende ir). Nesse caso, diga no verdict que é para depois.
 
 score de 0 a 100, nesta ordem de peso:
 1. Lacunas "required" pesam mais: cada uma derruba bastante a nota.
@@ -45,7 +48,8 @@ score de 0 a 100, nesta ordem de peso:
 3. Senioridade um nível acima do perfil não penaliza; dois ou mais níveis acima, sim. \
 Estágio e júnior são bem-vindos se o perfil diz que aceita.
 4. Empresa-alvo: +5.
-5. Presencial ou híbrido fora de São Paulo e de Natal: −20.
+5. Local: "after_move" não reduz a nota. Presencial ou híbrido numa cidade que o perfil não aceita \
+nem agora nem depois: −20.
 Use a faixa inteira: 85+ é para aplicar hoje, abaixo de 50 é descartar.
 """
 
@@ -113,7 +117,7 @@ def analyze_one(
     job_id: int | None = None,
     profile: str | None = None,
 ) -> tuple[JobRow, JobAnalysis]:
-    """Analyze one job (the given id, or the oldest pending) and return the result. Writes nothing."""
+    """Analyze one job (the given id, or the next pending) and return the result. Writes nothing."""
     profile = analysis_repo.get_profile(conn) if profile is None else profile
     if not profile.strip():
         raise ValueError("empty profile: pass --profile or set it with set_profile")

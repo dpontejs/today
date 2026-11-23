@@ -27,7 +27,7 @@ class JobPosting(BaseModel):
 
 
 # Bumped whenever the analysis prompt or rubric changes, so old scores can be told apart (feature 08).
-PROMPT_VERSION = "1"
+PROMPT_VERSION = "2"  # 2: timing now/after_move, location rules read from the profile
 
 
 class Gap(BaseModel):
@@ -48,6 +48,8 @@ class JobAnalysis(BaseModel):
     target_company: bool  # company is in the profile's target list
     score: int = Field(ge=0, le=100)
     verdict: str  # one sentence, pt-BR
+    # Fits today, or only after a move the profile plans (e.g. hybrid in São Paulo). Only "now" pushes.
+    timing: Literal["now", "after_move"] = "now"
 
 
 Fetch = Callable[[httpx.Client], list[JobPosting]]

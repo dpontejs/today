@@ -46,7 +46,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="in-memory database, writes nothing")
     parser.add_argument("--sources", help="comma list, e.g. gupy,remotar (default: all)")
     parser.add_argument("--one", action="store_true", help="analyze: one job, print the JSON")
-    parser.add_argument("--job-id", type=int, help="analyze: this job (default: the oldest pending)")
+    parser.add_argument("--job-id", type=int, help="analyze: this job (default: next pending)")
     parser.add_argument("--profile", help="analyze: markdown file instead of the stored profile")
     args = parser.parse_args()
     if args.command == "analyze":

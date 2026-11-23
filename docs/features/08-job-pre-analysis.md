@@ -42,7 +42,7 @@ def analyze_pending(conn, analyst, model, now, limit=20) -> AnalyzeReport     # 
 
 - Migration `006_job_analysis.sql`: `job_analyses(job_id PK FK jobs, analysis_json, score, model,
   prompt_version, analyzed_at)`; `profile(id=1, body_md, updated_at)`.
-- Runs right after each collection slot, at most `limit` jobs per slot, oldest first; the rest wait.
+- Runs right after each collection slot, at most `limit` jobs per slot, newest first (a role seen today never waits behind the backlog); the rest wait.
 - An analyst error (login, limit, timeout, invalid JSON) leaves the job `new` for the next slot; three
   failures on the same job → `analyzed` with no row and logged, so one bad posting never blocks the queue.
 - Push: score ≥ `JOBS_PUSH_SCORE` (default 75) → `★ <score> · <company> · <title>`, at most one push per slot
@@ -55,7 +55,7 @@ def analyze_pending(conn, analyst, model, now, limit=20) -> AnalyzeReport     # 
 ## Acceptance criteria (as tests)
 
 - [x] `test_analyze_pending_stores_analysis_and_marks_analyzed` (fake analyst).
-- [x] `test_analyze_respects_limit_and_oldest_first`.
+- [x] `test_analyze_respects_limit_and_newest_first`.
 - [x] `test_analyst_error_keeps_job_new`; `test_three_failures_stop_retrying`.
 - [x] `test_user_status_not_overwritten_by_analysis`.
 - [x] `test_strong_match_pushes_once_per_slot`; `test_several_strong_matches_grouped`.

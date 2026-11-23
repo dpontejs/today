@@ -206,3 +206,29 @@ def test_app_builds_analyst_from_settings(settings):
 
     assert create_app(settings).state.analyst is None
     assert isinstance(create_app(replace(settings, analyst="claude_cli")).state.analyst, ClaudeCliAnalyst)
+
+
+class TimingAnalyst(ScoreAnalyst):
+    """Like ScoreAnalyst, but scores of 90 or more only fit after the move (e.g. hybrid in São Paulo)."""
+
+    def complete(self, *, model, system, prompt, schema):
+        result = super().complete(model=model, system=system, prompt=prompt, schema=schema)
+        return result.model_copy(update={"timing": "after_move" if result.score >= 90 else "now"})
+
+
+def test_after_move_match_not_pushed(conn: sqlite3.Connection):
+    """A strong role that only fits after the move to São Paulo is listed, but does not ring the phone now."""
+    send = ready(conn)
+
+    run_slot(conn, "2026-11-23T13", static_source(95, 80), NOW, analyst=TimingAnalyst(), send=send)
+
+    (payload,) = send.sent
+    assert payload["title"] == "★ 80 · Nubank · ML Engineer 80"
+
+
+def test_only_after_move_matches_sends_nothing(conn: sqlite3.Connection):
+    send = ready(conn)
+
+    run_slot(conn, "2026-11-23T13", static_source(95), NOW, analyst=TimingAnalyst(), send=send)
+
+    assert send.sent == []

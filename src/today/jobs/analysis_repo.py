@@ -33,10 +33,12 @@ def set_profile(conn: sqlite3.Connection, body_md: str, now: datetime) -> None:
 
 
 def pending_jobs(conn: sqlite3.Connection, limit: int) -> list[JobRow]:
-    """Jobs still `new` with retries left, oldest first."""
+    """Jobs still `new` with retries left, newest first: a role seen today never waits behind the backlog.
+
+    Within one slot (same `first_seen_at`), the most recently published first, unknown dates last."""
     rows = conn.execute(
         """SELECT * FROM jobs WHERE status = 'new' AND analysis_attempts < ?
-           ORDER BY first_seen_at, id LIMIT ?""",
+           ORDER BY first_seen_at DESC, published_at IS NULL, published_at DESC, id DESC LIMIT ?""",
         (MAX_ATTEMPTS, limit),
     ).fetchall()
     return [row_to_job(r) for r in rows]
@@ -80,12 +82,14 @@ def record_failure(conn: sqlite3.Connection, job_id: int) -> int:
 def strong_analyses(
     conn: sqlite3.Connection, job_ids: list[int], threshold: int
 ) -> list[tuple[JobRow, JobAnalysis]]:
-    """Of `job_ids`, those scoring >= threshold and not dismissed meanwhile, best score first."""
+    """Of `job_ids`, those scoring >= threshold, fitting now (not only after a move) and not dismissed
+    meanwhile, best score first. Analyses without `timing` (prompt v1) count as fitting now."""
     marks = ",".join("?" * len(job_ids))
     return _with_analysis(
         conn.execute(
             f"""SELECT j.*, a.analysis_json FROM job_analyses a JOIN jobs j ON j.id = a.job_id
                 WHERE a.job_id IN ({marks}) AND a.score >= ? AND j.status != 'dismissed'
+                  AND COALESCE(json_extract(a.analysis_json, '$.timing'), 'now') = 'now'
                 ORDER BY a.score DESC, j.id""",
             (*job_ids, threshold),
         ).fetchall()

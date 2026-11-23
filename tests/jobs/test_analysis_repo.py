@@ -8,7 +8,13 @@ from today.jobs.models import Gap, JobAnalysis, JobPosting
 NOW = datetime(2026, 11, 23, 16, 0, tzinfo=UTC)
 
 
-def add_job(conn: sqlite3.Connection, external_id: str, seen: datetime, company: str = "Acme") -> int:
+def add_job(
+    conn: sqlite3.Connection,
+    external_id: str,
+    seen: datetime,
+    company: str = "Acme",
+    published: datetime | None = None,
+) -> int:
     posting = JobPosting(
         source="fake",
         external_id=external_id,
@@ -18,7 +24,7 @@ def add_job(conn: sqlite3.Connection, external_id: str, seen: datetime, company:
         workplace="remote",
         description="Python, PyTorch",
         url=f"https://example.com/{external_id}",
-        published_at=None,
+        published_at=published,
     )
     repo.upsert_jobs(conn, [posting], seen)
     return conn.execute("SELECT id FROM jobs WHERE external_id = ?", (external_id,)).fetchone()[0]
@@ -38,15 +44,25 @@ def analysis(score: int = 80) -> JobAnalysis:
     )
 
 
-def test_pending_oldest_first_and_limit(conn: sqlite3.Connection):
+def test_pending_newest_first_and_limit(conn: sqlite3.Connection):
+    """A role published today must not wait behind days of backlog (first collection brings ~300)."""
     newest = add_job(conn, "c", NOW)
     oldest = add_job(conn, "a", NOW - timedelta(hours=2))
     middle = add_job(conn, "b", NOW - timedelta(hours=1))
-    done = add_job(conn, "d", NOW - timedelta(hours=3))
+    done = add_job(conn, "d", NOW + timedelta(hours=1))
     repo.set_status(conn, done, "dismissed", NOW)
 
-    assert [j.id for j in ar.pending_jobs(conn, 2)] == [oldest, middle]
-    assert [j.id for j in ar.pending_jobs(conn, 10)] == [oldest, middle, newest]
+    assert [j.id for j in ar.pending_jobs(conn, 2)] == [newest, middle]
+    assert [j.id for j in ar.pending_jobs(conn, 10)] == [newest, middle, oldest]
+
+
+def test_pending_same_slot_ordered_by_publication(conn: sqlite3.Connection):
+    """Jobs seen in the same slot: most recently published first, unknown dates last."""
+    undated = add_job(conn, "u", NOW)
+    old = add_job(conn, "o", NOW, published=NOW - timedelta(days=30))
+    fresh = add_job(conn, "f", NOW, published=NOW - timedelta(days=1))
+
+    assert [j.id for j in ar.pending_jobs(conn, 10)] == [fresh, old, undated]
 
 
 def test_store_marks_analyzed_only_if_new(conn: sqlite3.Connection):

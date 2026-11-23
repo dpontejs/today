@@ -75,7 +75,7 @@ def test_analyze_pending_stores_analysis_and_marks_analyzed(conn: sqlite3.Connec
     assert stored_job.id == job and stored == result()
 
 
-def test_analyze_respects_limit_and_oldest_first(conn: sqlite3.Connection):
+def test_analyze_respects_limit_and_newest_first(conn: sqlite3.Connection):
     ar.set_profile(conn, PROFILE, NOW)
     newest = add_job(conn, "c", NOW)
     oldest = add_job(conn, "a", NOW - timedelta(hours=2))
@@ -83,8 +83,8 @@ def test_analyze_respects_limit_and_oldest_first(conn: sqlite3.Connection):
 
     report = analyze_pending(conn, FakeAnalyst(), "sonnet", NOW, limit=2)
 
-    assert report.analyzed == [oldest, middle]
-    assert status(conn, newest) == "new"
+    assert report.analyzed == [newest, middle]
+    assert status(conn, oldest) == "new"
 
 
 def test_analyst_error_keeps_job_new(conn: sqlite3.Connection):
@@ -155,7 +155,7 @@ def test_prompt_contains_profile_title_company_location(conn: sqlite3.Connection
 
 
 def test_system_prompt_has_the_rubric():
-    for text in ("Você avalia vagas para uma pessoa", "+5", "−20", "Natal"):
+    for text in ("Você avalia vagas para uma pessoa", "+5", "−20", "after_move"):
         assert text in SYSTEM
 
 
@@ -168,9 +168,9 @@ def test_analyze_one_prints_without_writing(conn: sqlite3.Connection):
     analyst = FakeAnalyst()
 
     job, out = analyze_one(conn, analyst, "sonnet")
-    assert job.id == older and out == result()
-    job, _ = analyze_one(conn, analyst, "sonnet", job_id=newer, profile="# Outro perfil")
-    assert job.id == newer and "# Outro perfil" in analyst.calls[-1]["prompt"]
+    assert job.id == newer and out == result()  # default: the next one the queue would take
+    job, _ = analyze_one(conn, analyst, "sonnet", job_id=older, profile="# Outro perfil")
+    assert job.id == older and "# Outro perfil" in analyst.calls[-1]["prompt"]
 
     assert conn.execute("SELECT COUNT(*) FROM job_analyses").fetchone()[0] == 0
     assert {status(conn, older), status(conn, newer)} == {"new"}
@@ -208,3 +208,11 @@ def test_unavailable_analyst_stops_slot_without_spending_retries(conn: sqlite3.C
 
     assert {status(conn, j) for j in jobs} == {"new"}
     assert len(ar.pending_jobs(conn, 10)) == 3
+
+
+def test_rubric_reads_location_preferences_from_profile():
+    """Cities live in the profile, not in the code; the analyst says if the role fits now or after a move."""
+    assert "São Paulo" not in SYSTEM and "Natal" not in SYSTEM
+    assert "after_move" in SYSTEM
+    assert JobAnalysis.model_fields["timing"].default == "now"  # analyses stored with prompt v1 still load
+    assert "timing" in JobAnalysis.model_json_schema()["properties"]
