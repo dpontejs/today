@@ -5,6 +5,7 @@ description = "A personal PWA for the day's reminders and to-dos."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=0.70",
     "argon2-cffi>=25.1.0",
     "fastapi>=0.162.4",
     "google-genai>=1,<3",

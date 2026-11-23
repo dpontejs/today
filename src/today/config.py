@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 USER_TZ = "America/Fortaleza"
 DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
+ANALYSTS = ("claude_cli", "anthropic_api")
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,10 @@ class Settings:
     vapid_subject: str | None = None  # mailto: or https URL the push services can contact
     jobs_enabled: bool = False  # starts the job collection loop (feature 07)
     jobs_sources: frozenset[str] | None = None  # None: every source
+    analyst: str | None = None  # claude_cli | anthropic_api; None: no job analysis (feature 08, ADR 0007)
+    analyst_model: str = "sonnet"
+    jobs_push_score: int = 75
+    analyze_limit: int = 20
 
 
 def _required(name: str) -> str:
@@ -45,6 +50,10 @@ def load_settings() -> Settings:
         gemini_model=os.environ.get("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL,
         jobs_enabled=os.environ.get("JOBS_ENABLED", "false").lower() == "true",
         jobs_sources=_jobs_sources(),
+        analyst=_analyst(),
+        analyst_model=os.environ.get("ANALYST_MODEL") or "sonnet",
+        jobs_push_score=int(os.environ.get("JOBS_PUSH_SCORE") or 75),
+        analyze_limit=int(os.environ.get("ANALYZE_LIMIT") or 20),
         **_vapid(),
     )
 
@@ -52,6 +61,13 @@ def load_settings() -> Settings:
 def _jobs_sources() -> frozenset[str] | None:
     names = frozenset(s.strip() for s in os.environ.get("JOBS_SOURCES", "").split(",") if s.strip())
     return names or None
+
+
+def _analyst() -> str | None:
+    name = os.environ.get("ANALYST") or None
+    if name is not None and name not in ANALYSTS:
+        raise RuntimeError(f"environment variable ANALYST must be one of {', '.join(ANALYSTS)}")
+    return name
 
 
 def _api_token() -> str | None:
