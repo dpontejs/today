@@ -128,7 +128,6 @@ def calendar_page(
         request,
         "calendar.html",
         {
-            "active_tab": "calendar",
             "month": shown,
             "weeks": weeks,
             "month_total": sum(c.count + c.done for w in weeks for c in w if c.in_month),

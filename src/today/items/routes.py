@@ -55,7 +55,6 @@ def _render_page(
         request,
         "today.html",
         {
-            "active_tab": "today",
             "view": view,
             "now": now.astimezone(settings.tz),
             "days": days,
