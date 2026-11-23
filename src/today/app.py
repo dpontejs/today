@@ -14,6 +14,7 @@ from today import auth, calendar_view, capture, i18n, notes, notify, push_routes
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
+from today.jobs.loop import run_jobs_loop, select_sources
 from today.mcp_server import mount_mcp
 
 PACKAGE_DIR = Path(__file__).parent
@@ -27,6 +28,8 @@ def create_app(settings: Settings) -> FastAPI:
     async def lifespan(app: FastAPI):
         # The reminder loop (ADR 0001) runs only when push is configured.
         loop = asyncio.create_task(notify.run_loop(app)) if app.state.push_sender else None
+        # Job collection (feature 07) runs only with JOBS_ENABLED=true.
+        jobs = asyncio.create_task(run_jobs_loop(app)) if app.state.job_sources is not None else None
         try:
             # A mounted sub-app's lifespan never runs, so the MCP session manager is started here.
             if mcp is None:
@@ -35,10 +38,11 @@ def create_app(settings: Settings) -> FastAPI:
                 async with mcp.session_manager.run():
                     yield
         finally:
-            if loop:
-                loop.cancel()
-                with suppress(asyncio.CancelledError):
-                    await loop
+            for task in (loop, jobs):
+                if task:
+                    task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await task
 
     app = FastAPI(title="today", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 
@@ -56,6 +60,8 @@ def create_app(settings: Settings) -> FastAPI:
         if settings.vapid_private_key
         else None
     )
+    # Unknown names in JOBS_SOURCES fail here, at boot, not silently inside the loop.
+    app.state.job_sources = select_sources(settings.jobs_sources) if settings.jobs_enabled else None
     app.state.extractor = (
         capture.GeminiExtractor(settings.gemini_api_key, settings.gemini_model)
         if settings.gemini_api_key

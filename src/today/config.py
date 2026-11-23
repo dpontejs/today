@@ -22,6 +22,8 @@ class Settings:
     vapid_private_key: str | None = None  # enables web push (feature 05)
     vapid_public_key: str | None = None
     vapid_subject: str | None = None  # mailto: or https URL the push services can contact
+    jobs_enabled: bool = False  # starts the job collection loop (feature 07)
+    jobs_sources: frozenset[str] | None = None  # None: every source
 
 
 def _required(name: str) -> str:
@@ -41,8 +43,15 @@ def load_settings() -> Settings:
         api_token=_api_token(),
         gemini_api_key=os.environ.get("GEMINI_API_KEY") or None,
         gemini_model=os.environ.get("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL,
+        jobs_enabled=os.environ.get("JOBS_ENABLED", "false").lower() == "true",
+        jobs_sources=_jobs_sources(),
         **_vapid(),
     )
+
+
+def _jobs_sources() -> frozenset[str] | None:
+    names = frozenset(s.strip() for s in os.environ.get("JOBS_SOURCES", "").split(",") if s.strip())
+    return names or None
 
 
 def _api_token() -> str | None:
