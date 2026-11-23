@@ -1,7 +1,8 @@
 """Pre-analysis of collected jobs against the owner's profile (feature 08).
 
 `analyze_pending` takes the oldest `new` jobs, asks the analyst for a `JobAnalysis` each, and stores it.
-An analyst error leaves the job `new` for the next slot; three errors take it out of the queue."""
+An analyst error leaves the job `new` for the next slot; three errors take it out of the queue. An unavailable
+analyst (limit, login, outage) stops the slot without charging any job."""
 
 import logging
 import sqlite3
@@ -11,7 +12,7 @@ from datetime import datetime
 from today.jobs import analysis_repo
 from today.jobs.models import PROMPT_VERSION, Gap, JobAnalysis
 from today.jobs.repo import JobRow, row_to_job
-from today.llm.analyst import Analyst, AnalystError
+from today.llm.analyst import Analyst, AnalystError, AnalystUnavailable
 
 log = logging.getLogger(__name__)
 
@@ -87,6 +88,12 @@ def analyze_pending(
         try:
             result = analyst.complete(
                 model=model, system=SYSTEM, prompt=build_prompt(job, profile), schema=JobAnalysis
+            )
+        except AnalystUnavailable as exc:
+            # Down for everyone: stop here, keep the retry budget, the next slot tries again.
+            log.warning("job analysis stopped, analyst unavailable: %s", exc)
+            return AnalyzeReport(
+                analyzed=analyzed, failed=failed, skipped_reason=f"analyst unavailable: {exc}"
             )
         except AnalystError as exc:
             failed += 1

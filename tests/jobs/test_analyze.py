@@ -188,3 +188,23 @@ def test_analyze_one_needs_a_profile_and_a_job(conn: sqlite3.Connection):
         analyze_one(conn, FakeAnalyst(), "sonnet")
     with pytest.raises(ValueError, match="no job"):
         analyze_one(conn, FakeAnalyst(), "sonnet", job_id=999)
+
+
+def test_unavailable_analyst_stops_slot_without_spending_retries(conn: sqlite3.Connection):
+    from today.llm.analyst import AnalystUnavailable
+
+    class Down(FakeAnalyst):
+        def complete(self, **kwargs):
+            self.calls.append(kwargs)
+            raise AnalystUnavailable("usage limit reached")
+
+    ar.set_profile(conn, PROFILE, NOW)
+    jobs = [add_job(conn, k, NOW - timedelta(minutes=i)) for i, k in enumerate("abc")]
+    for _ in range(4):
+        analyst = Down()
+        report = analyze_pending(conn, analyst, "sonnet", NOW, limit=20)
+        assert len(analyst.calls) == 1  # first failure stops the slot
+        assert report.analyzed == [] and "unavailable" in report.skipped_reason
+
+    assert {status(conn, j) for j in jobs} == {"new"}
+    assert len(ar.pending_jobs(conn, 10)) == 3

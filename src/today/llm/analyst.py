@@ -2,7 +2,9 @@
 
 `ClaudeCliAnalyst` runs `claude -p` on the owner's subscription in an empty temp dir with a minimal env;
 `AnthropicApiAnalyst` uses the API with the schema as the only, forced tool. Both raise `AnalystError` for
-anything that is not a valid answer (login, limit, timeout, invalid JSON), so callers retry later."""
+anything that is not a valid answer, so callers retry later. `AnalystUnavailable` (a subclass) means the
+analyst itself is down — login, usage limit, missing binary, API outage — and says nothing about the job:
+callers stop the batch without charging the job's retry budget."""
 
 import json
 import os
@@ -15,10 +17,18 @@ from pydantic import BaseModel, ValidationError
 # Only what the CLI needs; app secrets (SESSION_SECRET, GEMINI_API_KEY, API_TOKEN, ...) never reach it.
 CLI_ENV = ("HOME", "PATH", "LANG", "CLAUDE_CODE_OAUTH_TOKEN")
 TOOL_NAME = "answer"
+# Claude Code aliases (ANALYST_MODEL default "sonnet") mapped to Messages API ids for AnthropicApiAnalyst.
+API_MODELS = {"sonnet": "claude-sonnet-5-5", "opus": "claude-opus-5-5", "haiku": "claude-haiku-5-5"}
+# An is_error result about this answer, not about the account: counts against the job.
+JOB_ERROR_SUBTYPES = ("error_max_structured_output_retries",)
 
 
 class AnalystError(Exception):
-    """The model gave no valid answer this time."""
+    """The model gave no valid answer for this job this time."""
+
+
+class AnalystUnavailable(AnalystError):
+    """The analyst cannot answer anything right now (login, limit, outage): not the job's fault."""
 
 
 class Analyst(Protocol):
@@ -68,17 +78,19 @@ class ClaudeCliAnalyst:
                 )
             except subprocess.TimeoutExpired as exc:
                 raise AnalystError(f"claude timed out after {self.timeout_s:g} s") from exc
-            except FileNotFoundError as exc:
-                raise AnalystError(f"claude command not found: {self.command[0]}") from exc
+            except OSError as exc:  # not found, not executable
+                raise AnalystUnavailable(f"claude command not runnable: {self.command[0]}: {exc}") from exc
         try:
             result = json.loads(done.stdout)
         except ValueError as exc:
             detail = (done.stderr or done.stdout).strip()[:300]
-            raise AnalystError(f"claude exited {done.returncode} without JSON: {detail}") from exc
+            error = AnalystUnavailable if done.returncode else AnalystError
+            raise error(f"claude exited {done.returncode} without JSON: {detail}") from exc
         if not isinstance(result, dict):
             raise AnalystError("claude answered JSON that is not an object")
         if result.get("is_error"):
-            raise AnalystError(f"claude error ({result.get('subtype')}): {str(result.get('result'))[:300]}")
+            error = AnalystError if result.get("subtype") in JOB_ERROR_SUBTYPES else AnalystUnavailable
+            raise error(f"claude error ({result.get('subtype')}): {str(result.get('result'))[:300]}")
         if result.get("structured_output") is None:
             raise AnalystError("claude answered without structured_output")
         return _validate(schema, result["structured_output"])
@@ -92,7 +104,7 @@ class AnthropicApiAnalyst:
     def complete[T: BaseModel](self, *, model: str, system: str, prompt: str, schema: type[T]) -> T:
         try:
             message = self.client.messages.create(
-                model=model,
+                model=API_MODELS.get(model, model),
                 max_tokens=self.max_tokens,
                 system=system,
                 messages=[{"role": "user", "content": prompt}],
@@ -105,8 +117,10 @@ class AnthropicApiAnalyst:
                 ],
                 tool_choice={"type": "tool", "name": TOOL_NAME},
             )
-        except Exception as exc:  # network, auth, rate limit: all mean "try again next slot"
-            raise AnalystError(f"anthropic api: {exc}") from exc
+        except Exception as exc:
+            # 400: this request was bad (counts against the job); anything else is auth, limit or outage.
+            error = AnalystError if getattr(exc, "status_code", None) == 400 else AnalystUnavailable
+            raise error(f"anthropic api: {exc}") from exc
         for block in message.content:
             if getattr(block, "type", None) == "tool_use" and block.name == TOOL_NAME:
                 return _validate(schema, block.input)

@@ -73,7 +73,7 @@ def test_claude_cli_timeout_is_error(tmp_path):
 
 
 def test_claude_cli_missing_binary_is_error(tmp_path):
-    with pytest.raises(AnalystError, match="not found"):
+    with pytest.raises(AnalystError, match="No such file"):
         call(ClaudeCliAnalyst(command=(str(tmp_path / "no-claude"),)))
 
 
@@ -96,7 +96,7 @@ def test_anthropic_api_parses_tool_input():
 
     assert call(analyst) == Out(word="olá", n=3)
     sent = messages.kwargs
-    assert sent["model"] == "sonnet" and sent["system"] == "Você avalia."
+    assert sent["model"] == "claude-sonnet-5-5" and sent["system"] == "Você avalia."
     assert sent["messages"] == [{"role": "user", "content": "a vaga"}]
     (tool,) = sent["tools"]
     assert tool["name"] == "answer" and tool["input_schema"] == Out.model_json_schema()
@@ -147,3 +147,51 @@ def test_settings_analyst_env(monkeypatch):
     monkeypatch.setenv("ANALYST", "gpt")
     with pytest.raises(RuntimeError, match="ANALYST"):
         load_settings()
+
+
+def test_claude_cli_systemic_errors_are_unavailable(tmp_path):
+    from today.llm.analyst import AnalystUnavailable
+
+    with pytest.raises(AnalystUnavailable):
+        call(cli(tmp_path, "is_error")[0])
+    with pytest.raises(AnalystUnavailable):
+        call(ClaudeCliAnalyst(command=(str(tmp_path / "no-claude"),)))
+    not_executable = tmp_path / "claude"
+    not_executable.write_text("#!/bin/sh\n")
+    with pytest.raises(AnalystUnavailable):
+        call(ClaudeCliAnalyst(command=(str(not_executable),)))
+
+
+def test_claude_cli_job_errors_are_not_unavailable(tmp_path):
+    from today.llm.analyst import AnalystUnavailable
+
+    for mode in ("no_structured", "sleep"):
+        analyst, _ = cli(tmp_path, mode, timeout_s=0.5)
+        with pytest.raises(AnalystError) as err:
+            call(analyst)
+        assert not isinstance(err.value, AnalystUnavailable)
+
+
+def test_anthropic_api_maps_cli_aliases_to_api_ids():
+    messages = FakeMessages({"word": "olá", "n": 3})
+    analyst = AnthropicApiAnalyst(SimpleNamespace(messages=messages))
+    for alias, model_id in (
+        ("sonnet", "claude-sonnet-5-5"),
+        ("opus", "claude-opus-5-5"),
+        ("haiku", "claude-haiku-5-5"),
+    ):
+        analyst.complete(model=alias, system="s", prompt="p", schema=Out)
+        assert messages.kwargs["model"] == model_id
+    analyst.complete(model="claude-sonnet-5-5", system="s", prompt="p", schema=Out)
+    assert messages.kwargs["model"] == "claude-sonnet-5-5"
+
+
+def test_anthropic_api_outage_is_unavailable():
+    from today.llm.analyst import AnalystUnavailable
+
+    class Boom:
+        def create(self, **kwargs):
+            raise ConnectionError("down")
+
+    with pytest.raises(AnalystUnavailable):
+        call(AnthropicApiAnalyst(SimpleNamespace(messages=Boom())))
