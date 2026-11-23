@@ -35,6 +35,16 @@ Dark only in the MVP: it suits the lock-screen glance, and a light theme doubles
   `DONE` (title struck through, muted).
 - Milestone strip at the bottom: 21-cell bar (one per day), filled cells in accent.
 - Capture bar pinned to the bottom: input + 52px square accent button (mic). Touch targets ≥ 44px.
+- Navigation (`_nav.html`, sections declared in `today/nav.py`):
+  - Phone: bottom bar `HOJE · CALENDÁRIO · ANOTAÇÕES · MAIS`, 56px (`--nav-h`) plus
+    `env(safe-area-inset-bottom)`, `--rule` line on top, active link in `--ink` with a 2px `--accent` top
+    border. `MAIS` only exists when there is a career section; it opens a `--panel` list upward.
+  - The capture bar sticks right above the bottom bar (`bottom: calc(var(--nav-h) + safe area)`).
+  - Desktop, exactly `@media (min-width: 900px)`: fixed 220px (`--nav-w`) left sidebar, routine group, a
+    `--rule` line, then the career group always open; active link gets a 2px `--accent` left border.
+    `--nav-h` becomes 0 and `.board` grows to a 680px reading width.
+- List + detail (`_split.html`): one column on the phone, where the detail replaces the list and shows
+  `← VOLTAR`; two columns (2fr | 3fr) on desktop.
 
 ## Icon and notifications
 

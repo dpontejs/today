@@ -27,3 +27,38 @@ def test_add_form_gives_date_a_full_row():
     assert "grid-area: date" in rule(".add-date")
     template = (Path(__file__).parents[1] / "src/today/templates/today.html").read_text()
     assert 'class="add-date"' in template
+
+
+def media_block(query: str) -> str:
+    start = CSS.index(f"@media {query}" + " {")
+    depth, i = 0, CSS.index("{", start)
+    for j in range(i, len(CSS)):
+        depth += {"{": 1, "}": -1}.get(CSS[j], 0)
+        if depth == 0:
+            return CSS[i + 1 : j]
+    raise AssertionError(f"unclosed {query}")
+
+
+def rule_in(css: str, selector: str) -> str:
+    match = re.search(r"(?:^|[\s}])" + re.escape(selector) + r"\s*\{([^}]*)\}", css)
+    assert match, f"no CSS rule for {selector}"
+    return match.group(1)
+
+
+def test_nav_is_bottom_bar_on_phone():
+    """Installed on an iPhone, the bar must clear the home indicator."""
+    body = rule(".nav")
+    assert "position: fixed" in body and "bottom: 0" in body
+    assert "env(safe-area-inset-bottom)" in body
+
+
+def test_capture_sits_above_nav():
+    assert "var(--nav-h)" in rule(".capture").split("bottom:")[1].split(";")[0]
+
+
+def test_desktop_sidebar_and_reading_width():
+    desktop = media_block("(min-width: 900px)")
+    nav = rule_in(desktop, ".nav")
+    assert "position: fixed" in nav or "position: sticky" in nav
+    assert "left: 0" in nav
+    assert "max-width" in rule_in(desktop, ".board")
