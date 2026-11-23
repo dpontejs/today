@@ -57,3 +57,21 @@ def test_more_lists_career_sections(client: TestClient, monkeypatch: pytest.Monk
 def test_login_has_no_nav(settings: Settings):
     anonymous = TestClient(create_app(settings), base_url="https://testserver")
     assert 'class="nav"' not in anonymous.get("/login").text
+
+
+def render_split(client: TestClient, detail: str) -> str:
+    source = (
+        '{% extends "_split.html" %}{% block list %}LIST{% endblock %}{% block detail %}'
+        + detail
+        + "{% endblock %}"
+    )
+    template = client.app.state.templates.env.from_string(source)
+    return template.render(t=lambda key: key.upper(), list_url="/things")
+
+
+def test_split_template_renders_detail_flag(client: TestClient):
+    with_detail = render_split(client, "DETAIL")
+    assert "split-has-detail" in with_detail and 'href="/things"' in with_detail
+
+    without = render_split(client, "  ")
+    assert 'class="split"' in without and "split-has-detail" not in without and "LIST" in without

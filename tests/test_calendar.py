@@ -158,4 +158,5 @@ def test_long_section_collapses_after_five(client: TestClient):
 def test_capture_is_pinned_to_the_bottom():
     css = (Path(__file__).parents[1] / "src/today/static/app.css").read_text()
     rule = css[css.index(".capture {") :].split("}", 1)[0]
-    assert "position: sticky" in rule and "bottom: 0" in rule
+    # Pinned just above the bottom navigation bar (--nav-h is 0 on desktop, where the nav is a sidebar).
+    assert "position: sticky" in rule and "bottom: calc(var(--nav-h) + env(safe-area-inset-bottom))" in rule
