@@ -9,14 +9,18 @@ import httpx
 
 from today.jobs import repo
 from today.jobs.filter import passes_filter
-from today.jobs.models import Fetch
-from today.jobs.sources.linkedin import fetch_linkedin_description
+from today.jobs.models import Fetch, PartialFetch
+from today.jobs.sources import linkedin
 
 log = logging.getLogger(__name__)
 
 Describe = Callable[[httpx.Client, str], str | None]
-# Sources whose listing has no description: fetched per posting, only for new postings that pass the filter.
-DESCRIBERS: dict[str, Describe] = {"linkedin": fetch_linkedin_description}
+
+
+def default_describers() -> dict[str, Describe]:
+    """Sources whose listing has no description: fetched per posting, only for new postings that pass the
+    filter. Fresh per run, since a describer remembers its pacing and whether it was blocked."""
+    return {"linkedin": linkedin.Describer()}
 
 
 def collect(
@@ -24,12 +28,17 @@ def collect(
     client: httpx.Client,
     sources: Mapping[str, Fetch],
     now: datetime,
-    describers: Mapping[str, Describe] = DESCRIBERS,
+    describers: Mapping[str, Describe] | None = None,
 ) -> repo.CollectReport:
+    describers = default_describers() if describers is None else describers
     report: repo.CollectReport = {}
     for name, fetch in sources.items():
+        error = None
         try:
-            fetched = fetch(client)
+            try:
+                fetched = fetch(client)
+            except PartialFetch as partial:
+                fetched, error = partial.jobs, str(partial)
             kept = [job for job in fetched if passes_filter(job)]
             describe = describers.get(name)
             if describe:
@@ -45,5 +54,5 @@ def collect(
             log.warning("job source %s failed: %s", name, exc)
             report[name] = repo.SourceReport(fetched=0, kept=0, new=0, error=f"{type(exc).__name__}: {exc}")
             continue
-        report[name] = repo.SourceReport(fetched=len(fetched), kept=len(kept), new=new, error=None)
+        report[name] = repo.SourceReport(fetched=len(fetched), kept=len(kept), new=new, error=error)
     return report

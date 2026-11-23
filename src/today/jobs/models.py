@@ -28,6 +28,15 @@ class JobPosting(BaseModel):
 
 Fetch = Callable[[httpx.Client], list[JobPosting]]
 
+
+class PartialFetch(Exception):
+    """A source stopped early (e.g. rate limited): keep `jobs`, and show the message in the report."""
+
+    def __init__(self, jobs: list[JobPosting], message: str) -> None:
+        super().__init__(message)
+        self.jobs = jobs
+
+
 _DROP = re.compile(r"<(script|style|head)\b.*?</\1\s*>", re.IGNORECASE | re.DOTALL)
 _BREAK = re.compile(r"<\s*(br|/?p|/?div|/?li|/?ul|/?ol|/?h[1-6]|/?tr)\b[^>]*>", re.IGNORECASE)
 _TAG = re.compile(r"<[^>]*>")

@@ -15,7 +15,9 @@ filter; Claude reads it with `list_jobs` and triages with `update_job_status`.
   client (`make_client()`, with `User-Agent: today-personal/1.0`); tests pass one whose transport is
   `httpx.MockTransport` serving files from `tests/fixtures/jobs/`. No test touches the network.
 - **Recorded fixtures.** Each fixture is a real response, recorded once with curl and trimmed to two or three
-  postings, one of them not ML (so the filter has something to drop). When a source changes shape, re-record
+  postings, one of them not ML (so the filter has something to drop). LinkedIn's is the exception: written by
+  hand from the known card markup because the guest endpoint answered 429 while recording. Re-record it
+  before relying on LinkedIn. When a source changes shape, re-record
   the fixture, watch the test fail, then fix the adapter.
 - **Fail one, not all.** `collect` wraps each source in `try/except` and writes the error into the report.
   An HTML maintenance page answering 200 makes `get_json` raise; the other eight sources still save.
@@ -27,7 +29,10 @@ filter; Claude reads it with `list_jobs` and triages with `update_job_status`.
   from 06:00 to 20:00 runs only 19:00, not three stale collections. The slot key uses the local date, so
   22:00 in Fortaleza (01:00 UTC tomorrow) still belongs to today.
 - **Being a polite client.** LinkedIn is read only through the guest endpoint, last 24 h, three pages per
-  term, 3–7 s between requests, and stops at the first 429/999. Never logged in, never cookies.
+  term, 3–7 s between requests (search pages and description pages alike), and stops at the first 429/999,
+  keeping what it had and showing the block in the report (`PartialFetch`). Never logged in, and the cookie
+  jar is cleared before every request. A 200 page with no readable job card raises, so a challenge page or a
+  markup change shows up as an error instead of "0 jobs".
 
 ## Commands
 

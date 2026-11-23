@@ -124,3 +124,17 @@ def test_set_status_rejects_unknown_status_and_id(conn: sqlite3.Connection):
         repo.set_status(conn, row.id, "hired", NOW)
     with pytest.raises(ValueError, match="not found"):
         repo.set_status(conn, 999, "applied", NOW)
+
+
+def test_partial_source_saves_jobs_and_reports_the_error(conn: sqlite3.Connection):
+    from today.jobs.models import PartialFetch
+
+    def blocked(_client: httpx.Client) -> list[JobPosting]:
+        raise PartialFetch([posting("1", source="linkedin")], "blocked (HTTP 429) after 1 postings")
+
+    report = collect(conn, OFFLINE, {"linkedin": blocked}, NOW, describers={})
+
+    assert report["linkedin"] == repo.SourceReport(
+        fetched=1, kept=1, new=1, error="blocked (HTTP 429) after 1 postings"
+    )
+    assert count(conn) == 1

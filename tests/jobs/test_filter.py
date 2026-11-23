@@ -77,3 +77,21 @@ def test_filter_drops_onsite_outside_sp(location: str | None, workplace: str | N
 )
 def test_intern_kept_only_with_role_term(title: str, kept: bool):
     assert passes_filter(job(title)) is kept
+
+
+@pytest.mark.parametrize("location", ["Remote", "Remoto", "Home Office", "Anywhere", "Remote - Brazil"])
+def test_unknown_workplace_with_remote_location_kept(location: str):
+    assert passes_filter(job("Machine Learning Engineer", location, None)) is True
+
+
+@pytest.mark.parametrize(
+    ("title", "kept"),
+    [
+        ("Engenheiro de Inteligência Artificial", True),
+        ("Cientista de Inteligência Artificial Sênior", True),
+        ("Senior Software Engineer — Artificial Intelligence & Data Products", True),
+        ("Advogado - Inteligência Artificial e Privacidade", False),
+    ],
+)
+def test_spelled_out_ai_counts_with_an_engineering_role(title: str, kept: bool):
+    assert passes_filter(job(title)) is kept

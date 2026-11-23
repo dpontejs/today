@@ -221,7 +221,7 @@ def test_linkedin_parses_recorded_response():
     assert all("cookie" not in r.headers for r in seen)
 
 
-def test_linkedin_stops_on_429_and_keeps_what_it_had():
+def test_linkedin_stops_on_429_and_reports_what_it_had():
     calls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -231,9 +231,11 @@ def test_linkedin_stops_on_429_and_keeps_what_it_had():
         return httpx.Response(429)
 
     slept: list[float] = []
-    jobs = linkedin.fetch(httpx.Client(transport=httpx.MockTransport(handler)), sleep=slept.append)
+    with pytest.raises(linkedin.PartialFetch) as blocked:
+        linkedin.fetch(httpx.Client(transport=httpx.MockTransport(handler)), sleep=slept.append)
 
-    assert len(jobs) == 2
+    assert len(blocked.value.jobs) == 2  # kept, and the block still shows in the report
+    assert "429" in str(blocked.value)
     assert len(calls) == 2  # one page, then the 429 stops every remaining term
     assert slept and all(3 <= s <= 7 for s in slept)
 
@@ -277,3 +279,65 @@ def test_sources_registry_has_every_spec_source():
         "linkedin",
     }
     assert set(SOURCES) == expected
+
+
+def test_linkedin_never_sends_cookies_even_when_set():
+    sent: list[str | None] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(request.headers.get("cookie"))
+        name = "linkedin_detail.html" if "/jobs/view/" in request.url.path else "linkedin_search.html"
+        body = (FIXTURES / name).read_bytes()
+        return httpx.Response(200, content=body, headers={"set-cookie": "bcookie=abc; Path=/"})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    linkedin.fetch(client, terms=("a", "b"), sleep=no_sleep)
+    linkedin.fetch_linkedin_description(client, "4492585641")
+
+    assert len(sent) == 3
+    assert sent == [None, None, None]
+
+
+def test_linkedin_challenge_page_raises():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text="<html><script>var _0x26bb=1;</script></html>")
+
+    with pytest.raises(ValueError, match="no job cards"):
+        linkedin.fetch(httpx.Client(transport=httpx.MockTransport(handler)), sleep=no_sleep)
+
+
+def test_linkedin_cards_that_do_not_parse_raise():
+    page = '<li><div data-entity-urn="urn:li:jobPosting:1"><h3 class="renamed">ML</h3></div></li>'
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text=page)
+
+    with pytest.raises(ValueError, match="markup changed"):
+        linkedin.fetch(httpx.Client(transport=httpx.MockTransport(handler)), sleep=no_sleep)
+
+
+def test_linkedin_empty_result_is_not_an_error():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text="")
+
+    assert linkedin.fetch(httpx.Client(transport=httpx.MockTransport(handler)), sleep=no_sleep) == []
+
+
+def test_linkedin_descriptions_pause_and_stop_on_block():
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        if len(calls) == 2:
+            return httpx.Response(429)
+        return httpx.Response(200, content=(FIXTURES / "linkedin_detail.html").read_bytes())
+
+    slept: list[float] = []
+    describe = linkedin.Describer(sleep=slept.append)
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+
+    results = [describe(client, i) for i in ("1", "2", "3", "4")]
+
+    assert results[0] and results[1:] == [None, None, None]
+    assert len(calls) == 2  # blocked at the second: no more requests this run
+    assert len(slept) == 1 and 3 <= slept[0] <= 7

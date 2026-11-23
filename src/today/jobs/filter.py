@@ -11,11 +11,19 @@ ROLE = re.compile(
     r"|deep learning|computer vision|visao computacional"
     r"|\b(ai|ia) engineer|\bengenheir[oa](\s?\(a\))? de (ia|ai)\b"
     r"|\bllms?\b|\bgenai\b|applied scientist|research engineer"
+    # Spelled out, AI counts only next to an engineering or science role ("Advogado - IA" is not one).
+    r"|\b(engenheir\w*|engineer\w*|cientista|scientist|developer|desenvolvedor\w*)\b.*"
+    r"(inteligencia artificial|artificial intelligence)"
+    r"|(inteligencia artificial|artificial intelligence).*\b(engineer|scientist)"
 )
 # Sales roles mention AI all the time; the role term must be the role, not the product.
 SALES_LEAD = re.compile(r"^\W*(sales|account|commercial|comercial|vendas)\b")
 LOCAL = re.compile(r"sao paulo|\bsp\b|\bnatal\b")
-BRAZIL_OR_LATAM = re.compile(r"\bbrazil\b|\bbrasil\b|\blatam\b|latin america|america latina|\bsp\b|sao paulo")
+# With no workplace field (Greenhouse, LinkedIn), a location that says "Remote" is read as remote.
+BRAZIL_OR_LATAM = re.compile(
+    r"\bbrazil\b|\bbrasil\b|\blatam\b|latin america|america latina|\bsp\b|sao paulo"
+    r"|\bremot[eo]\b|home office|anywhere"
+)
 
 
 def fold(text: str) -> str:
