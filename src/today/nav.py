@@ -17,19 +17,25 @@ class Section:
     path: str
     label_key: str
     group: Literal["routine", "career"]
+    # Other paths that render this section's page, e.g. the Today page re-rendered by a failed POST /items.
+    also: tuple[str, ...] = ()
 
 
 SECTIONS: list[Section] = [
-    Section(key="today", path="/", label_key="tab_today", group="routine"),
+    Section(key="today", path="/", label_key="tab_today", group="routine", also=("/items",)),
     Section(key="calendar", path="/calendar", label_key="tab_calendar", group="routine"),
     Section(key="notes", path="/notes", label_key="tab_notes", group="routine"),
 ]
 
 
-def is_active(section: Section, path: str) -> bool:
-    if section.path == "/":
+def _matches(prefix: str, path: str) -> bool:
+    if prefix == "/":  # the root is a prefix of everything; only the exact path counts
         return path == "/"
-    return path == section.path or path.startswith(section.path + "/")
+    return path == prefix or path.startswith(prefix + "/")
+
+
+def is_active(section: Section, path: str) -> bool:
+    return any(_matches(p, path) for p in (section.path, *section.also))
 
 
 def nav_context(request: Request) -> dict:

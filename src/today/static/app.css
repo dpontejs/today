@@ -359,6 +359,7 @@ input[aria-invalid="true"] { border-color: var(--late); }
 .nav-more > summary { list-style: none; }
 .nav-more > summary::-webkit-details-marker { display: none; }
 .nav-more[open] > summary { color: var(--ink); }
+.nav-more.is-active > summary { color: var(--ink); border-top-color: var(--accent); }
 .nav-more > .nav-group {
   position: absolute;
   right: 0;

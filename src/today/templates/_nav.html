@@ -5,7 +5,7 @@
     {% endfor %}
   </ul>
   {% if nav_career %}
-  <details class="nav-more"{% if nav_career | selectattr(1) | list %} open{% endif %}>
+  <details class="nav-more{% if nav_career | selectattr(1) | list %} is-active{% endif %}">
     <summary>{{ t("more") }}</summary>
     <ul class="nav-group">
       {% for section, active in nav_career %}

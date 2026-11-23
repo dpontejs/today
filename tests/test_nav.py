@@ -75,3 +75,21 @@ def test_split_template_renders_detail_flag(client: TestClient):
 
     without = render_split(client, "  ")
     assert 'class="split"' in without and "split-has-detail" not in without and "LIST" in without
+
+
+def test_today_stays_active_after_add_form_error(client: TestClient):
+    """A failed add re-renders the Today page at /items; Today must still be the current section."""
+    response = client.post("/items", data={"title": "", "due_at": ""})
+    assert response.status_code == 422
+    assert 'href="/" aria-current="page"' in response.text
+
+
+def test_active_career_section_does_not_open_more_panel(client: TestClient):
+    """On the phone MORE is a popup over the content; it must not load already open."""
+    jobs = nav.Section(key="jobs", path="/jobs", label_key="tab_today", group="career")
+    html = client.app.state.templates.env.get_template("_nav.html").render(
+        t=lambda key: key.upper(), nav_routine=[], nav_career=[(jobs, True)]
+    )
+    details = html[html.index("<details") : html.index(">", html.index("<details")) + 1]
+    assert " open" not in details
+    assert 'class="nav-more is-active"' in html and 'href="/jobs" aria-current="page"' in html
