@@ -54,7 +54,7 @@ uv run pytest tests/jobs -v
 
 ## Read next
 
-- *Fundamentals of Software Architecture*: ch. 9 "Architecture Styles", the microkernel style: a core plus
+- *Fundamentals of Software Architecture*: ch. 12 "Microkernel Architecture Style": a core plus
   plug-ins, which is what `SOURCES` is.
 - *Software Architecture: The Hard Parts*: ch. 13 "Contracts": strict vs. loose contracts. `JobPosting` is the
   strict contract inside; each adapter absorbs a loose one outside.
