@@ -94,9 +94,7 @@ def _found(request: Request, note_id: int) -> Note:
 
 @router.get("/notes", response_class=HTMLResponse)
 def notes_page(request: Request) -> HTMLResponse:
-    return _render(
-        request, "notes.html", active_tab="notes", notes=list_notes(request.app.state.conn), error=None
-    )
+    return _render(request, "notes.html", notes=list_notes(request.app.state.conn), error=None)
 
 
 @router.post("/notes", response_class=HTMLResponse)
@@ -108,7 +106,6 @@ def add_note(request: Request, body: Annotated[str, Form()] = "") -> Response:
             request,
             "notes.html",
             422,
-            active_tab="notes",
             notes=list_notes(conn),
             error="note_invalid",
             draft=body,

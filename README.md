@@ -28,6 +28,7 @@ SQLite on a Docker volume                          (ADR 0002)
 3. Natural-language capture by text or voice, with suggested reminders — [docs/features/03-natural-language-capture.md](docs/features/03-natural-language-capture.md) ✓
 4. Calendar tab, 7/14/30 days, pinned capture bar ✓
 5. Web push + reminder loop + daily summary — [docs/features/05-web-push.md](docs/features/05-web-push.md)
+6. Adaptive navigation: bottom bar on the phone, sidebar on desktop, ready for career sections — [docs/guide/07-adaptive-navigation.md](docs/guide/07-adaptive-navigation.md) ✓
 7. Job collection: ML/AI roles from 9 sources at 07/13/19h, read and triaged through MCP — [docs/features/07-job-collection.md](docs/features/07-job-collection.md)
 
 ROADMAP import from the desktop is done through Claude + MCP (slice 2).

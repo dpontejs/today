@@ -48,10 +48,10 @@ def db(client: TestClient) -> sqlite3.Connection:
     return client.app.state.conn
 
 
-def test_tabs_order_today_notes_calendar(client: TestClient):
+def test_tabs_order_today_calendar_notes(client: TestClient):
     for path in ("/", "/notes", "/calendar"):
         html = client.get(path, headers=PT).text
-        assert html.index('href="/"') < html.index('href="/notes"') < html.index('href="/calendar"'), path
+        assert html.index('href="/"') < html.index('href="/calendar"') < html.index('href="/notes"'), path
     assert 'href="/notes" aria-current="page"' in client.get("/notes").text
 
 

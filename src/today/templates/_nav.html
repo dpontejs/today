@@ -1,0 +1,17 @@
+<nav class="nav" aria-label="{{ t('nav_label') }}">
+  <ul class="nav-group">
+    {% for section, active in nav_routine %}
+    <li><a href="{{ section.path }}"{% if active %} aria-current="page"{% endif %}>{{ t(section.label_key) }}</a></li>
+    {% endfor %}
+  </ul>
+  {% if nav_career %}
+  <details class="nav-more{% if nav_career | selectattr(1) | list %} is-active{% endif %}">
+    <summary>{{ t("more") }}</summary>
+    <ul class="nav-group">
+      {% for section, active in nav_career %}
+      <li><a href="{{ section.path }}"{% if active %} aria-current="page"{% endif %}>{{ t(section.label_key) }}</a></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</nav>

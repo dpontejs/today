@@ -1,0 +1,12 @@
+{#- List + detail. Extend it and fill `list` and `detail`; pass `list_url` for the phone's back link.
+    Phone: one column, the detail replaces the list when there is one. Desktop: both side by side. -#}
+{% set detail_html = self.detail() | trim %}
+<div class="split{% if detail_html %} split-has-detail{% endif %}">
+  <div class="split-list">{% block list %}{% endblock %}</div>
+  {% if detail_html %}
+  <div class="split-detail">
+    <a class="split-back" href="{{ list_url }}">← {{ t("back") }}</a>
+    {% block detail %}{% endblock %}
+  </div>
+  {% endif %}
+</div>
