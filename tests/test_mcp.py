@@ -11,6 +11,8 @@ from today.app import create_app
 from today.config import Settings
 from today.items.reminders import add_reminders
 from today.items.repo import ItemIn, create_item, get_item
+from today.jobs.models import JobPosting
+from today.jobs.repo import upsert_jobs
 
 TZ = ZoneInfo("America/Fortaleza")
 NOW = datetime(2026, 11, 10, 12, 0, tzinfo=UTC)  # 09:00 in Fortaleza
@@ -145,6 +147,8 @@ def test_mcp_lists_tools(client: TestClient):
         "reopen_item",
         "update_item",
         "delete_item",
+        "list_jobs",
+        "update_job_status",
     }
 
 
@@ -244,3 +248,65 @@ def test_list_items_shows_reminders(conn: sqlite3.Connection):
 def test_mcp_lists_edit_and_delete_tools(client: TestClient):
     names = {tool["name"] for tool in rpc(client, "tools/list").json()["result"]["tools"]}
     assert {"update_item", "delete_item"} <= names
+
+
+# --- jobs (feature 07) ----------------------------------------------------------------------------
+
+
+def seed_jobs(conn: sqlite3.Connection) -> list[int]:
+    jobs = [
+        JobPosting(
+            source="gupy",
+            external_id=str(n),
+            company="Acme",
+            title=f"ML Engineer {n}",
+            location=None,
+            workplace="remote",
+            description="x" * 5000 if n == 1 else "short",
+            url=f"https://acme.gupy.io/job/{n}",
+            published_at=NOW,
+        )
+        for n in (1, 2)
+    ]
+    upsert_jobs(conn, jobs, NOW)
+    return [r["id"] for r in conn.execute("SELECT id FROM jobs ORDER BY external_id")]
+
+
+def test_mcp_list_jobs_filters_by_status(conn: sqlite3.Connection):
+    first, second = seed_jobs(conn)
+    mcp_server.update_job_status(conn, second, "interested", NOW, TZ)
+
+    new = mcp_server.list_jobs(conn, TZ, status="new", limit=30)
+    interested = mcp_server.list_jobs(conn, TZ, status="interested", limit=30)
+    every = mcp_server.list_jobs(conn, TZ, status="all", limit=30)
+
+    assert [j["id"] for j in new] == [first]
+    assert [j["id"] for j in interested] == [second]
+    assert len(every) == 2
+    assert new[0]["first_seen_at"] == "2026-11-10T09:00:00-03:00"
+    assert len(new[0]["description"]) <= mcp_server.MAX_DESCRIPTION + 1
+
+
+def test_mcp_update_job_status_rejects_unknown_status(conn: sqlite3.Connection):
+    (job_id, _) = seed_jobs(conn)
+
+    with pytest.raises(ValueError, match="status must be one of"):
+        mcp_server.update_job_status(conn, job_id, "hired", NOW, TZ)
+    with pytest.raises(ValueError, match="limit"):
+        mcp_server.list_jobs(conn, TZ, status="new", limit=0)
+    assert mcp_server.update_job_status(conn, job_id, "applied", NOW, TZ)["status"] == "applied"
+
+
+def test_mcp_jobs_require_bearer_token(client: TestClient):
+    seed_jobs(client.app.state.conn)
+    call = {"name": "list_jobs", "arguments": {}}
+    no_auth = {k: v for k, v in MCP_HEADERS.items() if k != "Authorization"}
+
+    assert rpc(client, "tools/call", call, headers=no_auth).status_code == 401
+    response = rpc(client, "tools/call", call)
+    result = response.json()["result"]
+    assert not result.get("isError")
+    assert [j["title"] for j in result["structuredContent"]["result"]] == ["ML Engineer 2", "ML Engineer 1"]
+
+    bad = rpc(client, "tools/call", {"name": "update_job_status", "arguments": {"id": 1, "status": "hired"}})
+    assert bad.json()["result"]["isError"] is True

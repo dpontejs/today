@@ -1,4 +1,4 @@
-"""MCP server: list, create, edit, complete, reopen and delete items from AI clients (ADR 0005).
+"""MCP server: items (list, create, edit, complete, reopen, delete) and collected jobs (ADR 0005).
 
 The tool logic lives in plain functions over a connection (easy to test); `build_mcp` wraps them as MCP tools
 and `mount_mcp` serves them at `/mcp` behind a bearer token. Stateless HTTP with JSON responses: every call
@@ -23,6 +23,10 @@ from today.items.repo import Item, ItemIn, insert_item, mark_done, reopen
 from today.items.repo import delete_item as delete_row
 from today.items.repo import update_item as update_row
 from today.items.today import build_today
+from today.jobs import repo as jobs_repo
+
+MAX_DESCRIPTION = 2000
+MAX_JOBS = 100
 
 MAX_BATCH = 100
 SOURCE = "mcp"
@@ -52,6 +56,20 @@ class ItemOut(BaseModel):
     source: str
     source_key: str | None
     reminders: list[str] = Field(description="Notification times, ISO 8601 in America/Fortaleza")
+
+
+class JobOut(BaseModel):
+    id: int
+    source: str
+    company: str
+    title: str
+    location: str | None
+    workplace: Literal["remote", "hybrid", "onsite"] | None
+    url: str
+    description: str | None = Field(description=f"Plain text, cut at {MAX_DESCRIPTION} characters")
+    published_at: str | None = Field(description="ISO 8601 in America/Fortaleza")
+    first_seen_at: str = Field(description="ISO 8601 in America/Fortaleza")
+    status: Literal["new", "analyzed", "dismissed", "interested", "applied"]
 
 
 class Deleted(BaseModel):
@@ -179,6 +197,38 @@ def delete_item(conn: sqlite3.Connection, item_id: int) -> dict:
     return {"deleted": item_id}
 
 
+def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo) -> dict:
+    description = job.description
+    if description and len(description) > MAX_DESCRIPTION:
+        description = description[:MAX_DESCRIPTION] + "…"
+    return {
+        "id": job.id,
+        "source": job.source,
+        "company": job.company,
+        "title": job.title,
+        "location": job.location,
+        "workplace": job.workplace,
+        "url": job.url,
+        "description": description,
+        "published_at": job.published_at.astimezone(tz).isoformat() if job.published_at else None,
+        "first_seen_at": job.first_seen_at.astimezone(tz).isoformat(),
+        "status": job.status,
+    }
+
+
+def list_jobs(conn: sqlite3.Connection, tz: ZoneInfo, status: str = "new", limit: int = 30) -> list[dict]:
+    if not 1 <= limit <= MAX_JOBS:
+        raise ValueError(f"limit must be between 1 and {MAX_JOBS}")
+    rows = jobs_repo.list_jobs(conn, None if status == "all" else status, limit)
+    return [_job_out(r, tz) for r in rows]
+
+
+def update_job_status(
+    conn: sqlite3.Connection, job_id: int, status: str, now: datetime, tz: ZoneInfo
+) -> dict:
+    return _job_out(jobs_repo.set_status(conn, job_id, status, now), tz)
+
+
 # --- MCP wiring ------------------------------------------------------------------------------------
 
 
@@ -189,7 +239,9 @@ def build_mcp(app: FastAPI) -> MCPServer:
         instructions=(
             "Personal reminders and to-dos of one user in America/Fortaleza. "
             "Times without an offset are local. Use source_key when importing from a document, "
-            "so running the import again does not duplicate items."
+            "so running the import again does not duplicate items. "
+            "Job openings (ML/AI roles) are collected at 07:00, 13:00 and 19:00: read them with list_jobs "
+            "and triage with update_job_status; applying is always done by the user."
         ),
     )
     state = app.state
@@ -249,6 +301,23 @@ def build_mcp(app: FastAPI) -> MCPServer:
     @server.tool(name="delete_item", description="Delete an item and its reminders. Cannot be undone.")
     def delete_item_tool(id: int) -> Deleted:
         return Deleted(**guarded(delete_item, state.conn, id))
+
+    @server.tool(
+        name="list_jobs",
+        description=(
+            "Collected job openings, newest first. status: new, analyzed, dismissed, interested, applied "
+            f"or all. limit: 1 to {MAX_JOBS}."
+        ),
+    )
+    def list_jobs_tool(status: str = "new", limit: int = 30) -> list[JobOut]:
+        return [JobOut(**j) for j in guarded(list_jobs, state.conn, tz(), status, limit)]
+
+    @server.tool(
+        name="update_job_status",
+        description="Set a job's status: new, analyzed, dismissed, interested or applied.",
+    )
+    def update_job_status_tool(id: int, status: str) -> JobOut:
+        return JobOut(**guarded(update_job_status, state.conn, id, status, state.clock(), tz()))
 
     return server
 

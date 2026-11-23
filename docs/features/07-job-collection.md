@@ -1,7 +1,7 @@
 # 07 · Job collection: open roles land in the database three times a day
 
 - **Date:** 2026-11-23
-- **Status:** proposed
+- **Status:** implemented (branch feat/coleta-vagas)
 - **ADRs:** [0001](../adr/0001-modular-monolith-with-in-process-scheduler.md) (in-process loop)
 - **Research:** [docs/research/fontes-de-vagas.md](../research/fontes-de-vagas.md) (endpoints verified 2026-11-23)
 
@@ -56,14 +56,14 @@ async def run_jobs_loop(app) -> None                # runs `collect` once per sl
 
 ## Acceptance criteria (as tests)
 
-- [ ] `test_<source>_parses_recorded_response` for each of the 9 sources: given the fixture, then fields map.
-- [ ] `test_filter_keeps_ml_roles_and_drops_sales`; `test_filter_drops_onsite_outside_sp`;
+- [x] `test_<source>_parses_recorded_response` for each of the 9 sources: given the fixture, then fields map.
+- [x] `test_filter_keeps_ml_roles_and_drops_sales`; `test_filter_drops_onsite_outside_sp`;
       `test_intern_kept_only_with_role_term`.
-- [ ] `test_collect_inserts_new_and_dedupes_by_source_and_id`: run twice, then one row each.
-- [ ] `test_collect_keeps_user_status_on_resight`: given `interested`, when seen again, then still `interested`.
-- [ ] `test_failing_source_reported_others_saved`.
-- [ ] `test_loop_runs_each_slot_once_and_catches_up_after_restart`.
-- [ ] `test_mcp_list_jobs_filters_by_status`; `test_mcp_update_job_status_rejects_unknown_status`;
+- [x] `test_collect_inserts_new_and_dedupes_by_source_and_id`: run twice, then one row each.
+- [x] `test_collect_keeps_user_status_on_resight`: given `interested`, when seen again, then still `interested`.
+- [x] `test_failing_source_reported_others_saved`.
+- [x] `test_loop_runs_each_slot_once_and_catches_up_after_restart`.
+- [x] `test_mcp_list_jobs_filters_by_status`; `test_mcp_update_job_status_rejects_unknown_status`;
       `test_mcp_jobs_require_bearer_token`.
 
 ## End-to-end check

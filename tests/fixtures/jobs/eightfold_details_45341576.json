@@ -1,0 +1,38 @@
+{
+ "status": 200,
+ "error": {
+  "message": "",
+  "body": ""
+ },
+ "data": {
+  "id": 45341576,
+  "displayJobId": "128746",
+  "name": "Analista de Riscos de Crédito - Mercado Pago",
+  "locations": [
+   "Sudeste,Brazil"
+  ],
+  "standardizedLocations": [
+   "BR"
+  ],
+  "postedTs": 1793716090,
+  "stars": 0,
+  "department": "Fintech",
+  "creationTs": 1793715858,
+  "jobDescription": "<p>Faça história na democratização do comércio e dos serviços financeiros, transformando a vida de milhões de pessoas na América Latina com o Mercado Livre!</p><p>Aprimore as políticas de Crédito Pessoal por meio de análises e monitoramentos de dados, gerando impacto na eficácia das políticas de crédito e na evolução dos modelos.</p><p>Desafios:</p><ul><li><p>Desenvolver monitoramentos e analisar os principais KPIs de gestão, acompanhando os indicadores que apoiam as análises e a tomada de decisões da equipe.</p></li><li><p>Estruturar bases de dados com as variáveis essenciais utilizadas nas análises e tomadas de decisão, organizando as informações necessárias para os estudos da área.</p></li><li><p>Elaborar apresentações e compartilhar mensalmente os resultados com os principais stakeholders da Unidade de Negócios, além de atuar na construção de políticas para Crédito Pessoal.</p></li><li><p>Contribuir com ideias para a equipe de crédito e modelagem, buscando melhorar a eficácia das políticas e a evolução dos modelos de crédito, e automatizar processos do dia a dia com Inteligência Artificial para aumentar a eficiência operacional.</p></li></ul><p>Experiência e conhecimentos:</p><ul><li><p>Aprender com agilidade a partir dos desafios, maximizando seu potencial com tecnologia e GenAI.</p></li><li><p>Apaixonar-se por sair da zona de conforto, dar o máximo, superar os próprios limites e empreender em um ambiente saudável, alegre e divertido.</p></li><li><p>Dominar SQL, Python e técnicas de aprendizado de máquina.</p></li><li><p>Trazer experiência prévia relevante em análise de grandes volumes de dados e familiaridade com ferramentas de visualização como Looker, Tableau, Power BI ou similares.</p></li><li><p>Trazer conhecimentos de indicadores financeiros e risco de crédito, além de conhecimentos básicos em espanhol, como diferenciais.</p></li></ul><p>Conheça mais sobre nossa cultura e negócio no nosso Career Site (<a target=\"_blank\" rel=\"noopener noreferrer nofollow\" class=\"rich-text-link\" href=\"https://careers-meli.mercadolibre.com/\">https://careers-meli.mercadolibre.com/</a>).</p><p>O melhor está chegando!</p>",
+  "location": "Sudeste,Brazil",
+  "isHot": 0,
+  "workLocationOption": "onsite",
+  "locationFlexibility": null,
+  "atsJobId": "128746",
+  "positionUrl": "/careers/job/45341576",
+  "publicUrl": "https://mercadolibre.eightfold.ai/careers/job/45341576",
+  "jdHighlight": [],
+  "positionUserActions": {
+   "isSaved": false,
+   "applyAction": {
+    "status": "allowed"
+   }
+  }
+ },
+ "metadata": null
+}

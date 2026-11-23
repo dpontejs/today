@@ -1,0 +1,38 @@
+{
+ "status": 200,
+ "error": {
+  "message": "",
+  "body": ""
+ },
+ "data": {
+  "id": 45033961,
+  "displayJobId": "128121",
+  "name": "Cientista de Dados Sênior - Search Platform IT",
+  "locations": [
+   "Sudeste,Brazil"
+  ],
+  "standardizedLocations": [
+   "BR"
+  ],
+  "postedTs": 1793107641,
+  "stars": 0,
+  "department": "IT",
+  "creationTs": 1792410942,
+  "jobDescription": "<h2>Cientista de Dados Sênior - Search Platform IT</h2><div> </div><div>Como <strong>Cientista de Dados Sênior - Search Platform IT</strong> na Mercado Livre, você vai projetar e escalar sistemas inovadores e seguros que resolvem problemas reais e de alto impacto. Vai trabalhar em um ambiente dinâmico, com tecnologia de ponta, boas práticas de engenharia, modelos de IA próprios e aprendizado contínuo, com o propósito de democratizar o comércio eletrônico e os serviços financeiros na América Latina.</div><div>Imagine liderando projetos desafiadores, dinâmicos e inovadores, sendo responsável por:</div><ul><li>Atuar na equipe de Machine Learning de Search para melhorar a relevância dos resultados e o impacto da busca nos indicadores do negócio.</li><li>Projetar, treinar e avaliar modelos de ranking, considerando diferentes abordagens de Learning to Rank e requisitos de escala e baixa latência.</li><li>Construir features a partir de grandes volumes de dados de busca, como consultas, cliques e compras.</li><li>Desenhar e analisar experimentos e avaliações offline para medir a qualidade dos modelos e seu impacto no comportamento dos usuários.</li><li>Trabalhar com Engenharia para implantar, monitorar e manter modelos em produção, considerando desempenho, custo e latência.</li><li>Definir prioridades e soluções com a equipe, equilibrando relevância para o usuário, resultados de negócio e restrições técnicas.</li></ul><div>O que buscamos em você?</div><ul><li>Ter disponibilidade para trabalhar no modelo híbrido, em São Paulo.</li><li>Possuir experiência sólida em Ciência de Dados ou Machine Learning, incluindo a implantação de modelos em produção.</li><li>Conhecer fundamentos de Information Retrieval, sistemas de busca e Learning to Rank.</li><li>Dominar Python e ter experiência com bibliotecas de análise de dados e Machine Learning.</li><li>Ter experiência com SQL avançado e processamento de grandes volumes de dados, usando tecnologias como BigQuery ou Spark.</li><li>Ter experiência com experimentos A/B e avaliação de ranking, incluindo métricas como NDCG, MRR ou MAP.</li><li>Demonstrar capacidade analítica, resolução de problemas e colaboração com equipes de Engenharia e Produto.</li></ul><div>Quer deixar sua marca na tecnologia da América Latina? Candidate-se e faça parte do nosso propósito!</div><div>Modalidade de trabalho híbrida. Escritório Osasco/SP.</div>",
+  "location": "Sudeste,Brazil",
+  "isHot": 0,
+  "workLocationOption": "onsite",
+  "locationFlexibility": null,
+  "atsJobId": "128121",
+  "positionUrl": "/careers/job/45033961",
+  "publicUrl": "https://mercadolibre.eightfold.ai/careers/job/45033961",
+  "jdHighlight": [],
+  "positionUserActions": {
+   "isSaved": false,
+   "applyAction": {
+    "status": "allowed"
+   }
+  }
+ },
+ "metadata": null
+}
