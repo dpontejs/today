@@ -1,0 +1,139 @@
+{
+ "jobs": [
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/ifoodcarreiras/jobs/8058884002",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": true
+    }
+   ],
+   "internal_job_id": 6190307002,
+   "location": {
+    "name": "Brasil"
+   },
+   "metadata": [
+    {
+     "id": 4837038002,
+     "name": "Tipo de contrato",
+     "value": "CLT",
+     "value_type": "single_select"
+    },
+    {
+     "id": 22760490002,
+     "name": "Grade",
+     "value": "11",
+     "value_type": "single_select"
+    },
+    {
+     "id": 99288515002,
+     "name": "keywords",
+     "value": null,
+     "value_type": "long_text"
+    }
+   ],
+   "id": 8058884002,
+   "updated_at": "2026-11-19T07:42:02-05:00",
+   "requisition_id": "100120",
+   "title": "Senior Staff AI/ ML Engineer",
+   "company_name": "iFood",
+   "first_published": "2025-07-17T10:20:45-04:00",
+   "language": "pt",
+   "application_deadline": null,
+   "content": "&lt;h2&gt;Nosso modo de fazer no time&lt;/h2&gt;\n&lt;p&gt;O iFood move mais de 80 milhões de pedidos por mês, e por trás de cada experiência incrível, temos modelos de&amp;nbsp; Machine Learning e agentes de IA tomando decisões em tempo real.&lt;br&gt;Estamos buscando a pessoa que vai definir como IA opera em escala no iFood: alguém que pensa além do modelo,&amp;nbsp; enxerga o sistema completo e traduz estratégia em roadmap técnico para os próximos 12-24 meses. Se você quer&amp;nbsp; atuar na interseção entre engenharia de alto desempenho e a fronteira da IA generativa, liderando múltiplas&amp;nbsp; equipes, mentorando engenheiros e criando soluções que impactam milhões de usuários todos os dias: essa é a sua&amp;nbsp; oportunidade.&lt;/p&gt;\n&lt;h2&gt;Seu Cardápio Diário&lt;/h2&gt;\n&lt;p&gt;Estratégia de MLOps &amp;amp; Serving:&amp;nbsp; Definir a estratégia de MLOps para a organização. Projetar plataformas de serving que suportem múltiplos&amp;nbsp; frameworks e paradigmas (batch, real-time, agentes). Estabelecer CI/CD para modelos ML como padrão organizacional, com governança formal (model cards, approval workflows, model registry).&lt;br&gt;&lt;br&gt;Engenharia de Agentes de IA:&amp;nbsp; Definir a estratégia de agentes de IA para a organização. Projetar arquiteturas que escalem para múltiplos&amp;nbsp; domínios, envolvendo orquestração, tool calling, memória, RAG, evals e guardrails. Projetar como agentes interagem com a camada semântica de dados do iFood.&lt;br&gt;&lt;br&gt;FinOps &amp;amp; Infraestrutura de ML:&amp;nbsp; Liderar iniciativas de FinOps para ML: redução de custo computacional cross-equipe, migrações de infraestrutura&amp;nbsp; (on-demand para spot, gerações de GPU), auto-scaling inteligente. Projetar plataforma que serve múltiplas&amp;nbsp; equipes com diferentes necessidades.&lt;br&gt;&lt;br&gt;Responsible AI &amp;amp; Governança:&amp;nbsp; Contribuir para definição de políticas de uso responsável de IA (bias, fairness, safety, PII protection).&amp;nbsp; Garantir que model governance incorpore responsible AI. Implementar guardrails robustos contra alucinações,&amp;nbsp; prompt injection e vazamento de dados.&lt;br&gt;&lt;br&gt;Mentoria &amp;amp; Liderança Técnica:&amp;nbsp; Mentorar engenheiros e cientistas de dados em MLOps e GenAI. Escrever RFCs e ADRs que definam padrões técnicos&amp;nbsp; para o domínio. Organizar e fortalecer a comunidade técnica (guildas, tech talks, padrões compartilhados).&amp;nbsp; Elevar a barra técnica de múltiplas equipes.&lt;br&gt;&lt;br&gt;Saúde &amp;amp; Observabilidade:&amp;nbsp; Liderar excelência técnica dos sistemas, criando planos para garantia de qualidade e mitigação de falhas.&amp;nbsp; Monitorar regressões (drift, taxas de erro) e coordenar evoluções de sistemas para manter coesão da plataforma&amp;nbsp; de ML.&lt;/p&gt;\n&lt;h2&gt;Ingredientes que buscamos&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Estratégia de MLOps em escala: Experiência definindo estratégia de MLOps para múltiplas equipes — não só&amp;nbsp; operando, mas projetando como a organização leva modelos a produção de forma segura e reprodutível&lt;/li&gt;\n&lt;li&gt;Arquitetura de Agentes de IA: Experiência projetando agentes em produção que raciocinam, usam ferramentas e&amp;nbsp; lidam com erros — incluindo padronização de guardrails, evals e observabilidade em nível organizacional&lt;/li&gt;\n&lt;li&gt;FinOps para ML: Gestão de custo computacional como disciplina — GPU, spot instances, auto-scaling — com visão&amp;nbsp; de otimização cross-equipe, não pontual&lt;/li&gt;\n&lt;li&gt;Governança de Modelos: Model cards, registries, approval workflows e auditabilidade como prática, não como&amp;nbsp; checklist&lt;/li&gt;\n&lt;li&gt;Responsible AI: Experiência definindo ou aplicando políticas de fairness, bias e safety em modelos e agentes&lt;/li&gt;\n&lt;li&gt;Mentoria técnica: Track record de multiplicação — mentoria de engenheiros, liderança de guildas, elevação de padrões técnicos em equipes que não são a sua&lt;/li&gt;\n&lt;/ul&gt;\n&lt;h2&gt;Para Realçar o Sabor&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Visão AI-operable: Capacidade de pensar além do modelo, antecipando como o sistema completo vai evoluir — e&amp;nbsp; traduzindo isso em roadmap de 12-24 meses&lt;/li&gt;\n&lt;li&gt;Plataforma multi-tenant: Experiência projetando plataformas de ML que servem múltiplas equipes com diferentes&amp;nbsp; necessidades&lt;/li&gt;\n&lt;li&gt;Inner source / Open source: Contribuições em projetos além do seu domínio — RFCs, ADRs, bibliotecas&amp;nbsp; compartilhadas&lt;/li&gt;\n&lt;li&gt;Advisory para liderança: Experiência como advisor técnico para stakeholders seniores, conectando estratégia de IA a estratégia de negócio&lt;/li&gt;\n&lt;li&gt;Pesquisa aplicada: PoCs e pesquisas que introduziram novas capacidades para o time&lt;/li&gt;\n&lt;li&gt;Inglês intermediário/avançado: Para contato com times internacionais do ecossistema iFood&lt;/li&gt;\n&lt;/ul&gt;\n&lt;p&gt;Buscamos uma pessoa apaixonada por inovação e tecnologia, que esteja sempre em busca de novos aprendizados e que goste de desafios. Se você se identifica com este perfil, adoraríamos conhecer você!&lt;/p&gt;\n&lt;hr&gt;\n&lt;h2&gt;Sobre nós&lt;/h2&gt;\n&lt;p&gt;No iFood, acreditamos na força da diversidade para gerar #Inovação e atingir #Resultados incríveis, por isso, não fazemos distinção para candidatos com deficiência, gênero, orientação sexual, raça/etnia, idade, origem, constituição familiar e estética. Temos grupos compostos por foodlovers voluntários, onde falamos sobre Raça, Gênero, LGBTQI+ e PcD, queremos ser a empresa onde pessoas escolham como lugar onde vão se desenvolver e contribuir para a realização de sonhos, #AllTogether.&lt;/p&gt;\n&lt;p&gt;&lt;a href=&quot;https://carreiras.ifood.com.br/diversity&quot;&gt;Conheça nossas iniciativas →&lt;/a&gt;&lt;/p&gt;\n&lt;h2&gt;Você tem fome de que?&lt;/h2&gt;\n&lt;p&gt;Nós, FoodLovers, temos fome de inovação e resultado. Buscamos sempre fazer o nosso melhor, pensando &quot;fora da caixa&quot; e atuando com agilidade e responsabilidade! Temos fome de diversidade, conhecimento e compartilhamento. Trabalhamos em um ambiente de muita versatilidade. Sabe o que promove a nossa receita especial? As pessoas! Vem fazer parte disso🤝&lt;/p&gt;",
+   "departments": [
+    {
+     "id": 4112665002,
+     "name": "DATA AI | TECH",
+     "child_ids": [],
+     "parent_id": 4073913002
+    }
+   ],
+   "offices": [
+    {
+     "id": 4051754002,
+     "name": "IFOOD - BASE OSASCO ",
+     "location": "Av. dos Autonomistas -  Vila Yara, Osasco - SP",
+     "child_ids": [],
+     "parent_id": 4051204002
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": false,
+   "ai_opt_out_request_url": "http://app2.greenhouse.io/ai_opt_out_request/job_post/8058884002/ai_opt_out"
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/ifoodcarreiras/jobs/8929053002",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": true
+    }
+   ],
+   "internal_job_id": 6577858002,
+   "location": {
+    "name": "Osasco, Sao Paulo, Brazil"
+   },
+   "metadata": [
+    {
+     "id": 4837038002,
+     "name": "Tipo de contrato",
+     "value": "CLT",
+     "value_type": "single_select"
+    },
+    {
+     "id": 22760490002,
+     "name": "Grade",
+     "value": "11",
+     "value_type": "single_select"
+    },
+    {
+     "id": 99288515002,
+     "name": "keywords",
+     "value": null,
+     "value_type": "long_text"
+    }
+   ],
+   "id": 8929053002,
+   "updated_at": "2026-11-19T07:42:02-05:00",
+   "requisition_id": "52719",
+   "title": "Advogado(a) Tributarista Especialista- Ifood Pago",
+   "company_name": "iFood",
+   "first_published": "2026-11-10T08:38:54-05:00",
+   "language": "pt",
+   "application_deadline": null,
+   "content": "&lt;h2&gt;Nosso modo de fazer no time&lt;/h2&gt;\n&lt;p&gt;O iFood Pago é o braço financeiro do maior ecossistema de foodtech da América Latina. Aqui, a gente vai muito além do delivery: desenvolvemos soluções financeiras completas para restaurantes parceiros, entregadores e consumidores. Estamos revolucionando o mercado de pagamentos e serviços financeiros, com produtos que conectam milhões de pessoas e impulsionam negócios todos os dias.&lt;/p&gt;\n&lt;p&gt;Estamos em um momento estratégico: além de consolidar nossa operação, precisamos navegar as transformações trazidas pela Reforma Tributária com inteligência e visão de longo prazo. É aqui que você entra.&lt;/p&gt;\n&lt;p&gt;Procuramos alguém que será a referência técnica em tributação para todo o iFood Pago – alguém capaz de traduzir complexidade em clareza, de transformar desafios regulatórios em oportunidades de negócio, e de equilibrar eficiência tributária com gestão de riscos em um ambiente que muda rápido.&lt;/p&gt;\n&lt;p&gt;Vaga híbrída 2x por semana no escritório de Osasco-SP (temos abertura para avaliar o remoto)&lt;/p&gt;\n&lt;h2&gt;Seu Cardápio Diário&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Ser o ponto focal jurídico tributário do iFood Pago: avaliar contratos, produtos e estruturas, definindo estratégias tributárias que equilibrem eficiência, compliance e menor risco, com atenção especial às mudanças da Reforma Tributária.&lt;/li&gt;\n&lt;li&gt;Desenhar, avaliar e implementar estratégias tributárias alinhadas aos objetivos do negócio para expansões, reestruturações, integrações e lançamentos de novos produtos.&lt;/li&gt;\n&lt;li&gt;Atuar como business partner para líderes de negócio, aconselhando proativamente sobre implicações tributárias e propondo soluções práticas para operações de fintech e serviços financeiros.&lt;/li&gt;\n&lt;li&gt;Realizar projeções, cálculos e simulações de cenários para quantificar impactos tributários, subsidiar decisões comerciais e estimar carga tributária futura.&lt;/li&gt;\n&lt;li&gt;Apoiar operações, projetos, propostas comerciais e produtos na mitigação de riscos e na busca por otimização tributária.&lt;/li&gt;\n&lt;li&gt;Preparar, acompanhar e executar planejamento tributário e iniciativas de melhoria contínua, visando redução de riscos e otimização de custos.&lt;/li&gt;\n&lt;li&gt;Interagir com stakeholders multidisciplinares (Finanças, Jurídico, Produto, Operações, Comercial) para levantamento de informações, alinhamentos e execução de entregas.&lt;/li&gt;\n&lt;/ul&gt;\n&lt;h2&gt;Ingredientes que buscamos&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Formação em Direito e experiência sólida em direito tributário voltado para instituições financeiras, bancos ou empresas de pagamento;&lt;/li&gt;\n&lt;li&gt;Conhecimento aprofundado da legislação tributária brasileira, com foco em tributos indiretos (ISS, PIS, COFINS, IBS, CBS) aplicados a instituições financeiras e de pagamento;&lt;/li&gt;\n&lt;li&gt;Expertise em planejamento tributário e avaliação de impactos regulatórios;&lt;/li&gt;\n&lt;li&gt;Capacidade de modelagem de cenários tributários, simulações e análises quantitativas;&lt;/li&gt;\n&lt;li&gt;Avaliação jurídico-tributária de contratos, produtos e estruturas;&lt;/li&gt;\n&lt;li&gt;Interpretação de demonstrativos contábeis e conceitos financeiros;&lt;/li&gt;\n&lt;li&gt;Atuação como business partner, com facilidade para dialogar com áreas de negócio e traduzir linguagem técnica para públicos diversos;&lt;/li&gt;\n&lt;li&gt;Proatividade, pensamento analítico e senso de dono para antecipar riscos e propor melhorias;&lt;/li&gt;\n&lt;li&gt;Capacidade de priorizar e gerenciar entregas em ambiente dinâmico com mudanças regulatórias rápidas;&lt;/li&gt;\n&lt;li&gt;Perfil colaborativo alinhado aos valores iFood, com foco em inovação e resultados;&lt;/li&gt;\n&lt;/ul&gt;\n&lt;p&gt;&amp;nbsp;&lt;/p&gt;\n&lt;h2&gt;Para realçar o sabor:&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Familiaridade com ferramentas de inteligência artificial aplicadas à inteligência tributária;&lt;/li&gt;\n&lt;li&gt;Inglês.&lt;/li&gt;\n&lt;/ul&gt;\n&lt;hr&gt;\n&lt;h2&gt;Sobre nós&lt;/h2&gt;\n&lt;p&gt;No iFood, acreditamos na força da diversidade para gerar #Inovação e atingir #Resultados incríveis, por isso, não fazemos distinção para candidatos com deficiência, gênero, orientação sexual, raça/etnia, idade, origem, constituição familiar e estética. Temos grupos compostos por foodlovers voluntários, onde falamos sobre Raça, Gênero, LGBTQI+ e PcD. Queremos ser a empresa onde pessoas escolham como lugar para se desenvolver e contribuir para a realização de sonhos, #AllTogether.&lt;/p&gt;\n&lt;p&gt;&lt;a href=&quot;https://carreiras.ifood.com.br/diversity&quot;&gt;Conheça nossas iniciativas →&lt;/a&gt;&lt;/p&gt;\n&lt;h2&gt;Você tem fome de que?&lt;/h2&gt;\n&lt;p&gt;Nós, FoodLovers, temos fome de inovação e resultado. Buscamos sempre fazer o nosso melhor, pensando &quot;fora da caixa&quot; e atuando com agilidade e responsabilidade! Temos fome de diversidade, conhecimento e compartilhamento. Trabalhamos em um ambiente de muita versatilidade. Sabe o que promove a nossa receita especial? As pessoas! Vem fazer parte disso🤝&lt;/p&gt;",
+   "departments": [
+    {
+     "id": 4078026002,
+     "name": "TRIBUTARIO IFOOD PAGO | JRMA",
+     "child_ids": [],
+     "parent_id": 4073847002
+    }
+   ],
+   "offices": [
+    {
+     "id": 4051754002,
+     "name": "IFOOD - BASE OSASCO ",
+     "location": "Av. dos Autonomistas -  Vila Yara, Osasco - SP",
+     "child_ids": [],
+     "parent_id": 4051204002
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": false,
+   "ai_opt_out_request_url": "http://app2.greenhouse.io/ai_opt_out_request/job_post/8929053002/ai_opt_out"
+  }
+ ],
+ "meta": {
+  "total": 2
+ }
+}

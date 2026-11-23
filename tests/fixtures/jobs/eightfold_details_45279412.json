@@ -1,0 +1,40 @@
+{
+ "status": 200,
+ "error": {
+  "message": "",
+  "body": ""
+ },
+ "data": {
+  "id": 45279412,
+  "displayJobId": "128728",
+  "name": "Senior Software Engineer — Artificial Intelligence & Data Products",
+  "locations": [
+   "Sudeste,Brazil",
+   "Osasco, SP, Brasil"
+  ],
+  "standardizedLocations": [
+   "BR",
+   "SP,BR"
+  ],
+  "postedTs": 1793393968,
+  "stars": 0,
+  "department": "IT",
+  "creationTs": 1793393863,
+  "jobDescription": "<div><div style=\"padding: 10px 0px;border: 1px solid transparent;\"><div style=\"font-size:16px;word-wrap: break-word;\"><h2 style=\"font-size: 1em; margin: 0px\">Descripción breve - externa</h2>\r</div><div><p>Faça história na democratização do comércio e dos serviços financeiros, transformando a vida de milhões de pessoas na América Latina com o Mercado Livre!</p><p>Desenvolva produtos de dados e agentes de inteligência artificial que transformem informações em decisões de negócio mais qualificadas.</p><p>Você terá autonomia para criar soluções de ponta a ponta, conectando dados, contexto de negócio e ferramentas para apoiar decisões. O trabalho envolve arquitetura de software, sistemas distribuídos, agentes conversacionais e práticas de qualidade que mantêm as soluções confiáveis à medida que evoluem.</p><p>Imagine você empreendendo projetos desafiadores, dinâmicos e inovadores e sendo responsável por:</p><ul><li><p>Desenhar e desenvolver produtos de dados e agentes conversacionais que apoiem decisões de negócio.</p></li><li><p>Definir arquiteturas escaláveis, seguras e eficientes, conectadas a APIs e serviços cloud.</p></li><li><p>Construir agentes que integrem dados, contexto de negócio, ferramentas e competências reutilizáveis; aplicar SDD, RPI e Harness Engineering com Claude Code ou Codex para orientar e validar seu desenvolvimento.</p></li><li><p>Implementar testes, avaliações e observabilidade para verificar qualidade e confiabilidade; articular com engenharia, dados e produto para identificar oportunidades e medir resultados.</p></li></ul><p><strong>Experiência e conhecimentos:</strong></p><ul><li><p>Aprender com agilidade a partir dos desafios, maximizando seu potencial com tecnologia e GenAI.</p></li><li><p>Apaixonar-se por sair da zona de conforto, dar o máximo, superar os próprios limites e empreender em um ambiente saudável, alegre e divertido.</p></li><li><p>Possuir experiência prévia relevante em desenvolvimento e arquitetura de software, com conhecimentos de sistemas distribuídos, APIs e serviços cloud, e autonomia para levar soluções do desenho à produção.</p></li><li><p>Dominar especificações, contexto e mecanismos de validação para orientar agentes de desenvolvimento, avaliar código gerado por inteligência artificial e preservar a qualidade e a manutenção das soluções.</p></li><li><p>Trazer conhecimentos de LLMs, gestão de contexto, orquestração de agentes, testes automatizados, integração e entrega contínuas e observabilidade; somar como diferenciais Python, Go, LangGraph, MCP, RAG, GraphRAG, busca semântica, n8n, pipelines de dados, SQL, BigQuery, Dataflow, modelagem, particionamento, clustering, machine learning, analítica avançada e produtos de observabilidade, confiabilidade ou plataformas para desenvolvedores.</p></li></ul><p>Quer deixar sua marca na tecnologia da América Latina? Candidate-se e faça parte do nosso propósito!</p><p>Conheça mais sobre nossa cultura e negócio no nosso <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" class=\"rich-text-link\" href=\"https://careers-meli.mercadolibre.com/\">Career Site</a>.</p><p>O melhor está chegando!</p><p><em>Modelo de trabalho híbrido em Osasco, São Paulo, Brasil.</em></p></div></div></div>",
+  "location": "Sudeste,Brazil",
+  "isHot": 0,
+  "workLocationOption": "hybrid",
+  "locationFlexibility": null,
+  "atsJobId": "128728",
+  "positionUrl": "/careers/job/45279412",
+  "publicUrl": "https://mercadolibre.eightfold.ai/careers/job/45279412",
+  "jdHighlight": [],
+  "positionUserActions": {
+   "isSaved": false,
+   "applyAction": {
+    "status": "allowed"
+   }
+  }
+ },
+ "metadata": null
+}

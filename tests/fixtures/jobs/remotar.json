@@ -1,0 +1,818 @@
+{
+ "meta": {
+  "total": 3,
+  "per_page": 50,
+  "current_page": 1,
+  "last_page": 1,
+  "first_page": 1,
+  "first_page_url": "/?page=1",
+  "last_page_url": "/?page=4",
+  "next_page_url": null,
+  "previous_page_url": null
+ },
+ "data": [
+  {
+   "id": 173089,
+   "companyId": 8766,
+   "companyDisplayName": null,
+   "companyDisplayLink": null,
+   "companyDisplayAbout": null,
+   "title": "Machine Learning Engineer ",
+   "subtitle": null,
+   "description": "<p><strong>Core qualifications</strong></p>\n<ul>\n  <li>Strong industrial/OT integration knowledge covering time-series historians, Kepware, OPC UA/DA, and MQTT.</li>\n  <li>Working knowledge of ISA-95 architecture and IEC 62443 OT cybersecurity principles.</li>\n  <li>AWS ML experience using SageMaker, S3 data lakes, Glue, Athena, and Lambda.</li>\n  <li>Experience integrating SageMaker real-time endpoints and batch inference, including routing inference results to downstream applications.</li>\n  <li>Edge ML inference experience deploying models locally with technologies such as Docker and ONNX Runtime.</li>\n  <li>Understanding of the full MLOps lifecycle, including model packaging, versioning, deployment, monitoring, and rollback across cloud and edge environments.</li>\n  <li>Ability to design resilient edge-to-cloud architectures, including offline operation, store-and-forward, reliable MQTT messaging, and synchronization.</li>\n  <li>Experience applying ML to industrial time-series data, including anomaly detection, forecasting, feature engineering, and sensor-data quality.</li>\n  <li>Strong Python programming skills for ML inference integration and data processing.</li>\n  <li>Experience with containerization, Greengrass component lifecycle, and remote edge-fleet management.</li>\n  <li>Secure cloud architecture experience with VPCs, IAM, KMS, private endpoints, CloudWatch, and SNS.</li>\n</ul>\n<p><strong>Preferred / nice-to-have</strong></p>\n<ul>\n  <li>Manufacturing or chemical-process industry experience.</li>\n  <li>Relevant AWS certifications, particularly AWS Certified Solutions Architect and/or AWS machine-learning credentials.</li>\n</ul>",
+   "moreInfos": "<p>&nbsp;<strong>3-6+ Months contract + Possible extensions </strong>&nbsp;</p>",
+   "countryId": null,
+   "city": null,
+   "state": null,
+   "type": "remote",
+   "expiresAt": "2026-12-13T17:43:15.000-03:00",
+   "expires": true,
+   "expired": false,
+   "externalLink": "https://www.linkedin.com/jobs/view/4492585641/?",
+   "isExternalLink": true,
+   "isPromoted": false,
+   "active": true,
+   "ignoreCompanyBenefits": true,
+   "createdAt": "2026-11-23T17:46:04.311-03:00",
+   "updatedAt": "2026-11-23T17:46:06.766-03:00",
+   "thumbnailUrl": "job-thumbnails/173089.png",
+   "integrationSource": null,
+   "jobBenefits": [],
+   "jobFeaturedInfos": [],
+   "jobCategories": [
+    {
+     "id": 216518,
+     "jobId": 173089,
+     "categoryId": 13,
+     "createdAt": "2026-11-23T17:46:04.327-03:00",
+     "updatedAt": "2026-11-23T17:46:04.327-03:00",
+     "category": {
+      "id": 13,
+      "name": "Programação",
+      "createdAt": "2022-06-14T20:58:34.917-03:00",
+      "updatedAt": "2022-06-14T20:58:34.917-03:00"
+     }
+    }
+   ],
+   "country": null,
+   "author": {
+    "id": 159877,
+    "username": "rafagc"
+   },
+   "jobRequirements": [],
+   "jobSalary": {
+    "id": 160872,
+    "jobId": 173089,
+    "from": 0,
+    "to": 0,
+    "currency": "BRL",
+    "type": "monthly",
+    "createdAt": "2026-11-23T17:46:04.331-03:00",
+    "updatedAt": "2026-11-23T17:46:04.331-03:00"
+   },
+   "jobTags": [
+    {
+     "id": 578888,
+     "jobId": 173089,
+     "tagId": 7,
+     "createdAt": "2026-11-23T17:46:04.321-03:00",
+     "updatedAt": "2026-11-23T17:46:04.321-03:00",
+     "tag": {
+      "id": 7,
+      "name": "👌 Candidatura simplificada",
+      "createdAt": "2022-06-14T20:58:34.935-03:00",
+      "updatedAt": "2022-06-14T20:58:34.935-03:00",
+      "type": "job"
+     }
+    },
+    {
+     "id": 578889,
+     "jobId": 173089,
+     "tagId": 4,
+     "createdAt": "2026-11-23T17:46:04.324-03:00",
+     "updatedAt": "2026-11-23T17:46:04.324-03:00",
+     "tag": {
+      "id": 4,
+      "name": "🌍 100% Remoto",
+      "createdAt": "2022-06-14T20:58:34.932-03:00",
+      "updatedAt": "2022-06-14T20:58:34.932-03:00",
+      "type": "job"
+     }
+    }
+   ],
+   "company": {
+    "id": 8766,
+    "name": "System Soft Technologies",
+    "link": "https://sstech.us",
+    "about": "<p>System Soft Group is an IT services and solutions company that helps organizations overcome limited managed IT capabilities and achieve key technology goals. We're an extension of your IT team, offering targeted project support and comprehensive IT consulting to keep your infrastructure scalable, resilient, and future-ready. We focus on innovative technologies and delivery models to help your organization be more agile, valuable, and competitive.&nbsp;</p>",
+    "active": true,
+    "createdAt": "2026-11-23T17:35:12.353-03:00",
+    "updatedAt": "2026-11-23T17:35:12.353-03:00",
+    "brandColor": "#ffffff",
+    "companyProfilePicture": {
+     "id": 7385,
+     "companyId": 8766,
+     "url": "https://remotar-assets-prod.s3.sa-east-1.amazonaws.com/company-profile-pictures/cmwtq6e9i00em01n54v5pfp3o.jpeg",
+     "mediumUrl": "https://remotar-assets-prod.s3.sa-east-1.amazonaws.com/company-profile-pictures/7b613ce243b99b32549516a599c377f1a3709d5c5c7910583df51a7986c404f03ba2cd0b2ecab4fa.jpeg",
+     "smallUrl": "https://remotar-assets-prod.s3.sa-east-1.amazonaws.com/company-profile-pictures/723f345b0e84185951115bfb170070db14a8f3b58a84902b36cbc1e445e2aa0629ec0b36210f1545.jpeg",
+     "createdAt": "2026-11-23T17:35:33.736-03:00",
+     "updatedAt": "2026-11-23T17:35:33.736-03:00"
+    },
+    "companyProfileCover": null,
+    "companyJobBenefits": [],
+    "companyLinks": [
+     {
+      "id": 28460,
+      "companyId": 8766,
+      "title": "Linkedin",
+      "url": "https://www.linkedin.com/company/systemsofttech/",
+      "createdAt": "2026-11-23T17:35:12.359-03:00",
+      "updatedAt": "2026-11-23T17:35:12.359-03:00"
+     },
+     {
+      "id": 28461,
+      "companyId": 8766,
+      "title": "Instagram",
+      "url": "https://www.instagram.com/system.soft.technologies/?hl=en",
+      "createdAt": "2026-11-23T17:35:12.360-03:00",
+      "updatedAt": "2026-11-23T17:35:12.360-03:00"
+     },
+     {
+      "id": 28462,
+      "companyId": 8766,
+      "title": "Twitter",
+      "url": "http://twitter.com/intent/follow?source=followbutton&variant=1.0&screen_name=SystemSoft_Tech",
+      "createdAt": "2026-11-23T17:35:12.361-03:00",
+      "updatedAt": "2026-11-23T17:35:12.361-03:00"
+     },
+     {
+      "id": 28463,
+      "companyId": 8766,
+      "title": "Facebook",
+      "url": "https://www.facebook.com/SystemSoftTechnologies/",
+      "createdAt": "2026-11-23T17:35:12.362-03:00",
+      "updatedAt": "2026-11-23T17:35:12.362-03:00"
+     }
+    ]
+   }
+  },
+  {
+   "id": 173070,
+   "companyId": 162,
+   "companyDisplayName": null,
+   "companyDisplayLink": null,
+   "companyDisplayAbout": null,
+   "title": "Cientista de Dados Especialista",
+   "subtitle": "Especialista em Prevenção à Fraude com foco em Machine Learning, Python e SQL",
+   "description": "<p>A Vetta Tecnologia busca um(a) Cientista de Dados Especialista em Prevenção à Fraude para atuar na identificação, análise e mitigação de riscos relacionados a fraudes internas e externas. A Vetta é uma empresa líder em digitalização industrial, com soluções que ajudam clientes globalmente a reduzir o consumo de energia, melhorar a eficiência operacional e apoiar a transição energética através da descarbonização.</p><h2>Responsabilidades</h2><ul><li>Desenvolver modelos preditivos, algoritmos e soluções analíticas avançadas.</li><li>Criar ferramentas de monitoramento e automação para redução de perdas, proteção de ativos e fortalecimento dos controles do negócio.</li><li>Transformar dados em insights estratégicos para prevenção e combate à fraude.</li></ul>",
+   "moreInfos": "Selecionamos as principais informações da posição. Para conferir o descritivo completo, clique em \"acessar\"",
+   "countryId": null,
+   "city": null,
+   "state": null,
+   "type": "remote",
+   "expiresAt": null,
+   "expires": false,
+   "expired": false,
+   "externalLink": "https://vetta.gupy.io/job/eyJqb2JJZCI6MTI5MjQ5MDcsInNvdXJjZSI6InJlbW90YXIifQ==?jobBoardSource=remotar",
+   "isExternalLink": true,
+   "isPromoted": false,
+   "active": true,
+   "ignoreCompanyBenefits": false,
+   "createdAt": "2026-11-23T16:09:53.467-03:00",
+   "updatedAt": "2026-11-23T16:09:55.708-03:00",
+   "thumbnailUrl": "job-thumbnails/173070.png",
+   "integrationSource": "gupy",
+   "jobBenefits": [
+    {
+     "id": 162493,
+     "jobId": 173070,
+     "description": "Cartão Flash com vale-alimentação/refeição de R$ 32,00 por dia.",
+     "createdAt": "2026-11-23T16:09:53.500-03:00",
+     "updatedAt": "2026-11-23T16:09:53.500-03:00"
+    },
+    {
+     "id": 162494,
+     "jobId": 173070,
+     "description": "Auxílio home office de R$ 100,00/mês.",
+     "createdAt": "2026-11-23T16:09:53.503-03:00",
+     "updatedAt": "2026-11-23T16:09:53.503-03:00"
+    },
+    {
+     "id": 162495,
+     "jobId": 173070,
+     "description": "Flexibilidade no horário de trabalho.",
+     "createdAt": "2026-11-23T16:09:53.507-03:00",
+     "updatedAt": "2026-11-23T16:09:53.507-03:00"
+    },
+    {
+     "id": 162496,
+     "jobId": 173070,
+     "description": "Plano de Saúde SulAmérica, com possibilidade de inclusão de dependentes.",
+     "createdAt": "2026-11-23T16:09:53.510-03:00",
+     "updatedAt": "2026-11-23T16:09:53.510-03:00"
+    },
+    {
+     "id": 162497,
+     "jobId": 173070,
+     "description": "Plano Odontológico Bradesco, com possibilidade de inclusão de dependentes.",
+     "createdAt": "2026-11-23T16:09:53.512-03:00",
+     "updatedAt": "2026-11-23T16:09:53.512-03:00"
+    },
+    {
+     "id": 162498,
+     "jobId": 173070,
+     "description": "WellHub, TotalPass e UniCamente para saúde integral.",
+     "createdAt": "2026-11-23T16:09:53.515-03:00",
+     "updatedAt": "2026-11-23T16:09:53.515-03:00"
+    },
+    {
+     "id": 162499,
+     "jobId": 173070,
+     "description": "Onhappy, plataforma de viagens corporativas e lazer com descontos exclusivos.",
+     "createdAt": "2026-11-23T16:09:53.517-03:00",
+     "updatedAt": "2026-11-23T16:09:53.517-03:00"
+    },
+    {
+     "id": 162500,
+     "jobId": 173070,
+     "description": "Plano de Saúde Pet da Guapeco.",
+     "createdAt": "2026-11-23T16:09:53.520-03:00",
+     "updatedAt": "2026-11-23T16:09:53.520-03:00"
+    },
+    {
+     "id": 162501,
+     "jobId": 173070,
+     "description": "Clube de Descontos e Recompensas.",
+     "createdAt": "2026-11-23T16:09:53.522-03:00",
+     "updatedAt": "2026-11-23T16:09:53.522-03:00"
+    },
+    {
+     "id": 162502,
+     "jobId": 173070,
+     "description": "Licença maternidade e paternidade estendida.",
+     "createdAt": "2026-11-23T16:09:53.525-03:00",
+     "updatedAt": "2026-11-23T16:09:53.525-03:00"
+    },
+    {
+     "id": 162503,
+     "jobId": 173070,
+     "description": "Seguro de Vida.",
+     "createdAt": "2026-11-23T16:09:53.528-03:00",
+     "updatedAt": "2026-11-23T16:09:53.528-03:00"
+    },
+    {
+     "id": 162504,
+     "jobId": 173070,
+     "description": "Convênio com o SESC.",
+     "createdAt": "2026-11-23T16:09:53.530-03:00",
+     "updatedAt": "2026-11-23T16:09:53.530-03:00"
+    },
+    {
+     "id": 162505,
+     "jobId": 173070,
+     "description": "PLR - conforme tabela do sindicato.",
+     "createdAt": "2026-11-23T16:09:53.533-03:00",
+     "updatedAt": "2026-11-23T16:09:53.533-03:00"
+    },
+    {
+     "id": 162506,
+     "jobId": 173070,
+     "description": "Day-Off de Aniversário.",
+     "createdAt": "2026-11-23T16:09:53.535-03:00",
+     "updatedAt": "2026-11-23T16:09:53.535-03:00"
+    },
+    {
+     "id": 162507,
+     "jobId": 173070,
+     "description": "No Dress Code.",
+     "createdAt": "2026-11-23T16:09:53.537-03:00",
+     "updatedAt": "2026-11-23T16:09:53.537-03:00"
+    },
+    {
+     "id": 162508,
+     "jobId": 173070,
+     "description": "Programa de Incentivo à Formação Contínua e Capacitação.",
+     "createdAt": "2026-11-23T16:09:53.541-03:00",
+     "updatedAt": "2026-11-23T16:09:53.541-03:00"
+    },
+    {
+     "id": 162509,
+     "jobId": 173070,
+     "description": "Programa de Indicação de Talentos.",
+     "createdAt": "2026-11-23T16:09:53.544-03:00",
+     "updatedAt": "2026-11-23T16:09:53.544-03:00"
+    }
+   ],
+   "jobFeaturedInfos": [],
+   "jobCategories": [
+    {
+     "id": 216479,
+     "jobId": 173070,
+     "categoryId": 4,
+     "createdAt": "2026-11-23T16:09:53.496-03:00",
+     "updatedAt": "2026-11-23T16:09:53.496-03:00",
+     "category": {
+      "id": 4,
+      "name": "Data Science / Analytics",
+      "createdAt": "2022-06-14T20:58:34.908-03:00",
+      "updatedAt": "2022-06-14T20:58:34.908-03:00"
+     }
+    }
+   ],
+   "country": null,
+   "author": null,
+   "jobRequirements": [
+    {
+     "id": 189775,
+     "jobId": 173070,
+     "description": "Experiência na construção de ferramentas para monitoramento e detecção de fraudes.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.547-03:00",
+     "updatedAt": "2026-11-23T16:09:53.547-03:00"
+    },
+    {
+     "id": 189776,
+     "jobId": 173070,
+     "description": "Utilização de técnicas de modelagem estatística, mineração e tratamento de dados, data scraping, análise exploratória, inteligência de negócios e visualização de dados.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.549-03:00",
+     "updatedAt": "2026-11-23T16:09:53.549-03:00"
+    },
+    {
+     "id": 189777,
+     "jobId": 173070,
+     "description": "Capacidade de traduzir necessidades de negócio em soluções analíticas.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.551-03:00",
+     "updatedAt": "2026-11-23T16:09:53.551-03:00"
+    },
+    {
+     "id": 189778,
+     "jobId": 173070,
+     "description": "Conhecimento em Ciência de Dados aplicada à Prevenção à Fraude.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.552-03:00",
+     "updatedAt": "2026-11-23T16:09:53.552-03:00"
+    },
+    {
+     "id": 189779,
+     "jobId": 173070,
+     "description": "Experiência no Desenvolvimento de modelos preditivos e algoritmos de Machine Learning.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.554-03:00",
+     "updatedAt": "2026-11-23T16:09:53.554-03:00"
+    },
+    {
+     "id": 189780,
+     "jobId": 173070,
+     "description": "Experiência em Análise e tratamento de grandes volumes de dados.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.555-03:00",
+     "updatedAt": "2026-11-23T16:09:53.555-03:00"
+    },
+    {
+     "id": 189781,
+     "jobId": 173070,
+     "description": "Experiência em Detecção de padrões e comportamentos fraudulentos.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.556-03:00",
+     "updatedAt": "2026-11-23T16:09:53.556-03:00"
+    },
+    {
+     "id": 189782,
+     "jobId": 173070,
+     "description": "Conhecimento em Data Mining e Data Scraping.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.558-03:00",
+     "updatedAt": "2026-11-23T16:09:53.558-03:00"
+    },
+    {
+     "id": 189783,
+     "jobId": 173070,
+     "description": "Experiência em Automação de processos analíticos.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.559-03:00",
+     "updatedAt": "2026-11-23T16:09:53.559-03:00"
+    },
+    {
+     "id": 189784,
+     "jobId": 173070,
+     "description": "Conhecimento em Modelagem estatística e análise preditiva.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.561-03:00",
+     "updatedAt": "2026-11-23T16:09:53.561-03:00"
+    },
+    {
+     "id": 189785,
+     "jobId": 173070,
+     "description": "Experiência no Desenvolvimento de dashboards e visualizações de dados.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.562-03:00",
+     "updatedAt": "2026-11-23T16:09:53.562-03:00"
+    },
+    {
+     "id": 189786,
+     "jobId": 173070,
+     "description": "Experiência em Mapeamento e análise de processos de negócio.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.563-03:00",
+     "updatedAt": "2026-11-23T16:09:53.563-03:00"
+    },
+    {
+     "id": 189787,
+     "jobId": 173070,
+     "description": "Conhecimento em Linguagens Python e SQL.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.564-03:00",
+     "updatedAt": "2026-11-23T16:09:53.564-03:00"
+    },
+    {
+     "id": 189788,
+     "jobId": 173070,
+     "description": "Experiência com Ferramentas de BI e Analytics.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.566-03:00",
+     "updatedAt": "2026-11-23T16:09:53.566-03:00"
+    },
+    {
+     "id": 189789,
+     "jobId": 173070,
+     "description": "Atuação em ambientes ágeis e orientados a dados.",
+     "mandatory": true,
+     "createdAt": "2026-11-23T16:09:53.567-03:00",
+     "updatedAt": "2026-11-23T16:09:53.567-03:00"
+    }
+   ],
+   "jobSalary": {
+    "id": 160853,
+    "jobId": 173070,
+    "from": null,
+    "to": null,
+    "currency": null,
+    "type": "uninformed",
+    "createdAt": "2026-11-23T16:09:53.475-03:00",
+    "updatedAt": "2026-11-23T16:09:53.475-03:00"
+   },
+   "jobTags": [
+    {
+     "id": 578815,
+     "jobId": 173070,
+     "tagId": 6,
+     "createdAt": "2026-11-23T16:09:53.488-03:00",
+     "updatedAt": "2026-11-23T16:09:53.488-03:00",
+     "tag": {
+      "id": 6,
+      "name": "♿ PcD",
+      "createdAt": "2022-06-14T20:58:34.934-03:00",
+      "updatedAt": "2025-12-20T16:22:03.543-03:00",
+      "type": "job"
+     }
+    },
+    {
+     "id": 578816,
+     "jobId": 173070,
+     "tagId": 1,
+     "createdAt": "2026-11-23T16:09:53.491-03:00",
+     "updatedAt": "2026-11-23T16:09:53.491-03:00",
+     "tag": {
+      "id": 1,
+      "name": "💼 CLT",
+      "createdAt": "2022-06-14T20:58:34.928-03:00",
+      "updatedAt": "2022-06-14T20:58:34.928-03:00",
+      "type": "job"
+     }
+    },
+    {
+     "id": 578817,
+     "jobId": 173070,
+     "tagId": 4,
+     "createdAt": "2026-11-23T16:09:53.493-03:00",
+     "updatedAt": "2026-11-23T16:09:53.493-03:00",
+     "tag": {
+      "id": 4,
+      "name": "🌍 100% Remoto",
+      "createdAt": "2022-06-14T20:58:34.932-03:00",
+      "updatedAt": "2022-06-14T20:58:34.932-03:00",
+      "type": "job"
+     }
+    }
+   ],
+   "company": {
+    "id": 162,
+    "name": "Vetta",
+    "link": "https://vetta.digital/pt-br",
+    "about": "<p><strong>Somos uma empresa global de digitalização industrial</strong>, com duas décadas de experiência no segmento, que contribui com a eficiência operacional e com a<strong> redução do consumo de energia e de gases através da descarbonização</strong>. Acreditamos que, com <strong><u>inovação e ação</u></strong>, podemos tornar <u>o mundo mais sustentável </u>e os processos industriais mais eficientes.   </p><p>Atuamos em conjunto com a <u>SMS group, líder mundial no segmento de metais</u><u>,</u> e somos responsáveis pelo desenvolvimento de soluções digitais para nossos clientes em mais de 14 países pelo mundo. As nossas soluções contam com a combinação de experiência em processos, know-how de inteligência artificial (IA) e recursos de desenvolvimento de software para resultar em tecnologias de ponta e de otimização.  </p><p>Queremos trazer soluções inovadoras, buscando melhores formas de tornar a indústria e o futuro mais sustentável por meio da descarbonização. <strong>Quer fazer parte dessa história? </strong><strong>#VemSerVetta  </strong></p><p><em>Todas as nossas vagas são inclusivas e abertas a todos e todas sem distinção por deficiência (PCD), raça, cor, religião, gênero, nacionalidade ou qualquer outra forma de diversidade. </em></p>",
+    "active": true,
+    "createdAt": "2022-08-04T21:12:31.439-03:00",
+    "updatedAt": "2026-05-11T14:17:24.489-03:00",
+    "brandColor": "#00C0C0",
+    "companyProfilePicture": {
+     "id": 160,
+     "companyId": 162,
+     "url": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/cl6fpun8r00qs042q3i234ubk.jpg",
+     "mediumUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/_HAWE6TveKRtQtQmIYmtEIN_CSyvBw1btjzV-I_VdBQ8cqT674c6nRaWsBLyooEzZ0EvAKE3CaaXgKai.jpeg",
+     "smallUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/OoPQHL792kgO7uDX1uslrQDH7294KolPHHq0KrkgV1KlgQXTzwyr9l829EqXxz8q1gEa42c08VYIfjZf.jpeg",
+     "createdAt": "2022-08-04T21:15:54.047-03:00",
+     "updatedAt": "2022-08-04T21:15:54.047-03:00"
+    },
+    "companyProfileCover": {
+     "id": 161,
+     "companyId": 162,
+     "url": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/cl6fpuh8600qq042q1sotbs0z.jpg",
+     "mediumUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/hVfc5LtQsOvqqe4akGZikFcIsJDQ6XwT2MKeLi-8Ny4De_-VS80i3QK-68kuYbOKmqDUXhBZr2ZqJV5t.jpeg",
+     "smallUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/CvqeDNzwv2xUsBgWG0UhXwfXAPWCj-hVzx25QUXjnmNnlSHJ2fJDISusbexuqsQ1EVAoFx5qTcp65gWl.jpeg",
+     "createdAt": "2022-08-04T21:15:46.838-03:00",
+     "updatedAt": "2022-08-04T21:15:46.838-03:00"
+    },
+    "companyJobBenefits": [
+     {
+      "id": 829,
+      "companyId": 162,
+      "description": "Cartão Vale Alimentação e Refeição de R$32,00/dia",
+      "createdAt": "2022-08-04T21:12:31.444-03:00",
+      "updatedAt": "2024-05-10T17:44:53.350-03:00"
+     },
+     {
+      "id": 830,
+      "companyId": 162,
+      "description": "Auxílio home office de R$100,00/mês, além de flexibilidade no horário",
+      "createdAt": "2022-08-04T21:12:31.445-03:00",
+      "updatedAt": "2024-05-10T17:44:53.384-03:00"
+     },
+     {
+      "id": 831,
+      "companyId": 162,
+      "description": "Plano de saúde e Plano odontológico",
+      "createdAt": "2022-08-04T21:12:31.446-03:00",
+      "updatedAt": "2024-05-10T17:44:53.386-03:00"
+     },
+     {
+      "id": 832,
+      "companyId": 162,
+      "description": "Total Pass e Vittude para que você possa cuidar, integralmente, da sua saúde ao praticar atividades físicas e ter contato com profissionais de diferentes áreas da saúde.",
+      "createdAt": "2022-08-04T21:12:31.447-03:00",
+      "updatedAt": "2024-05-10T17:44:53.387-03:00"
+     },
+     {
+      "id": 833,
+      "companyId": 162,
+      "description": "Clube de Descontos Online – New Value",
+      "createdAt": "2022-08-04T21:12:31.448-03:00",
+      "updatedAt": "2024-05-10T17:44:53.389-03:00"
+     },
+     {
+      "id": 834,
+      "companyId": 162,
+      "description": "Licença maternidade e paternidade estendida, para os pais e mães viverem essa fase com tranquilidade.",
+      "createdAt": "2022-08-04T21:12:31.449-03:00",
+      "updatedAt": "2024-05-10T17:44:53.390-03:00"
+     },
+     {
+      "id": 5690,
+      "companyId": 162,
+      "description": "PLR",
+      "createdAt": "2024-05-10T17:44:53.392-03:00",
+      "updatedAt": "2024-05-10T17:44:53.392-03:00"
+     },
+     {
+      "id": 5691,
+      "companyId": 162,
+      "description": "Day-Off de Aniversário",
+      "createdAt": "2024-05-10T17:44:53.394-03:00",
+      "updatedAt": "2024-05-10T17:44:53.394-03:00"
+     },
+     {
+      "id": 5692,
+      "companyId": 162,
+      "description": "Programa de Incentivo à Formação Contínua e Capacitação",
+      "createdAt": "2024-05-10T17:44:53.395-03:00",
+      "updatedAt": "2024-05-10T17:44:53.395-03:00"
+     },
+     {
+      "id": 5693,
+      "companyId": 162,
+      "description": "Programa de Indicação de Talentos.",
+      "createdAt": "2024-05-10T17:44:53.397-03:00",
+      "updatedAt": "2024-05-10T17:44:53.397-03:00"
+     }
+    ],
+    "companyLinks": [
+     {
+      "id": 24028,
+      "companyId": 162,
+      "title": "Instagram",
+      "url": "https://www.instagram.com/vetta.digital/",
+      "createdAt": "2025-11-23T02:12:44.057-03:00",
+      "updatedAt": "2025-11-23T02:12:44.057-03:00"
+     },
+     {
+      "id": 24029,
+      "companyId": 162,
+      "title": "Facebook",
+      "url": "https://www.facebook.com/vettatecnologia/",
+      "createdAt": "2025-11-23T02:12:44.064-03:00",
+      "updatedAt": "2025-11-23T02:12:44.064-03:00"
+     },
+     {
+      "id": 24030,
+      "companyId": 162,
+      "title": "Glassdoor",
+      "url": "https://www.glassdoor.com.br/Avalia%C3%A7%C3%B5es/Vetta-Brazil-Avalia%C3%A7%C3%B5es-E3894139.htm",
+      "createdAt": "2025-11-23T02:12:44.067-03:00",
+      "updatedAt": "2025-11-23T02:12:44.067-03:00"
+     },
+     {
+      "id": 24031,
+      "companyId": 162,
+      "title": "LinkedIn",
+      "url": "https://www.linkedin.com/company/vettadigital/",
+      "createdAt": "2025-11-23T02:12:44.070-03:00",
+      "updatedAt": "2025-11-23T02:12:44.070-03:00"
+     }
+    ]
+   }
+  },
+  {
+   "id": 173081,
+   "companyId": 1873,
+   "companyDisplayName": null,
+   "companyDisplayLink": null,
+   "companyDisplayAbout": null,
+   "title": "Analytics Engineering Manager, Data Platform & Governance",
+   "subtitle": "Build and govern the data platform (warehouse, pipelines, BI), then hire a Lead Analytics Engineer. Remote, USD $75,000–$120,000.",
+   "description": "<h3>About LawnStarter</h3>\n<p>LawnStarter is the nation's leading on-demand marketplace for lawn care and outdoor services, with over $150M in annual bookings. We're expanding beyond lawn care to become the one-stop shop for all home services, operating across three brands (LawnStarter, Lawn Love, Home Gnome) on a single shared platform.</p>\n<h3>About Analytics at LawnStarter</h3>\n<p>We're a small, senior analytics team supporting the entire company, product, marketing, operations, and finance all run on the data we serve. The foundation is solid: a centralized Redshift data warehouse where all source data lands, modeled in dbt and orchestrated by Airflow, with Segment feeding event data in. You won't be stitching scattered sources together, the platform exists; your job is to make it trustworthy and keep it that way. We're mid-migration to Lightdash as our single BI platform, replacing Tableau and Metabase.</p>\n<p>Here's the honest gap: everyone on the team today is an analyst. Data quality, tracking standards, and platform hygiene get done as side work, squeezed between analyses. Nobody wakes up thinking about them, which is exactly the job we're hiring for.</p>\n<h3>The Role</h3>\n<p>You'll be the first person at LawnStarter dedicated to data governance, the owner of whether our data can be trusted, and of the roadmap that makes it more trustworthy every quarter. Trust means the quality and freshness of our source data, pipelines, and reports; the definitions behind our metrics; the standards behind our Segment event tracking; the health of our Lightdash workspace; the data feeding our machine learning models; and the security of the data itself. The roadmap means sitting with product, marketing, ops, and finance to understand what the business needs from data, turning that into priorities for the platform, and sequencing the work, yours and, soon, your team's.</p>\n<p>This is a hands-on role, every manager at LawnStarter builds, and this one is no exception. You'll start solo, with the Analytics team around you: building automation, writing checks, fixing what's broken, and putting processes in place that scale past you. Once you've landed, we open a Lead Analytics Engineer role reporting to you, you'll help choose them, and the function grows from there as scope demands.</p>\n<h3>What makes this role different</h3>\n<ul>\n  <li><strong>You're first.</strong> Governance has been everyone's side job, so what exists today is yours to reshape, keep what works, redesign what doesn't, and your standards become the company's standards.</li>\n  <li><strong>You own the roadmap, not a backlog.</strong> Nobody hands you requirements, you discover what the business needs from data and decide what gets built, in what order, and why.</li>\n  <li><strong>Whole-stack ownership.</strong> Source data to pipelines to dashboards and ML models, you own trust across the entire chain, not one slice of it.</li>\n  <li><strong>A live migration to shape.</strong> Lightdash is landing now. You get to set up its permissions, structure, and norms before bad habits form, instead of untangling them later.</li>\n</ul>\n<h3>What You'll Own</h3>\n<ul>\n  <li><strong>The data roadmap -</strong> discovering what product, marketing, ops, and finance need from data, prioritizing it against platform health, and sequencing the investment. You'll present it, defend it, and re-plan it as the business moves.</li>\n  <li><strong>Data quality and freshness -</strong> automated monitoring across source data, pipelines, and reports; catching upstream schema and source changes before they break anything downstream; running incidents to resolution when they happen.</li>\n  <li><strong>Data lineage and impact analysis -</strong> a living map from production source to warehouse model to dashboard, and the process that uses it: when a production change is proposed, its downstream impact on pipelines, metrics, and reports gets assessed before it ships, not discovered after. The end-state is data contracts with engineering, so breaking changes get caught in their workflow, not ours.</li>\n  <li><strong>Lightdash -</strong> administration, workspace structure, permissions, and the rollout itself. Your job is to give the company self-serve autonomy while keeping the workspace tidy enough that people can find and trust what's there. Enablement is part of the deal, people follow standards they've been taught, and so is keeping queries fast and warehouse costs sane.</li>\n  <li><strong>The semantic layer -</strong> we just shipped it for our most critical metrics: one governed definition per metric, in code. You'll extend definition and mapping to the rest and guard the layer against uncontrolled growth as it scales.</li>\n  <li><strong>Event tracking governance -</strong> our governed Segment event catalog: reviewing new events against its standards, keeping it matched to what production actually sends, and evolving the guardrails (naming, property dictionary, drift detection) as tracking grows.</li>\n  <li><strong>AI data readiness - </strong>AI agents query our warehouse every day through Brain, our internal AI toolkit. You'll govern what data AI tools can access and keep the warehouse AI-legible: documented, consistent, and safe for an agent to query and get the right answer.</li>\n  <li><strong>Data security and privacy -</strong> access controls, PII handling and retention under US state privacy laws, and periodic reviews of who, and which AI tools, can see what.</li>\n  <li><strong>The governance system itself -</strong> the documentation, ownership models, and review loops that keep all of the above running without heroics.</li>\n</ul>\n<h3>Problems to Solve</h3>\n<p><strong>Turn business needs into a data roadmap</strong> Every area of the company wants something from data, and today those asks reach the Analytics team as a stream of interruptions. You'll build the intake and prioritization that turns them into a roadmap , one that balances stakeholder needs against platform health, survives contact with a changing business, and that your stakeholders can see themselves in. The hard part: saying \"not yet\" to important people, with a reason they respect.</p>\n<p><strong>Make the Lightdash migration a step-change, not a re-platforming</strong> We're replacing Tableau and Metabase with Lightdash. Done poorly, we trade two messy tools for one messy tool. You'll design the structure, spaces, permissions, certification, naming, that lets stakeholders self-serve at the speed the company needs without creating an uncontrolled dashboard-growth nightmare. The hard part: autonomy and tidiness pull in opposite directions, and you have to deliver both.</p>\n<p><strong>Finish and defend the semantic layer</strong> We just shipped our semantic layer for our most critical metrics, one governed definition per metric, so \"two dashboards, two numbers\" can't happen. The unglamorous truth: a long tail of metrics still needs definition and mapping, and a semantic layer only stays trustworthy if someone curbs its growth. You'll own both, extending coverage and keeping one-metric-one-definition true as the layer scales.</p>\n<p><strong>Tame event-tracking entropy</strong> Segment events power our funnels and product analytics, and they're implemented by many engineers across many teams. The guardrails exist, a governed event catalog with naming standards, a property dictionary, a review lifecycle, and automated drift detection against production. What's missing is a dedicated owner: someone who holds every new event to the standard, keeps the catalog matched to what production actually sends, and evolves the guardrails as tracking grows. Without that, entropy wins, events drift and silently degrade when features change.</p>\n<p><strong>Get ahead of breakage instead of chasing it</strong> Today, when production data changes upstream, we too often find out when a pipeline breaks or a stakeholder flags a wrong number. You won't start from zero, an AI-powered Analytics Engineer agent already runs freshness monitoring, metric anomaly detection, and dbt-based lineage checks, but it doesn't yet run at the scale or coverage we need. You'll take detection from partial to comprehensive, extend lineage beyond dbt (Segment events and Lightdash need stitching in), and wire it into engineering's change review, so a proposed production change comes with a downstream impact assessment instead of a postmortem. The end-state is data contracts: breaking changes caught in engineering's workflow, not ours.</p>\n<h3>What Success Looks Like (Year 1)</h3>\n<ul>\n  <li><strong>Zero pipeline incidents from unannounced source-data changes -</strong> lineage and automation catch them before they break anything downstream, and production changes ship with an impact assessment instead of a postmortem.</li>\n  <li><strong>Zero freshness incidents -</strong> stakeholders never open a stale dashboard.</li>\n  <li><strong>Every area of the business manages on official, well-maintained metrics and dashboards -</strong> product, marketing, ops, and finance self-serve in Lightdash against a fully mapped semantic layer; Tableau and Metabase are retired; arguments about whose number is right don't happen. Not because you built the dashboards<strong> -</strong> because you built the system that keeps them trustworthy.</li>\n  <li><strong>Every Segment event has an owner and a standard -</strong> new events ship compliant, and degradation gets caught automatically, not by accident.</li>\n  <li><strong>Governance runs as a system -</strong> documented processes that would survive you taking a month off.</li>\n</ul>\n<h3>Who You Are</h3>\n<ul>\n  <li><strong>Governance is your craft, not your chore.</strong> You genuinely enjoy making data systems trustworthy and tidy, you're the person who can't leave a broken naming convention alone. This is unlikely to be a good fit if you see governance as a stepping stone to \"real\" analytics work.</li>\n  <li><strong>AI-native.</strong> You use AI tools (Claude Code, Copilot, ChatGPT) daily to build quality checks, write automation, triage anomalies, and document as you go, one person covering ground that used to take a team. You also see the reverse direction: AI agents consume our data daily, and making the warehouse safe and legible for them is part of governance now. This is unlikely to be a good fit if you're skeptical of AI tools or prefer to do everything manually.</li>\n  <li><strong>A hands-on manager.</strong> You've been accountable for other people's output, allocating their time, owning their priorities, and you never stopped building yourself. You write the SQL, debug the Airflow DAG, and configure the permissions personally. This is unlikely to be a good fit if seniority took you away from the keyboard, or if you've never been responsible for anyone's work but your own.</li>\n  <li><strong>Product-minded.</strong> You start from what the business is trying to decide, not from what the pipeline does, and you can turn a vague stakeholder ask into a prioritized plan. This is unlikely to be a good fit if you need requirements handed to you, or if roadmap conversations feel like a distraction from the real work.</li>\n  <li><strong>Automation-first.</strong> Your instinct for any recurring check is to build a monitor, not a checklist. This is unlikely to be a good fit if your quality practice depends on manual review and discipline.</li>\n  <li><strong>An enforcer people actually like.</strong> You'll hold engineers and analysts you don't manage to standards, which takes clear rules, good tooling that makes compliance easy, and the spine to say no gracefully. This is unlikely to be a good fit if you avoid friction or, at the other extreme, enjoy being the department of no.</li>\n</ul>\n<h3>This Role Is NOT</h3>\n<ul>\n  <li><strong>A big-team leadership role.</strong> You start solo and then hire a Lead Analytics Engineer who reports to you; the team grows only as scope demands. If you want to direct a large org rather than build alongside a small one, this isn't it.</li>\n  <li><strong>A policy or committee job.</strong> There are no governance councils to chair and no binders to produce. When something's broken, you fix it, with code, config, or a conversation.</li>\n  <li><strong>A BI analyst role.</strong> You won't spend your days building dashboards for stakeholders. You build the platform and guardrails that let everyone else do that well.</li>\n  <li><strong>A finished system to babysit.</strong> Much of this doesn't exist yet. If you want to operate a mature data platform rather than build one, you'll be frustrated here.</li>\n</ul>\n<h3>Tech You'll Touch</h3>\n<ul>\n  <li><strong>Warehouse &amp; pipelines</strong> - Redshift, dbt, Airflow</li>\n  <li><strong>Ingestion</strong> - Fivetran, plus custom Airflow pipelines</li>\n  <li><strong>Event tracking</strong> - Segment</li>\n  <li><strong>BI</strong> - Lightdash (primary), Tableau and Metabase (sunsetting)</li>\n  <li><strong>AI tooling</strong> - Claude Code, Codex, Brain (our internal AI toolkit), and any tool that makes you more effective or efficient</li>\n  <li><strong>Observability</strong> - an AI-powered Analytics Engineer agent (freshness monitoring, anomaly detection, dbt lineage) you'll scale up, plus the quality and impact tooling you'll add around it</li>\n</ul>\n<p>You don't need every box checked. You need hands-on depth in the warehouse/pipeline layer and credible experience keeping a BI tool and tracking plan healthy at company scale.</p>\n<h3>What we offer</h3>\n<ul>\n  <li><strong>Base salary</strong>: $75k–$120k/year</li>\n  <li><strong>Fully remote</strong>: This work needs deep focus, building monitors, untangling pipelines, and we trust you to manage your environment. Async collaboration is the norm.</li>\n  <li><strong>Flexible PTO</strong>: We focus on results. Take what you need.</li>\n</ul>\n<p><em>LawnStarter provides equal employment opportunities (EEO) to all employees and applicants for employment without regard to race, color, religion, sex, national origin, age, disability, or genetics. We comply with applicable state and local laws governing nondiscrimination in employment.</em></p>",
+   "moreInfos": null,
+   "countryId": null,
+   "city": null,
+   "state": null,
+   "type": "remote",
+   "expiresAt": null,
+   "expires": false,
+   "expired": false,
+   "externalLink": "https://apply.workable.com/lawnstarter/j/D48A55B879/?utm_source=remotar",
+   "isExternalLink": true,
+   "isPromoted": false,
+   "active": true,
+   "ignoreCompanyBenefits": true,
+   "createdAt": "2026-11-23T17:09:31.492-03:00",
+   "updatedAt": "2026-11-23T17:09:33.902-03:00",
+   "thumbnailUrl": "job-thumbnails/173081.png",
+   "integrationSource": null,
+   "jobBenefits": [],
+   "jobFeaturedInfos": [],
+   "jobCategories": [
+    {
+     "id": 216497,
+     "jobId": 173081,
+     "categoryId": 4,
+     "createdAt": "2026-11-23T17:09:31.515-03:00",
+     "updatedAt": "2026-11-23T17:09:31.515-03:00",
+     "category": {
+      "id": 4,
+      "name": "Data Science / Analytics",
+      "createdAt": "2022-06-14T20:58:34.908-03:00",
+      "updatedAt": "2022-06-14T20:58:34.908-03:00"
+     }
+    }
+   ],
+   "country": null,
+   "author": {
+    "id": 5,
+    "username": "tati"
+   },
+   "jobRequirements": [],
+   "jobSalary": {
+    "id": 160864,
+    "jobId": 173081,
+    "from": 7500000,
+    "to": 12000000,
+    "currency": "USD",
+    "type": "yearly",
+    "createdAt": "2026-11-23T17:09:31.519-03:00",
+    "updatedAt": "2026-11-23T17:09:31.519-03:00"
+   },
+   "jobTags": [
+    {
+     "id": 578856,
+     "jobId": 173081,
+     "tagId": 13,
+     "createdAt": "2026-11-23T17:09:31.507-03:00",
+     "updatedAt": "2026-11-23T17:09:31.507-03:00",
+     "tag": {
+      "id": 13,
+      "name": "✈️ Vaga internacional",
+      "createdAt": "2022-06-14T20:58:34.941-03:00",
+      "updatedAt": "2022-07-30T19:33:05.066-03:00",
+      "type": "job"
+     }
+    },
+    {
+     "id": 578857,
+     "jobId": 173081,
+     "tagId": 4,
+     "createdAt": "2026-11-23T17:09:31.512-03:00",
+     "updatedAt": "2026-11-23T17:09:31.512-03:00",
+     "tag": {
+      "id": 4,
+      "name": "🌍 100% Remoto",
+      "createdAt": "2022-06-14T20:58:34.932-03:00",
+      "updatedAt": "2022-06-14T20:58:34.932-03:00",
+      "type": "job"
+     }
+    }
+   ],
+   "company": {
+    "id": 1873,
+    "name": "LawnStarter",
+    "link": "https://www.lawnstarter.com/?utm_source=remotar",
+    "about": "<p>LawnStarter is a marketplace for outdoor home services. We are the easiest and most efficient way to order and manage your outdoor home service needs, and are currently in 120 markets in the United States. With incredibly high ratings from consumers and providers, it is easy to see why we have industry-leading retention on both sides of the marketplace and are poised to build a multi-billion-dollar consumer brand. &nbsp;</p>\n<p>We have successfully raised over $35M from some of the leading technology and growth investors.</p>",
+    "active": true,
+    "createdAt": "2024-04-22T18:55:42.421-03:00",
+    "updatedAt": "2024-04-22T18:55:42.421-03:00",
+    "brandColor": "#5bb565",
+    "companyProfilePicture": {
+     "id": 1867,
+     "companyId": 1873,
+     "url": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/clvbhxtce00eg02xgclzye43m.jpeg",
+     "mediumUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/f8Beoh_kinqWOkUn-ZMJWtAUDGdwIDW7LFuog0jhoOCiztIsdOH_7S4_hQVvs1NloAyZw0rd2eZVld-C.jpeg",
+     "smallUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-pictures/tdpKszBnFK1uvmHGy9o_s7Goup7a5eVJY9scJZZ9DRxsVG2g4nIHfKyeJe8O1c8V_5N4fdarq3JWJa19.jpeg",
+     "createdAt": "2024-04-22T18:55:58.326-03:00",
+     "updatedAt": "2024-04-22T18:55:58.326-03:00"
+    },
+    "companyProfileCover": {
+     "id": 1819,
+     "companyId": 1873,
+     "url": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/clvbhxnlo00ee02xg5hq20jzw.jpeg",
+     "mediumUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/FIuii8ctHx787I7Vyt_CwjXyAC-Tj0qIXBkweeAxXLBIhkihUjtMEEF8SeG4nPGoYV3OwRsrUTCFR1D9.jpeg",
+     "smallUrl": "https://s3.sa-east-1.amazonaws.com/remotar-assets-prod/company-profile-covers/IEiYrwj3M7I80z08Qbse86L2XUnFTq4sKZE6OSpJ8rLxIOt8939OcIbraHjCiTKv_wdWNDZ8LWfQUld9.jpeg",
+     "createdAt": "2024-04-22T18:55:51.739-03:00",
+     "updatedAt": "2024-04-22T18:55:51.739-03:00"
+    },
+    "companyJobBenefits": [
+     {
+      "id": 5292,
+      "companyId": 1873,
+      "description": "Healthcare benefits: Medical, dental, and vision;",
+      "createdAt": "2024-04-22T18:55:42.444-03:00",
+      "updatedAt": "2024-04-22T18:55:42.444-03:00"
+     },
+     {
+      "id": 5293,
+      "companyId": 1873,
+      "description": "Skin in the game: We want our product managers to benefit from significant company growth. To that end, equity is a big portion of how we structure compensation for PMs;",
+      "createdAt": "2024-04-22T18:55:42.450-03:00",
+      "updatedAt": "2024-04-22T18:55:42.450-03:00"
+     },
+     {
+      "id": 5294,
+      "companyId": 1873,
+      "description": "Fully remote position: Work remotely from anywhere you want;",
+      "createdAt": "2024-04-22T18:55:42.452-03:00",
+      "updatedAt": "2024-04-22T18:55:42.452-03:00"
+     },
+     {
+      "id": 5295,
+      "companyId": 1873,
+      "description": "Unlimited PTO: We focus on results. Take the time you need to recharge or enjoy life, work hard when you are back.",
+      "createdAt": "2024-04-22T18:55:42.454-03:00",
+      "updatedAt": "2024-04-22T18:55:42.454-03:00"
+     }
+    ],
+    "companyLinks": [
+     {
+      "id": 11674,
+      "companyId": 1873,
+      "title": "Glassdoor",
+      "url": "https://www.glassdoor.com.br/Vis%C3%A3o-geral/Trabalhar-na-LawnStarter-EI_IE1165659.13,24.htm",
+      "createdAt": "2024-04-22T18:56:00.643-03:00",
+      "updatedAt": "2024-04-22T18:56:00.643-03:00"
+     },
+     {
+      "id": 11675,
+      "companyId": 1873,
+      "title": "Linkedin",
+      "url": "https://www.linkedin.com/company/lawnstarter/",
+      "createdAt": "2024-04-22T18:56:00.645-03:00",
+      "updatedAt": "2024-04-22T18:56:00.645-03:00"
+     },
+     {
+      "id": 11676,
+      "companyId": 1873,
+      "title": "Facebook",
+      "url": "https://www.facebook.com/lawnstarter",
+      "createdAt": "2024-04-22T18:56:00.646-03:00",
+      "updatedAt": "2024-04-22T18:56:00.646-03:00"
+     },
+     {
+      "id": 11677,
+      "companyId": 1873,
+      "title": "Instagram",
+      "url": "https://www.instagram.com/lawnstarter/",
+      "createdAt": "2024-04-22T18:56:00.647-03:00",
+      "updatedAt": "2024-04-22T18:56:00.647-03:00"
+     }
+    ]
+   }
+  }
+ ]
+}

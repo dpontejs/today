@@ -1,0 +1,79 @@
+{
+ "status": 200,
+ "error": {
+  "message": "",
+  "body": ""
+ },
+ "data": {
+  "positions": [
+   {
+    "id": 45279412,
+    "displayJobId": "128728",
+    "name": "Senior Software Engineer — Artificial Intelligence & Data Products",
+    "locations": [
+     "Sudeste,Brazil",
+     "Osasco, SP, Brasil"
+    ],
+    "standardizedLocations": [
+     "BR",
+     "SP,BR"
+    ],
+    "postedTs": 1793393968,
+    "solrScore": null,
+    "stars": 0,
+    "department": "IT",
+    "creationTs": 1793393863,
+    "isHot": 0,
+    "workLocationOption": "hybrid",
+    "locationFlexibility": null,
+    "atsJobId": "128728",
+    "positionUrl": "/careers/job/45279412"
+   },
+   {
+    "id": 45033961,
+    "displayJobId": "128121",
+    "name": "Cientista de Dados Sênior - Search Platform IT",
+    "locations": [
+     "Sudeste,Brazil"
+    ],
+    "standardizedLocations": [
+     "BR"
+    ],
+    "postedTs": 1793107641,
+    "solrScore": null,
+    "stars": 0,
+    "department": "IT",
+    "creationTs": 1792410942,
+    "isHot": 0,
+    "workLocationOption": "onsite",
+    "locationFlexibility": null,
+    "atsJobId": "128121",
+    "positionUrl": "/careers/job/45033961"
+   },
+   {
+    "id": 45341576,
+    "displayJobId": "128746",
+    "name": "Analista de Riscos de Crédito - Mercado Pago",
+    "locations": [
+     "Sudeste,Brazil"
+    ],
+    "standardizedLocations": [
+     "BR"
+    ],
+    "postedTs": 1793716090,
+    "solrScore": null,
+    "stars": 0,
+    "department": "Fintech",
+    "creationTs": 1793715858,
+    "isHot": 0,
+    "workLocationOption": "onsite",
+    "locationFlexibility": null,
+    "atsJobId": "128746",
+    "positionUrl": "/careers/job/45341576"
+   }
+  ],
+  "count": 3,
+  "sortBy": "relevance"
+ },
+ "metadata": null
+}
