@@ -8,6 +8,7 @@ stands alone, which fits one process (ADR 0001) and short tools.
 
 import hmac
 import sqlite3
+from dataclasses import asdict
 from datetime import datetime
 from typing import Literal
 from zoneinfo import ZoneInfo
@@ -27,6 +28,8 @@ from today.items.today import build_today
 from today.jobs import analysis_repo
 from today.jobs import repo as jobs_repo
 from today.jobs.models import JobAnalysis
+from today.projects import repo as projects_repo
+from today.projects.gaps import GapStat, gap_stats
 
 MAX_DESCRIPTION = 2000
 MAX_JOBS = 100
@@ -268,6 +271,70 @@ def update_job_status(
 # --- MCP wiring ------------------------------------------------------------------------------------
 
 
+class ProjectOut(BaseModel):
+    id: int
+    name: str
+    idea_md: str
+    status: str
+    evaluation: dict | None
+    evaluated_at: str | None
+    repo_url: str | None
+    updated_at: str
+
+
+class VoiceSampleOut(BaseModel):
+    id: int
+    kind: str
+    body: str
+    created_at: str
+
+
+MAX_VOICE_SAMPLE = 10_000
+
+
+def _project_out(project: projects_repo.Project) -> dict:
+    return ProjectOut(
+        id=project.id, name=project.name, idea_md=project.idea_md, status=project.status,
+        evaluation=project.evaluation, evaluated_at=project.evaluated_at, repo_url=project.repo_url,
+        updated_at=project.updated_at,
+    ).model_dump()  # fmt: skip
+
+
+def get_gap_stats(conn: sqlite3.Connection, now: datetime, days: int = 60) -> list[dict]:
+    if not 1 <= days <= 365:
+        raise ValueError("days must be between 1 and 365")
+    return [g.model_dump() for g in gap_stats(conn, now, days=days)]
+
+
+def get_project(conn: sqlite3.Connection, project_id: int) -> dict:
+    project = projects_repo.get_project(conn, project_id)
+    if project is None:
+        raise ValueError(f"project {project_id} not found")
+    return _project_out(project)
+
+
+def update_project(
+    conn: sqlite3.Connection, project_id: int, now: datetime, status: str | None, repo_url: str | None
+) -> dict:
+    get_project(conn, project_id)
+    return _project_out(projects_repo.update_project(conn, project_id, now, status=status, repo_url=repo_url))
+
+
+def add_voice_sample(conn: sqlite3.Connection, kind: str, body: str, now: datetime) -> dict:
+    body = body.strip()
+    if not body or len(body) > MAX_VOICE_SAMPLE:
+        raise ValueError(f"body must have 1 to {MAX_VOICE_SAMPLE} characters")
+    return asdict(projects_repo.add_voice_sample(conn, kind, body, now))
+
+
+def list_voice_samples(conn: sqlite3.Connection, kind: str, limit: int) -> list[dict]:
+    if not 1 <= limit <= 20:
+        raise ValueError("limit must be between 1 and 20")
+    if kind not in projects_repo.VOICE_KINDS:
+        raise ValueError(f"kind must be one of {', '.join(projects_repo.VOICE_KINDS)}")
+    return [asdict(v) for v in projects_repo.list_voice_samples(conn, kind, limit)]
+
+
 def build_mcp(app: FastAPI) -> MCPServer:
     """Tools read the connection, clock and zone from `app.state` at call time (tests swap the clock)."""
     server = MCPServer(
@@ -279,7 +346,10 @@ def build_mcp(app: FastAPI) -> MCPServer:
             "Job openings (ML/AI roles) are collected at 07:00, 13:00 and 19:00: read them with list_jobs "
             "and triage with update_job_status; applying is always done by the user. "
             "After each collection every new role is scored 0-100 against the user's profile "
-            "(get_profile/set_profile): list_jobs(min_score=70) returns the strong ones, best first."
+            "(get_profile/set_profile): list_jobs(min_score=70) returns the strong ones, best first. "
+            "Portfolio projects: list_projects/get_project/update_project; get_gap_stats tells which "
+            "gaps repeat in the jobs the user cares about; list_voice_samples/add_voice_sample hold "
+            "texts the user approved, to write in their voice."
         ),
     )
     state = app.state
@@ -377,6 +447,53 @@ def build_mcp(app: FastAPI) -> MCPServer:
     )
     def set_profile_tool(body_md: str) -> Profile:
         return Profile(**guarded(set_profile, state.conn, body_md, state.clock()))
+
+    @server.tool(
+        name="get_gap_stats",
+        description=(
+            "Gaps that repeat in the jobs analyzed in the last `days` (dismissed excluded), heaviest first. "
+            "weight: 3 per job marked interested/applied, 2 if score >= 70, else 1. The market signal for "
+            "choosing or scoping portfolio projects."
+        ),
+    )
+    def get_gap_stats_tool(days: int = 60) -> list[GapStat]:
+        return [GapStat(**g) for g in guarded(get_gap_stats, state.conn, state.clock(), days)]
+
+    @server.tool(
+        name="list_projects",
+        description="Portfolio projects (idea, active, done, dropped), most recently updated first.",
+    )
+    def list_projects_tool(status: str | None = None) -> list[ProjectOut]:
+        projects = guarded(projects_repo.list_projects, state.conn, status)
+        return [ProjectOut(**_project_out(p)) for p in projects]
+
+    @server.tool(name="get_project", description="One project with its idea and stored idea evaluation.")
+    def get_project_tool(id: int) -> ProjectOut:
+        return ProjectOut(**guarded(get_project, state.conn, id))
+
+    @server.tool(
+        name="update_project",
+        description="Set a project's status (idea, active, done, dropped) and/or its repository URL.",
+    )
+    def update_project_tool(id: int, status: str | None = None, repo_url: str | None = None) -> ProjectOut:
+        return ProjectOut(**guarded(update_project, state.conn, id, state.clock(), status, repo_url))
+
+    @server.tool(
+        name="list_voice_samples",
+        description=(
+            "Texts the user approved, newest first, to imitate their voice when writing for them "
+            "(kind: linkedin_post). Empty: there is no reference yet; write the first one together."
+        ),
+    )
+    def list_voice_samples_tool(kind: str = "linkedin_post", limit: int = 5) -> list[VoiceSampleOut]:
+        return [VoiceSampleOut(**v) for v in guarded(list_voice_samples, state.conn, kind, limit)]
+
+    @server.tool(
+        name="add_voice_sample",
+        description="Store an approved text (e.g. the final LinkedIn post) as a voice reference.",
+    )
+    def add_voice_sample_tool(kind: str, body: str) -> VoiceSampleOut:
+        return VoiceSampleOut(**guarded(add_voice_sample, state.conn, kind, body, state.clock()))
 
     return server
 
