@@ -25,6 +25,8 @@ Dark only in the MVP: it suits the lock-screen glance, and a light theme doubles
 - **Display / times:** Barlow Condensed 700. Date numeral 84px, row times 26px, tabular.
 - **Everything else:** JetBrains Mono 400/600/700. Body 14px, row titles 14px, labels 10–11px uppercase
   with `letter-spacing: 0.14–0.18em`.
+- **Running text** (verdicts, gap notes, company summaries on Jobs/Projects): `--font-text`, the system
+  sans-serif at 15–17px. Monospace stays for numbers, titles and labels; long prose in mono tired the eye.
 - Self-hosted woff2 files in `static/fonts/` (no Google Fonts request at runtime, works offline).
 
 ## Layout

@@ -20,6 +20,8 @@
   --accent: #FFB000;
   --late: #FF6A3D;
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  /* Running text (verdicts, notes, summaries): monospace tires long reading; numbers and labels stay mono. */
+  --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --gutter: 18px;
   --nav-h: 56px; /* bottom bar on the phone; 0 on desktop, where the nav is a sidebar */
@@ -581,8 +583,10 @@ textarea[aria-invalid="true"] { border-color: var(--late); }
 .job-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 24px; }
 
 @media (min-width: 900px) {
-  .board.board-wide { max-width: 1180px; }
-  .job-columns { grid-template-columns: 1fr 1fr; }
+  .board.board-wide { max-width: 1440px; margin: 0; padding-left: 40px; padding-right: 40px; }
+  .board-wide .split { grid-template-columns: minmax(340px, 1fr) minmax(0, 1.6fr); gap: 40px; }
+  .job-row { grid-template-columns: 62px minmax(0, 1fr) auto; }
+  .job-row .job-pills { grid-column: 3; justify-content: flex-end; }
   .split-detail { position: sticky; top: 24px; align-self: start; max-height: calc(100dvh - 48px); overflow-y: auto; }
 }
 
@@ -590,3 +594,31 @@ textarea[aria-invalid="true"] { border-color: var(--late); }
 .project-new { display: grid; gap: 10px; margin-bottom: 18px; }
 .htmx-indicator { display: none; }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: block; }
+
+/* Readability of the jobs/projects detail (prototype: running text in sans, larger labels) */
+.job-verdict { font-family: var(--font-text); font-size: 17px; line-height: 1.45; }
+.job-list { gap: 10px; }
+.job-list li { font-family: var(--font-text); font-size: 15px; line-height: 1.45; }
+.gap-note { color: var(--ink-2); font-size: 14px; }
+.gap-kind { font-family: var(--font-mono); }
+.job-company-summary { font-family: var(--font-text); font-size: 15px; line-height: 1.5; }
+.job-detail .section-head { font-size: 12px; margin-top: 8px; }
+.job-columns { gap: 26px; }
+.job-link { font-size: 14px; line-height: 1.35; }
+.views a { font-size: 12px; }
+/* Phone: the five view filters scroll sideways instead of wrapping into three lines */
+.views { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.views a { white-space: nowrap; }
+
+/* More air: view filters, list rows and detail sections (feedback on the jobs tab) */
+.views { gap: 6px 32px; margin: 12px 0 28px; }
+.views a { min-height: 48px; padding: 0 2px; }
+.views a span { margin-left: 4px; }
+.board-wide .job-row { padding: 12px 0; }
+.job-detail .section-head { margin-top: 18px; margin-bottom: 6px; }
+.job-verdict { margin-bottom: 28px; }
+.nav-lang { border-top: 1px solid var(--rule); margin-top: 8px; }
+.nav-lang .link-button { min-height: 48px; padding: 0 16px; }
+@media (min-width: 900px) {
+  .nav-lang .link-button { padding: 0 var(--gutter); }
+}

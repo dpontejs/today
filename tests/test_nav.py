@@ -95,3 +95,10 @@ def test_active_career_section_does_not_open_more_panel(client: TestClient):
     details = html[html.index("<details") : html.index(">", html.index("<details")) + 1]
     assert " open" not in details
     assert 'class="nav-more is-active"' in html and 'href="/jobs" aria-current="page"' in html
+
+
+def test_language_switch_reachable_from_every_section(client: TestClient):
+    """The PT/EN switch used to live only in the Today header; it must be in the navigation (MORE/sidebar)."""
+    for path in ("/calendar", "/notes", "/jobs", "/projects"):
+        html = nav_html(client.get(path, headers={"Accept-Language": "pt-BR"}).text)
+        assert 'href="/lang/en"' in html, path
