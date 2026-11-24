@@ -1,0 +1,53 @@
+{% extends "_split.html" %}
+{% block list %}
+<ol class="rows jobs">
+  {% for job, analysis in jobs %}
+  {% set is_selected = selected and selected[0].id == job.id %}
+  <li class="row job-row{% if is_selected %} is-selected{% endif %}">
+    <span class="time job-score">{{ analysis.score if analysis else "—" }}</span>
+    <a class="title job-link" href="/jobs/{{ job.id }}?view={{ view }}"{% if is_selected %} aria-current="true"{% endif %}>
+      <span class="job-company">{{ job.company }}</span> · {{ job.title }}
+    </a>
+    <span class="job-pills">{% include "_job_pills.html" %}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% if not jobs %}<p class="empty">{{ t("jobs_empty") }}</p>{% endif %}
+{% endblock %}
+{% block detail %}
+{% if selected %}{% set job, analysis = selected %}
+<article class="job-detail" aria-labelledby="job-title">
+  <p class="eyebrow">{{ job.company }}{% if job.location %} · {{ job.location }}{% endif %}</p>
+  <h2 class="job-title" id="job-title">{{ job.title }}</h2>
+  <p class="job-meta">{% include "_job_pills.html" %}
+    <a class="link-button" href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ t("job_open") }}</a></p>
+  {% if analysis %}
+  <p class="job-verdict"><span class="job-score-big">{{ analysis.score }}</span> {{ analysis.verdict }}</p>
+  <div class="job-columns">
+    <section>
+      <h3 class="section-head"><span>{{ t("job_meets") }}</span><span>{{ analysis.meets | length }}</span></h3>
+      <ul class="job-list">{% for m in analysis.meets %}<li class="meet">✓ {{ m }}</li>{% endfor %}</ul>
+    </section>
+    <section>
+      <h3 class="section-head"><span>{{ t("job_gaps") }}</span><span>{{ analysis.gaps | length }}</span></h3>
+      <ul class="job-list">
+        {% for g in analysis.gaps | sort(attribute="kind", reverse=true) %}
+        <li class="gap gap-{{ 'required' if g.kind == 'required' else 'nice' }}">✗ {{ g.skill }} <span class="gap-kind">{{ t("job_required" if g.kind == "required" else "job_nice") }}</span>{% if g.note %}<br><span class="gap-note">{{ g.note }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+  <h3 class="section-head"><span>{{ t("job_company") }}</span><span>{{ t("seniority_" ~ analysis.seniority) }}</span></h3>
+  <p class="job-company-summary">{{ analysis.company_summary }}</p>
+  {% else %}
+  <p class="empty">{{ t("job_queued_detail") }}</p>
+  {% endif %}
+  <form class="job-actions" method="post" action="/jobs/{{ job.id }}/status">
+    <input type="hidden" name="view" value="{{ view }}">
+    <button class="btn-accent" name="status" value="interested">{{ t("action_interested") }}</button>
+    <button class="btn-quiet" name="status" value="applied">{{ t("action_applied") }}</button>
+    <button class="btn-quiet" name="status" value="dismissed">{{ t("action_dismissed") }}</button>
+  </form>
+</article>
+{% endif %}
+{% endblock %}

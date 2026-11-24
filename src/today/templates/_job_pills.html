@@ -1,0 +1,6 @@
+{#- Expects `job` and `analysis` (None while the job waits for analysis). -#}
+{% set place = (analysis.workplace if analysis else job.workplace) or "unknown" %}
+{% if place in ("remote", "hybrid", "onsite") %}<span class="pill pill-quiet">{{ t("pill_" ~ place) }}</span>{% endif %}
+{% if analysis and analysis.timing == "after_move" %}<span class="pill pill-quiet">{{ t("pill_after_move") }}</span>{% endif %}
+{% if analysis and analysis.seniority == "intern" %}<span class="pill pill-quiet">{{ t("pill_intern") }}</span>{% endif %}
+{% if analysis and analysis.target_company %}<span class="pill pill-next">{{ t("pill_target") }}</span>{% endif %}

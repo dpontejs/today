@@ -41,7 +41,9 @@ def test_active_section_marked(client: TestClient):
     assert html.count('aria-current="page"') == 1
 
 
-def test_more_hidden_without_career_sections(client: TestClient):
+def test_more_hidden_without_career_sections(client: TestClient, monkeypatch: pytest.MonkeyPatch):
+    routine = [s for s in nav.SECTIONS if s.group == "routine"]
+    monkeypatch.setattr(nav, "SECTIONS", routine)
     assert 'class="nav-more"' not in client.get("/").text
 
 

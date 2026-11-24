@@ -140,3 +140,43 @@ def _with_analysis(rows: list[sqlite3.Row]) -> list:
         analysis = JobAnalysis.model_validate_json(raw) if raw is not None else None
         out.append((row_to_job(data), analysis))
     return out
+
+
+# --- Jobs tab views (feature 09) -------------------------------------------------------------------
+
+_TIMING = "COALESCE(json_extract(a.analysis_json, '$.timing'), 'now')"
+# Each view of the Jobs tab, as a WHERE clause over `jobs j LEFT JOIN job_analyses a`.
+VIEWS: dict[str, str] = {
+    "review": f"j.status = 'analyzed' AND a.job_id IS NOT NULL AND {_TIMING} = 'now'",
+    "interested": "j.status = 'interested'",
+    "applied": "j.status = 'applied'",
+    "later": f"j.status = 'analyzed' AND a.job_id IS NOT NULL AND {_TIMING} = 'after_move'",
+    "dismissed": "j.status = 'dismissed'",
+}
+_FROM = "FROM jobs j LEFT JOIN job_analyses a ON a.job_id = j.id"
+
+
+def jobs_in_view(conn: sqlite3.Connection, view: str) -> list[tuple[JobRow, JobAnalysis | None]]:
+    """The jobs of one view, best score first (unanalyzed last), then newest."""
+    rows = conn.execute(
+        f"""SELECT j.*, a.analysis_json {_FROM} WHERE {VIEWS[view]}
+            ORDER BY a.score IS NULL, a.score DESC, j.first_seen_at DESC, j.id DESC"""
+    ).fetchall()
+    return _with_analysis(rows)
+
+
+def view_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    """How many jobs each view holds, plus `queued`: jobs still waiting for the analyst."""
+    counts = {
+        view: conn.execute(f"SELECT COUNT(*) {_FROM} WHERE {where}").fetchone()[0]
+        for view, where in VIEWS.items()
+    }
+    counts["queued"] = conn.execute(
+        "SELECT COUNT(*) FROM jobs WHERE status = 'new' AND analysis_attempts < ?", (MAX_ATTEMPTS,)
+    ).fetchone()[0]
+    return counts
+
+
+def job_with_analysis(conn: sqlite3.Connection, job_id: int) -> tuple[JobRow, JobAnalysis | None] | None:
+    rows = conn.execute(f"SELECT j.*, a.analysis_json {_FROM} WHERE j.id = ?", (job_id,)).fetchall()
+    return _with_analysis(rows)[0] if rows else None

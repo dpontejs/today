@@ -14,6 +14,7 @@ from today import auth, calendar_view, capture, i18n, nav, notes, notify, push_r
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
+from today.jobs import routes as job_routes
 from today.jobs.loop import run_jobs_loop, select_sources
 from today.llm.analyst import make_analyst
 from today.mcp_server import mount_mcp
@@ -101,6 +102,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(capture.router)
     app.include_router(calendar_view.router)
     app.include_router(notes.router)
+    app.include_router(job_routes.router)
     app.include_router(push_routes.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)
