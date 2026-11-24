@@ -585,3 +585,8 @@ textarea[aria-invalid="true"] { border-color: var(--late); }
   .job-columns { grid-template-columns: 1fr 1fr; }
   .split-detail { position: sticky; top: 24px; align-self: start; max-height: calc(100dvh - 48px); overflow-y: auto; }
 }
+
+/* Projects tab (feature 10): reuses the jobs list/detail; the form sits above the list */
+.project-new { display: grid; gap: 10px; margin-bottom: 18px; }
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: block; }

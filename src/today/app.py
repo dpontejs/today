@@ -18,6 +18,7 @@ from today.jobs import routes as job_routes
 from today.jobs.loop import run_jobs_loop, select_sources
 from today.llm.analyst import make_analyst
 from today.mcp_server import mount_mcp
+from today.projects import routes as project_routes
 
 PACKAGE_DIR = Path(__file__).parent
 STATIC_DIR = PACKAGE_DIR / "static"
@@ -107,6 +108,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(calendar_view.router)
     app.include_router(notes.router)
     app.include_router(job_routes.router)
+    app.include_router(project_routes.router)
     app.include_router(push_routes.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)

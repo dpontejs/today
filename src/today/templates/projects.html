@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t("projects_title") }} · today{% endblock %}
+{% block head %}
+<script src="/static/htmx.min.js" defer></script>
+{% endblock %}
+{% block body %}
+<main class="board board-wide" hx-boost="true">
+  {% include "_nav.html" %}
+  <header class="notes-header">
+    <h1 class="notes-title">{{ t("projects_title") }}</h1>
+    <p class="eyebrow">{{ t("projects_hint") }}</p>
+  </header>
+  {% include "_projects_split.html" %}
+</main>
+{% endblock %}

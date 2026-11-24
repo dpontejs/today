@@ -26,6 +26,7 @@ SECTIONS: list[Section] = [
     Section(key="calendar", path="/calendar", label_key="tab_calendar", group="routine"),
     Section(key="notes", path="/notes", label_key="tab_notes", group="routine"),
     Section(key="jobs", path="/jobs", label_key="tab_jobs", group="career"),
+    Section(key="projects", path="/projects", label_key="tab_projects", group="career"),
 ]
 
 
