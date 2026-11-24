@@ -11,6 +11,7 @@
       {% for section, active in nav_career %}
       <li><a href="{{ section.path }}"{% if active %} aria-current="page"{% endif %}>{{ t(section.label_key) }}</a></li>
       {% endfor %}
+      <li class="nav-lang">{% include "_lang_switch.html" %}</li>
     </ul>
   </details>
   {% endif %}
