@@ -14,6 +14,7 @@ from today import auth, calendar_view, capture, i18n, nav, notes, notify, push_r
 from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
+from today.jobs import routes as job_routes
 from today.jobs.loop import run_jobs_loop, select_sources
 from today.llm.analyst import make_analyst
 from today.mcp_server import mount_mcp
@@ -54,6 +55,10 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.clock = lambda: datetime.now(UTC)
     templates = Jinja2Templates(
         directory=PACKAGE_DIR / "templates", context_processors=[i18n.i18n_context, nav.nav_context]
+    )
+    # Job URLs come from scraped feeds: only http(s) becomes a link, never javascript: or data:.
+    templates.env.filters["http_url"] = lambda url: (
+        url if str(url).lower().startswith(("https://", "http://")) else None
     )
     templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
     app.state.templates = templates
@@ -101,6 +106,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(capture.router)
     app.include_router(calendar_view.router)
     app.include_router(notes.router)
+    app.include_router(job_routes.router)
     app.include_router(push_routes.router)
     if settings.api_token:
         mcp = mount_mcp(app, settings.api_token)

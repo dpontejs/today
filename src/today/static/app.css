@@ -536,3 +536,52 @@ textarea[aria-invalid="true"] { border-color: var(--late); }
 .note-stamp { font-size: 11px; color: var(--muted); }
 .note-actions { display: flex; gap: 14px; }
 .link-danger { color: var(--late); }
+
+/* Jobs tab (feature 09): the score takes the place of the departure time */
+.views { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 4px 0 18px; border-bottom: 1px solid var(--rule); }
+.views a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.views a[aria-current="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.job-row { grid-template-columns: 62px 1fr; }
+.job-row .job-pills { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+.job-row.is-selected .job-score { color: var(--accent); }
+.job-link { color: var(--ink); text-decoration: none; }
+.job-company { font-weight: 700; }
+.pill-quiet { background: none; color: var(--muted); border: 1px solid var(--rule); }
+.btn-quiet {
+  min-height: 52px;
+  padding: 0 20px;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+.job-title { margin: 6px 0 10px; font-family: var(--font-display); font-size: 30px; line-height: 1.05; }
+.job-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 18px; }
+.job-verdict { display: flex; gap: 14px; align-items: baseline; margin: 0 0 22px; font-size: 15px; }
+.job-score-big { font-family: var(--font-display); font-size: 48px; line-height: 1; color: var(--accent); }
+.job-columns { display: grid; gap: 18px; }
+.job-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
+.gap-required { color: var(--late); }
+.gap-nice, .gap-kind, .gap-note { color: var(--muted); }
+.gap-kind { font-size: 11px; letter-spacing: 0.1em; }
+.job-company-summary { color: var(--ink-2); margin: 0 0 22px; }
+.job-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 24px; }
+
+@media (min-width: 900px) {
+  .board.board-wide { max-width: 1180px; }
+  .job-columns { grid-template-columns: 1fr 1fr; }
+  .split-detail { position: sticky; top: 24px; align-self: start; max-height: calc(100dvh - 48px); overflow-y: auto; }
+}
