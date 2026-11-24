@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ t("projects_title") }} · today{% endblock %}
 {% block head %}
+<!-- Swap 422 validation answers too (htmx 2 only swaps 2xx by default), as notes.html does. -->
+<meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"422","swap":true,"error":false},{"code":"...","swap":false}]}'>
 <script src="/static/htmx.min.js" defer></script>
 {% endblock %}
 {% block body %}

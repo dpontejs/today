@@ -5,8 +5,8 @@
   <input id="project-name" name="name" type="text" maxlength="120" placeholder="{{ t('project_name') }}" value="{{ draft.name or '' }}">
   <label for="project-idea" class="visually-hidden">{{ t("project_idea") }}</label>
   <textarea id="project-idea" name="idea_md" rows="5" maxlength="5000" placeholder="{{ t('project_idea_placeholder') }}"
-            {% if error %}aria-invalid="true" aria-describedby="project-err"{% endif %}>{{ draft.idea_md or "" }}</textarea>
-  {% if error %}<p class="error" id="project-err" role="alert">{{ t(error) }}</p>{% endif %}
+            {% if error and not selected %}aria-invalid="true" aria-describedby="project-err"{% endif %}>{{ "" if selected else (draft.idea_md or "") }}</textarea>
+  {% if error and not selected %}<p class="error" id="project-err" role="alert">{{ t(error) }}</p>{% endif %}
   <button type="submit" class="btn-accent">{{ t("project_evaluate") }}</button>
   <p class="eyebrow htmx-indicator">{{ t("project_evaluating") }}</p>
 </form>
@@ -51,7 +51,8 @@
   {% endif %}
   <form class="note-new" method="post" action="/projects/{{ p.id }}/evaluate" hx-disabled-elt="find button">
     <label for="idea-edit" class="section-head"><span>{{ t("project_idea") }}</span></label>
-    <textarea id="idea-edit" name="idea_md" rows="6" maxlength="5000">{{ p.idea_md }}</textarea>
+    <textarea id="idea-edit" name="idea_md" rows="6" maxlength="5000"{% if error %} aria-invalid="true" aria-describedby="idea-err"{% endif %}>{{ draft.idea_md if error else p.idea_md }}</textarea>
+    {% if error %}<p class="error" id="idea-err" role="alert">{{ t(error) }}</p>{% endif %}
     <button type="submit" class="btn-quiet"{% if not analyst_on %} disabled{% endif %}>{{ t("project_reevaluate") }}</button>
     <p class="eyebrow htmx-indicator">{{ t("project_evaluating") }}</p>
   </form>

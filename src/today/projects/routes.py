@@ -48,6 +48,11 @@ def _found(request: Request, project_id: int) -> repo.Project:
     return project
 
 
+def _clean(text: str) -> str:
+    """Browsers send textarea line breaks as CRLF, which `maxlength` counts as one character."""
+    return text.replace("\r\n", "\n").replace("\r", "\n").strip()
+
+
 def _evaluate(request: Request, project_id: int) -> None:
     """Best effort: on any analyst failure the project stays, with the previous evaluation (or none)."""
     state = request.app.state
@@ -68,7 +73,7 @@ def projects_page(request: Request) -> HTMLResponse:
 def create_project(
     request: Request, name: Annotated[str, Form()] = "", idea_md: Annotated[str, Form()] = ""
 ) -> Response:
-    name, idea_md = name.strip(), idea_md.strip()
+    name, idea_md = name.strip(), _clean(idea_md)
     if not name or not idea_md or len(name) > MAX_NAME or len(idea_md) > MAX_IDEA:
         return _render(request, 422, error="project_invalid", draft={"name": name, "idea_md": idea_md})
     project_id = repo.create_project(request.app.state.conn, name, idea_md, request.app.state.clock())
@@ -83,9 +88,11 @@ def project_detail(request: Request, project_id: int) -> HTMLResponse:
 
 @router.post("/projects/{project_id}/evaluate")
 def reevaluate(request: Request, project_id: int, idea_md: Annotated[str, Form()] = "") -> Response:
-    _found(request, project_id)
-    idea_md = idea_md.strip()
-    if idea_md and len(idea_md) <= MAX_IDEA:
+    project = _found(request, project_id)
+    idea_md = _clean(idea_md)
+    if len(idea_md) > MAX_IDEA:
+        return _render(request, 422, selected=project, error="project_invalid", draft={"idea_md": idea_md})
+    if idea_md:
         repo.update_project(request.app.state.conn, project_id, request.app.state.clock(), idea_md=idea_md)
     _evaluate(request, project_id)
     return RedirectResponse(f"/projects/{project_id}", status_code=303)

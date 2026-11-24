@@ -134,3 +134,30 @@ def test_unknown_project_is_404(client: TestClient):
     assert client.get("/projects/999").status_code == 404
     assert client.post("/projects/999/evaluate", data={}).status_code == 404
     assert client.post("/projects/999/status", data={"status": "done"}).status_code == 404
+
+
+def test_crlf_idea_at_the_limit_is_accepted(client: TestClient):
+    """The textarea counts a line break as 1 character, but the browser sends it as CRLF (2)."""
+    idea = "\r\n".join(["x" * 99] * 50)  # 50 lines: 4950 + 49 breaks = 4999 in the browser, 5048 raw
+    assert create(client, idea=idea).status_code == 303
+    (project,) = pr.list_projects(db(client))
+    assert "\r" not in project.idea_md
+
+
+def test_reevaluate_with_too_long_idea_is_422_and_keeps_the_old_one(client: TestClient):
+    create(client)
+    (project,) = pr.list_projects(db(client))
+
+    response = client.post(f"/projects/{project.id}/evaluate", data={"idea_md": "x" * 5001})
+
+    assert response.status_code == 422
+    assert "Dê um nome ao projeto e descreva a ideia" in response.text
+    assert pr.get_project(db(client), project.id).idea_md == "Risco de crédito no GCP"
+
+
+def test_projects_page_lets_htmx_swap_validation_errors():
+    """Under hx-boost, htmx 2 drops 4xx answers unless responseHandling swaps 422 (as notes.html does)."""
+    from pathlib import Path
+
+    template = (Path(__file__).parents[2] / "src/today/templates/projects.html").read_text()
+    assert '"code":"422","swap":true' in template.replace(" ", "")
