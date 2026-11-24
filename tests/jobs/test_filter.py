@@ -21,13 +21,13 @@ def job(title: str, location: str | None = "Brazil", workplace: str | None = "re
 @pytest.mark.parametrize(
     ("title", "kept"),
     [
-        ("Senior ML Engineer", True),
+        ("ML Engineer", True),
         ("Cientista de Dados Pleno", True),
         ("Engenheiro de Visão Computacional", True),
         ("MLOps Engineer", True),
-        ("Senior Staff AI/ ML Engineer", True),
-        ("[30118] - Senior AI Engineer", True),
-        ("Engenheiro(a) de IA Sênior", True),
+        ("AI/ ML Engineer", True),
+        ("[30118] - AI Engineer", True),
+        ("Engenheiro(a) de IA Pleno", True),
         ("Data Scientist II", True),
         ("LLM Applied Scientist", True),
         ("Account Executive", False),
@@ -88,10 +88,44 @@ def test_unknown_workplace_with_remote_location_kept(location: str):
     ("title", "kept"),
     [
         ("Engenheiro de Inteligência Artificial", True),
-        ("Cientista de Inteligência Artificial Sênior", True),
-        ("Senior Software Engineer — Artificial Intelligence & Data Products", True),
+        ("Cientista de Inteligência Artificial Pleno", True),
+        ("Software Engineer — Artificial Intelligence & Data Products", True),
         ("Advogado - Inteligência Artificial e Privacidade", False),
     ],
 )
 def test_spelled_out_ai_counts_with_an_engineering_role(title: str, kept: bool):
+    assert passes_filter(job(title)) is kept
+
+
+@pytest.mark.parametrize(
+    ("title", "kept"),
+    [
+        ("Senior Machine Learning Engineer", False),
+        ("Cientista de Dados Sênior", False),
+        ("ML Engineer Sr.", False),
+        ("Sr ML Engineer", False),
+        ("Cientista de Dados Especialista", False),
+        ("Staff Machine Learning Engineer", False),
+        ("Principal Applied Scientist", False),
+        ("Lead Data Scientist", False),
+        ("Tech Lead - Machine Learning", False),
+        ("Head of AI Engineering", False),
+        ("Data Science Coordinator", False),
+        ("Coordenador(a) de Ciência de Dados", False),
+        ("Gerente de Machine Learning", False),
+        ("Machine Learning Engineering Manager", False),
+        ("Director, Applied Science", False),
+        ("Diretor de Ciência de Dados", False),
+        # kept: junior/mid/no level, and words that only look like levels
+        ("Machine Learning Engineer", True),
+        ("Cientista de Dados Pleno", True),
+        ("Engenheiro de Machine Learning Júnior", True),
+        ("Estágio em Ciência de Dados", True),
+        ("Data Scientist II", True),
+        ("ML Engineer - Lead Scoring models", True),  # "lead scoring" is a domain, not a level
+        ("Machine Learning Engineer - Leadership Team support", True),
+    ],
+)
+def test_filter_drops_senior_and_above(title: str, kept: bool):
+    """~2 years of experience: senior/specialist and above use analysis quota and score ~30 (2026-11-24)."""
     assert passes_filter(job(title)) is kept

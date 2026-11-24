@@ -1,4 +1,4 @@
-"""Keep ML / AI / data science roles that are remote, or hybrid/onsite in São Paulo or Natal. No LLM here:
+"""Keep ML / AI / data science roles below senior, remote or hybrid/onsite in São Paulo or Natal. No LLM:
 word-boundary regexes over the title and location, accents folded."""
 
 import re
@@ -18,6 +18,14 @@ ROLE = re.compile(
 )
 # Sales roles mention AI all the time; the role term must be the role, not the product.
 SALES_LEAD = re.compile(r"^\W*(sales|account|commercial|comercial|vendas)\b")
+# Senior and above (owner has ~2 years): they used half the analysis quota and scored ~30 on 2026-11-24.
+# "lead" counts only as a level ("Lead Data Scientist", "Tech Lead"), not in "lead scoring"/"leadership".
+SENIOR = re.compile(
+    r"\bs[e]nior\b|\bsr\b\.?|\bespecialista\b|\bstaff\b|\bprincipal\b"
+    r"|^\W*lead\b|\btech lead\b|\blead (data|ml|machine|ai|ia|applied|research|engineer|scientist)"
+    r"|\bhead of\b|\bcoordinator\b|\bcoordenador\w*|\bgerente\b|\bmanager\b"
+    r"|\bdirector\b|\bdiretor\w*"
+)
 LOCAL = re.compile(r"sao paulo|\bsp\b|\bnatal\b")
 # With no workplace field (Greenhouse, LinkedIn), a location that says "Remote" is read as remote.
 BRAZIL_OR_LATAM = re.compile(
@@ -34,7 +42,7 @@ def fold(text: str) -> str:
 
 def passes_filter(job: JobPosting) -> bool:
     title = fold(job.title)
-    if not ROLE.search(title) or SALES_LEAD.search(title):
+    if not ROLE.search(title) or SALES_LEAD.search(title) or SENIOR.search(title):
         return False
     if job.workplace == "remote":
         return True
