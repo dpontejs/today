@@ -208,12 +208,12 @@ def test_linkedin_parses_recorded_response():
     assert len(jobs) == 2
     first = jobs[0]
     assert first.source == "linkedin"
-    assert first.external_id == "4492585641"
-    assert first.company == "Acme AI & Dados"
-    assert first.title == "Machine Learning Engineer"
-    assert first.url == "https://www.linkedin.com/jobs/view/4492585641"
+    assert first.external_id == "4492640438"
+    assert first.company == "Seguros Unimed"
+    assert first.title == "Engenheiro de Machine Learning"
+    assert first.url == "https://www.linkedin.com/jobs/view/4492640438"
     assert first.workplace is None
-    assert first.location == "São Paulo, São Paulo, Brazil"
+    assert first.location == "Greater São Paulo Area"
     assert first.published_at == datetime(2026, 11, 23, tzinfo=UTC)
     assert first.description is None  # fetched by `collect`, only for postings that pass the filter
     assert all(r.url.params["f_TPR"] == "r86400" for r in seen)
@@ -241,13 +241,12 @@ def test_linkedin_stops_on_429_and_reports_what_it_had():
 
 
 def test_linkedin_description_is_plain_text():
-    client = serve({"www.linkedin.com/jobs/view/4492585641": "linkedin_detail.html"})
+    client = serve({"www.linkedin.com/jobs/view/4492640438": "linkedin_detail.html"})
 
-    text = linkedin.fetch_linkedin_description(client, "4492585641")
+    text = linkedin.fetch_linkedin_description(client, "4492640438")
 
     assert text is not None
-    assert "computer vision models & ship them" in text
-    assert "MLOps" in text
+    assert text.startswith("Somos a Seguros Unimed")
     assert "<" not in text and "Show more" not in text
 
 
@@ -292,7 +291,7 @@ def test_linkedin_never_sends_cookies_even_when_set():
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
     linkedin.fetch(client, terms=("a", "b"), sleep=no_sleep)
-    linkedin.fetch_linkedin_description(client, "4492585641")
+    linkedin.fetch_linkedin_description(client, "4492640438")
 
     assert len(sent) == 3
     assert sent == [None, None, None]
