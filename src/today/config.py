@@ -27,6 +27,7 @@ class Settings:
     jobs_sources: frozenset[str] | None = None  # None: every source
     analyst: str | None = None  # claude_cli | anthropic_api; None: no job analysis (feature 08, ADR 0007)
     analyst_model: str = "sonnet"
+    projects_model: str = "opus"  # idea evaluation (feature 10): few calls, the answer matters more
     jobs_push_score: int = 75
     analyze_limit: int = 20
 
@@ -52,6 +53,7 @@ def load_settings() -> Settings:
         jobs_sources=_jobs_sources(),
         analyst=_analyst(),
         analyst_model=os.environ.get("ANALYST_MODEL") or "sonnet",
+        projects_model=os.environ.get("PROJECTS_MODEL") or "opus",
         jobs_push_score=int(os.environ.get("JOBS_PUSH_SCORE") or 75),
         analyze_limit=int(os.environ.get("ANALYZE_LIMIT") or 20),
         **_vapid(),

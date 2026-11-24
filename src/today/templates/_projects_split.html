@@ -1,0 +1,66 @@
+{% extends "_split.html" %}
+{% block list %}
+<form class="note-new project-new" method="post" action="/projects" novalidate hx-disabled-elt="find button">
+  <label for="project-name" class="visually-hidden">{{ t("project_name") }}</label>
+  <input id="project-name" name="name" type="text" maxlength="120" placeholder="{{ t('project_name') }}" value="{{ draft.name or '' }}">
+  <label for="project-idea" class="visually-hidden">{{ t("project_idea") }}</label>
+  <textarea id="project-idea" name="idea_md" rows="5" maxlength="5000" placeholder="{{ t('project_idea_placeholder') }}"
+            {% if error and not selected %}aria-invalid="true" aria-describedby="project-err"{% endif %}>{{ "" if selected else (draft.idea_md or "") }}</textarea>
+  {% if error and not selected %}<p class="error" id="project-err" role="alert">{{ t(error) }}</p>{% endif %}
+  <button type="submit" class="btn-accent">{{ t("project_evaluate") }}</button>
+  <p class="eyebrow htmx-indicator">{{ t("project_evaluating") }}</p>
+</form>
+<ol class="rows jobs">
+  {% for p in projects %}
+  {% set is_selected = selected and selected.id == p.id %}
+  <li class="row job-row{% if is_selected %} is-selected{% endif %}">
+    <span class="time job-score">{{ p.evaluation.score if p.evaluation else "—" }}</span>
+    <a class="title job-link" href="/projects/{{ p.id }}"{% if is_selected %} aria-current="true"{% endif %}><span class="job-company">{{ p.name }}</span></a>
+    <span class="job-pills"><span class="pill pill-quiet">{{ t("project_status_" ~ p.status) }}</span></span>
+  </li>
+  {% endfor %}
+</ol>
+{% if not projects %}<p class="empty">{{ t("projects_empty") }}</p>{% endif %}
+{% endblock %}
+{% block detail %}
+{% if selected %}{% set p = selected %}{% set e = p.evaluation %}
+<article class="job-detail" aria-labelledby="project-title">
+  <p class="eyebrow">{{ t("project_status_" ~ p.status) }}{% if p.repo_url %} · {{ p.repo_url }}{% endif %}</p>
+  <h2 class="job-title" id="project-title">{{ p.name }}</h2>
+  {% if e %}
+  <p class="job-verdict"><span class="job-score-big">{{ e.score }}</span> {{ e.verdict }}</p>
+  {% if e.effort_note %}<p class="job-company-summary">{{ e.effort_note }}</p>{% endif %}
+  <div class="job-columns">
+    <section>
+      <h3 class="section-head"><span>{{ t("project_covers") }}</span><span>{{ e.covers | length }}</span></h3>
+      <ul class="job-list">{% for c in e.covers %}<li class="meet">✓ {{ c }}</li>{% endfor %}</ul>
+      <h3 class="section-head"><span>{{ t("project_already_shown") }}</span><span>{{ e.already_shown | length }}</span></h3>
+      <ul class="job-list">{% for c in e.already_shown %}<li class="gap gap-nice">= {{ c }}</li>{% endfor %}</ul>
+    </section>
+    <section>
+      <h3 class="section-head"><span>{{ t("project_missing") }}</span><span>{{ e.missing | length }}</span></h3>
+      <ul class="job-list">{% for c in e.missing %}<li class="gap gap-required">✗ {{ c }}</li>{% endfor %}</ul>
+    </section>
+  </div>
+  <h3 class="section-head"><span>{{ t("project_suggestions") }}</span><span>{{ e.scope_suggestions | length }}</span></h3>
+  <ul class="job-list">{% for c in e.scope_suggestions %}<li>→ {{ c }}</li>{% endfor %}</ul>
+  {% elif analyst_on %}
+  <p class="empty">{{ t("project_pending") }}</p>
+  {% else %}
+  <p class="empty">{{ t("project_unavailable") }}</p>
+  {% endif %}
+  <form class="note-new" method="post" action="/projects/{{ p.id }}/evaluate" hx-disabled-elt="find button">
+    <label for="idea-edit" class="section-head"><span>{{ t("project_idea") }}</span></label>
+    <textarea id="idea-edit" name="idea_md" rows="6" maxlength="5000"{% if error %} aria-invalid="true" aria-describedby="idea-err"{% endif %}>{{ draft.idea_md if error else p.idea_md }}</textarea>
+    {% if error %}<p class="error" id="idea-err" role="alert">{{ t(error) }}</p>{% endif %}
+    <button type="submit" class="btn-quiet"{% if not analyst_on %} disabled{% endif %}>{{ t("project_reevaluate") }}</button>
+    <p class="eyebrow htmx-indicator">{{ t("project_evaluating") }}</p>
+  </form>
+  <form class="job-actions" method="post" action="/projects/{{ p.id }}/status">
+    {% for s in ("active", "done", "dropped") %}
+    <button class="{{ 'btn-accent' if s == 'active' else 'btn-quiet' }}" name="status" value="{{ s }}"{% if p.status == s %} disabled{% endif %}>{{ t("project_set_" ~ s) }}</button>
+    {% endfor %}
+  </form>
+</article>
+{% endif %}
+{% endblock %}

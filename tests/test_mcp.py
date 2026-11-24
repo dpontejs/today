@@ -151,6 +151,12 @@ def test_mcp_lists_tools(client: TestClient):
         "update_job_status",
         "get_profile",
         "set_profile",
+        "get_gap_stats",
+        "list_projects",
+        "get_project",
+        "update_project",
+        "list_voice_samples",
+        "add_voice_sample",
     }
 
 
@@ -361,3 +367,37 @@ def test_mcp_list_jobs_min_score(conn: sqlite3.Connection):
     every = mcp_server.list_jobs(conn, TZ, status="all")
     assert {j["title"]: j["score"] for j in every}["ML 3"] is None
     assert mcp_server.list_jobs(conn, TZ, min_score=60, status="interested") == []
+
+
+def test_mcp_projects_gap_stats_and_voice_samples(client: TestClient):
+    """The tools the /fechar-projeto skill uses, through the real MCP endpoint."""
+    from today.projects import repo as projects_repo
+
+    def call(name: str, arguments: dict):
+        result = rpc(client, "tools/call", {"name": name, "arguments": arguments}).json()["result"]
+        assert not result.get("isError"), result
+        return result["structuredContent"]
+
+    def error(name: str, arguments: dict) -> bool:
+        return (
+            rpc(client, "tools/call", {"name": name, "arguments": arguments}).json()["result"].get("isError")
+        )
+
+    conn = client.app.state.conn
+    pid = projects_repo.create_project(conn, "credit-risk", "Risco de crédito", NOW)
+
+    assert call("get_gap_stats", {"days": 60}) == {"result": []}
+    assert [p["name"] for p in call("list_projects", {})["result"]] == ["credit-risk"]
+    assert call("get_project", {"id": pid})["status"] == "idea"
+    done = call(
+        "update_project", {"id": pid, "status": "done", "repo_url": "https://github.com/x/credit-risk"}
+    )
+    assert (done["status"], done["repo_url"]) == ("done", "https://github.com/x/credit-risk")
+    assert error("update_project", {"id": pid, "status": "shipped"})
+    assert error("get_project", {"id": 999})
+
+    call("add_voice_sample", {"kind": "linkedin_post", "body": "Primeiro post"})
+    call("add_voice_sample", {"kind": "linkedin_post", "body": "Segundo post"})
+    samples = call("list_voice_samples", {"kind": "linkedin_post", "limit": 1})["result"]
+    assert [s["body"] for s in samples] == ["Segundo post"]
+    assert error("add_voice_sample", {"kind": "linkedin_post", "body": "   "})

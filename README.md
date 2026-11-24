@@ -33,6 +33,7 @@ SQLite on a Docker volume                          (ADR 0002)
 7. Job collection: ML/AI roles from 9 sources at 07/13/19h, read and triaged through MCP — [docs/features/07-job-collection.md](docs/features/07-job-collection.md)
 8. Job pre-analysis: each new role scored 0–100 against my profile by Claude, strong matches pushed — [docs/features/08-job-pre-analysis.md](docs/features/08-job-pre-analysis.md), [guide](docs/guide/09-job-pre-analysis.md)
 9. Jobs tab: list + detail triage on desktop (to review, interested, applied, after the move, dismissed) — [guide](docs/guide/10-jobs-tab.md)
+10. Projects: idea evaluated against my profile and the gaps that repeat in the jobs I want; closed by the `/fechar-projeto` skill — [docs/features/10-projects.md](docs/features/10-projects.md), [guide](docs/guide/11-projects.md)
 
 ROADMAP import from the desktop is done through Claude + MCP (slice 2).
 
