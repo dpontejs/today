@@ -20,7 +20,7 @@
   <p class="eyebrow">{{ job.company }}{% if job.location %} · {{ job.location }}{% endif %}</p>
   <h2 class="job-title" id="job-title">{{ job.title }}</h2>
   <p class="job-meta">{% include "_job_pills.html" %}
-    <a class="link-button" href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ t("job_open") }}</a></p>
+    {% set link = job.url | http_url %}{% if link %}<a class="link-button" href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ t("job_open") }}</a>{% endif %}</p>
   {% if analysis %}
   <p class="job-verdict"><span class="job-score-big">{{ analysis.score }}</span> {{ analysis.verdict }}</p>
   <div class="job-columns">
@@ -40,7 +40,7 @@
   <h3 class="section-head"><span>{{ t("job_company") }}</span><span>{{ t("seniority_" ~ analysis.seniority) }}</span></h3>
   <p class="job-company-summary">{{ analysis.company_summary }}</p>
   {% else %}
-  <p class="empty">{{ t("job_queued_detail") }}</p>
+  <p class="empty">{{ t("job_queued_detail" if job.status == "new" else "job_failed_detail") }}</p>
   {% endif %}
   <form class="job-actions" method="post" action="/jobs/{{ job.id }}/status">
     <input type="hidden" name="view" value="{{ view }}">

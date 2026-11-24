@@ -56,6 +56,10 @@ def create_app(settings: Settings) -> FastAPI:
     templates = Jinja2Templates(
         directory=PACKAGE_DIR / "templates", context_processors=[i18n.i18n_context, nav.nav_context]
     )
+    # Job URLs come from scraped feeds: only http(s) becomes a link, never javascript: or data:.
+    templates.env.filters["http_url"] = lambda url: (
+        url if str(url).lower().startswith(("https://", "http://")) else None
+    )
     templates.env.filters["local_time"] = lambda dt: dt.astimezone(settings.tz).strftime("%H:%M")
     app.state.templates = templates
     app.state.login_limiter = auth.LoginLimiter()

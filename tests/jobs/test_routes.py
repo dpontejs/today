@@ -205,3 +205,28 @@ def test_mark_rejects_statuses_the_user_does_not_set(client: TestClient):
 
 def test_mark_unknown_job_is_404(client: TestClient):
     assert client.post("/jobs/999/status", data={"status": "dismissed", "view": "review"}).status_code == 404
+
+
+def test_job_link_only_for_http_urls(client: TestClient):
+    """URLs come from scraped feeds (Remotar's externalLink is typed by the poster): no javascript: link."""
+    conn = db(client)
+    job = add(conn, "Evil", 80)
+    conn.execute("UPDATE jobs SET url = 'javascript:alert(1)' WHERE id = ?", (job,))
+
+    html = client.get(f"/jobs/{job}").text
+
+    assert "javascript:" not in html
+
+
+def test_job_whose_analysis_failed_stays_in_review(client: TestClient):
+    """Three failed analyses leave the job `analyzed` without an analysis: it must not vanish from the tab."""
+    conn = db(client)
+    job = add(conn, "Broken", None)
+    for _ in range(ar.MAX_ATTEMPTS):
+        ar.record_failure(conn, job)
+    add(conn, "Strong", 90)
+
+    html = client.get("/jobs").text
+    assert html.index("Strong") < html.index("Broken")  # unscored jobs go last
+    assert 'data-count="review">2<' in html
+    assert "A análise desta vaga falhou." in client.get(f"/jobs/{job}").text

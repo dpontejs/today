@@ -147,7 +147,8 @@ def _with_analysis(rows: list[sqlite3.Row]) -> list:
 _TIMING = "COALESCE(json_extract(a.analysis_json, '$.timing'), 'now')"
 # Each view of the Jobs tab, as a WHERE clause over `jobs j LEFT JOIN job_analyses a`.
 VIEWS: dict[str, str] = {
-    "review": f"j.status = 'analyzed' AND a.job_id IS NOT NULL AND {_TIMING} = 'now'",
+    # Includes jobs whose analysis failed three times (analyzed, no row): listed last, never lost.
+    "review": f"j.status = 'analyzed' AND (a.job_id IS NULL OR {_TIMING} = 'now')",
     "interested": "j.status = 'interested'",
     "applied": "j.status = 'applied'",
     "later": f"j.status = 'analyzed' AND a.job_id IS NOT NULL AND {_TIMING} = 'after_move'",
