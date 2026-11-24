@@ -12,12 +12,19 @@ COPY README.md ./
 COPY src ./src
 RUN uv sync --frozen --no-dev --no-editable
 
+# ---- claude: the pinned Claude Code CLI for job analysis (ADR 0007)
+FROM node:22-slim AS claude
+RUN npm install -g @anthropic-ai/claude-code@2.1.331 && npm cache clean --force
+
 # ---- runtime
 FROM python:3.12-slim
 # Links the GHCR package to this repo.
 LABEL org.opencontainers.image.source="https://github.com/dpontejs/today"
-RUN useradd --system --uid 10001 --no-create-home app \
+# A home directory: `claude -p` keeps its config under ~/.claude.
+RUN useradd --system --uid 10001 --create-home --home-dir /home/app app \
     && mkdir /data && chown app:app /data
+# Since 2.x the npm package installs a self-contained native binary: Node itself stays in the build stage.
+COPY --from=claude /usr/local/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe /usr/local/bin/claude
 COPY --from=build /app/.venv /app/.venv
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONUNBUFFERED=1 \

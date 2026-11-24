@@ -17,7 +17,8 @@ FastAPI app — one process, one container          (ADR 0001)
    ├─ items      CRUD + Today view (Jinja + HTMX)
    ├─ notify     push subscriptions + 60 s reminder loop → Web Push (VAPID)
    ├─ mcp        /mcp tools for Claude & other MCP clients (ADR 0005)
-   └─ capture    text or voice → item drafts + reminders (Gemini)  (ADR 0003, 0006)
+   ├─ capture    text or voice → item drafts + reminders (Gemini)  (ADR 0003, 0006)
+   └─ jobs       collect at 07/13/19h → score vs. profile (claude -p)  (ADR 0007)
 SQLite on a Docker volume                          (ADR 0002)
 ```
 
@@ -30,6 +31,7 @@ SQLite on a Docker volume                          (ADR 0002)
 5. Web push + reminder loop + daily summary — [docs/features/05-web-push.md](docs/features/05-web-push.md)
 6. Adaptive navigation: bottom bar on the phone, sidebar on desktop, ready for career sections — [docs/guide/07-adaptive-navigation.md](docs/guide/07-adaptive-navigation.md) ✓
 7. Job collection: ML/AI roles from 9 sources at 07/13/19h, read and triaged through MCP — [docs/features/07-job-collection.md](docs/features/07-job-collection.md)
+8. Job pre-analysis: each new role scored 0–100 against my profile by Claude, strong matches pushed — [docs/features/08-job-pre-analysis.md](docs/features/08-job-pre-analysis.md), [guide](docs/guide/09-job-pre-analysis.md)
 
 ROADMAP import from the desktop is done through Claude + MCP (slice 2).
 
@@ -45,6 +47,7 @@ Out of the MVP: recurrence, writing back to ROADMAP.md, chat agent, e-mail, mult
 | [0004](docs/adr/0004-single-user-passphrase-auth.md) | Single-user passphrase auth with a session cookie |
 | [0005](docs/adr/0005-mcp-api-with-bearer-token.md) | MCP server at `/mcp` behind a bearer token |
 | [0006](docs/adr/0006-reminders-table.md) | Reminders in their own table, many per item |
+| [0007](docs/adr/0007-claude-code-for-analysis-and-writing.md) | Claude Code (`claude -p`) on the subscription for job analysis, behind `Analyst` |
 
 ## Docs
 

@@ -23,6 +23,7 @@ from fastapi.concurrency import run_in_threadpool
 from today.i18n import LANGS, day_label, weekday_long
 from today.items.repo import Item, row_to_item, to_db
 from today.items.today import build_today
+from today.jobs.analysis_repo import analyses_since, strong_analyses
 
 log = logging.getLogger("today.notify")
 
@@ -32,13 +33,25 @@ SUMMARY_FROM_HOUR, SUMMARY_UNTIL_HOUR = 8, 12
 LOOP_SECONDS = 60
 
 TEXT = {
-    "en": {"many": "{n} reminders now", "summary": "{weekday} · {today} today, {late} late", "late": "Late"},
+    "en": {
+        "many": "{n} reminders now",
+        "summary": "{weekday} · {today} today, {late} late",
+        "late": "Late",
+        "strong": "{n} strong jobs",
+        "jobs": ("{n} new job, best: {company} · {score}", "{n} new jobs, best: {company} · {score}"),
+    },
     "pt": {
         "many": "{n} lembretes agora",
         "summary": "{weekday} · {today} hoje, {late} {late_word}",
         "late": "Atrasado",
+        "strong": "{n} vagas fortes",
+        "jobs": (
+            "{n} vaga nova, melhor: {company} · {score}",
+            "{n} vagas novas, melhor: {company} · {score}",
+        ),
     },
 }
+JOBS_WINDOW = timedelta(hours=24)
 
 
 @dataclass(frozen=True)
@@ -188,18 +201,34 @@ def deliver_due(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo, send: Sen
 # --- 08:00 summary ---------------------------------------------------------------------------------
 
 
+def _jobs_line(lang: str, jobs: list) -> str | None:
+    """'2 vagas novas, melhor: Nubank · 88' for the jobs analyzed in the window, best first."""
+    if not jobs:
+        return None
+    best_job, best = jobs[0]
+    singular, plural = TEXT[lang]["jobs"]
+    return (singular if len(jobs) == 1 else plural).format(
+        n=len(jobs), company=best_job.company, score=best.score
+    )
+
+
 def _summary_payload(
-    conn, now: datetime, tz: ZoneInfo, lang: str, late: list[Item], today: list[Item]
+    conn, now: datetime, tz: ZoneInfo, lang: str, late: list[Item], today: list[Item], jobs: list = ()
 ) -> dict:
     text = TEXT[lang]
-    title = text["summary"].format(
-        weekday=weekday_long(now.astimezone(tz), lang),
-        today=len(today),
-        late=len(late),
-        late_word="atrasado" if len(late) == 1 else "atrasados",
-    )
+    jobs_line = _jobs_line(lang, list(jobs))
     lines = [f"{i.due_at.astimezone(tz):%H:%M} {i.title}" for i in today]
     lines += [f"{text['late']}: {i.title}" for i in late]
+    if late or today:
+        title = text["summary"].format(
+            weekday=weekday_long(now.astimezone(tz), lang),
+            today=len(today),
+            late=len(late),
+            late_word="atrasado" if len(late) == 1 else "atrasados",
+        )
+        lines += [jobs_line] if jobs_line else []
+    else:  # only jobs today
+        title = jobs_line
     return {
         "title": title,
         "body": "\n".join(lines),
@@ -210,7 +239,8 @@ def _summary_payload(
 
 
 def daily_summary(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo, send: Send) -> bool:
-    """Once per local day between 08:00 and 12:00, and only when something is late or due today."""
+    """Once per local day between 08:00 and 12:00, when something is late or due today or jobs were analyzed
+    in the last 24 h."""
     local = now.astimezone(tz)
     if not SUMMARY_FROM_HOUR <= local.hour < SUMMARY_UNTIL_HOUR:
         return False
@@ -218,13 +248,44 @@ def daily_summary(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo, send: S
     if conn.execute("SELECT 1 FROM daily_summaries WHERE day = ?", (day,)).fetchone():
         return False
     view = build_today(conn, now, tz)
-    if not view.late and not view.today:
+    jobs = analyses_since(conn, now - JOBS_WINDOW)
+    if not view.late and not view.today and not jobs:
         return False
     conn.execute("INSERT INTO daily_summaries (day, sent_at) VALUES (?, ?)", (day, to_db(now)))
     delivered, _ = send_to_all(
-        conn, now, send, lambda lang: _summary_payload(conn, now, tz, lang, view.late, view.today)
+        conn, now, send, lambda lang: _summary_payload(conn, now, tz, lang, view.late, view.today, jobs)
     )
     return delivered > 0
+
+
+# --- strong job matches (feature 08) --------------------------------------------------------------
+
+
+def _strong_line(job, analysis) -> str:
+    return f"★ {analysis.score} · {job.company} · {job.title}"
+
+
+def _strong_payload(lang: str, strong: list) -> dict:
+    if len(strong) == 1:
+        ((job, analysis),) = strong
+        title, body = _strong_line(job, analysis), analysis.verdict
+    else:
+        title = TEXT[lang]["strong"].format(n=len(strong))
+        body = "\n".join(_strong_line(j, a) for j, a in strong)
+    return {"title": title, "body": body, "url": "/", "tag": "strong-jobs"}
+
+
+def push_strong(
+    conn: sqlite3.Connection, analyzed_ids: list[int], threshold: int, now: datetime, send: Send | None
+) -> int:
+    """One push for the jobs of this slot scoring >= threshold. Returns how many strong jobs it announced."""
+    if send is None or not analyzed_ids:
+        return 0
+    strong = strong_analyses(conn, analyzed_ids, threshold)
+    if not strong:
+        return 0
+    send_to_all(conn, now, send, lambda lang: _strong_payload(lang, strong))
+    return len(strong)
 
 
 # --- VAPID and the real sender ---------------------------------------------------------------------

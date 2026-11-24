@@ -15,6 +15,7 @@ from today.config import Settings, load_settings
 from today.db import connect, migrate
 from today.items import routes as item_routes
 from today.jobs.loop import run_jobs_loop, select_sources
+from today.llm.analyst import make_analyst
 from today.mcp_server import mount_mcp
 
 PACKAGE_DIR = Path(__file__).parent
@@ -64,6 +65,8 @@ def create_app(settings: Settings) -> FastAPI:
     )
     # Unknown names in JOBS_SOURCES fail here, at boot, not silently inside the loop.
     app.state.job_sources = select_sources(settings.jobs_sources) if settings.jobs_enabled else None
+    # Job pre-analysis (feature 08, ADR 0007) runs after each slot only with ANALYST set.
+    app.state.analyst = make_analyst(settings)
     app.state.extractor = (
         capture.GeminiExtractor(settings.gemini_api_key, settings.gemini_model)
         if settings.gemini_api_key

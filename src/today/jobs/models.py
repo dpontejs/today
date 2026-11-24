@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Literal
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Workplace = Literal["remote", "hybrid", "onsite"]
 USER_AGENT = "today-personal/1.0"
@@ -24,6 +24,32 @@ class JobPosting(BaseModel):
     description: str | None  # plain text
     url: str
     published_at: datetime | None
+
+
+# Bumped whenever the analysis prompt or rubric changes, so old scores can be told apart (feature 08).
+PROMPT_VERSION = "2"  # 2: timing now/after_move, location rules read from the profile
+
+
+class Gap(BaseModel):
+    skill: str
+    kind: Literal["required", "nice_to_have"]
+    note: str | None
+
+
+class JobAnalysis(BaseModel):
+    """What the analyst returns for one posting, validated before it is stored (feature 08)."""
+
+    meets: list[str]
+    gaps: list[Gap]
+    workplace: Literal["remote", "hybrid", "onsite", "unknown"]
+    location: str | None
+    company_summary: str  # area, size, maturity in one or two sentences
+    seniority: Literal["intern", "junior", "mid", "senior", "staff_plus", "unknown"]
+    target_company: bool  # company is in the profile's target list
+    score: int = Field(ge=0, le=100)
+    verdict: str  # one sentence, pt-BR
+    # Fits today, or only after a move the profile plans (e.g. hybrid in São Paulo). Only "now" pushes.
+    timing: Literal["now", "after_move"] = "now"
 
 
 Fetch = Callable[[httpx.Client], list[JobPosting]]

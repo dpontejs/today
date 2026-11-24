@@ -149,6 +149,8 @@ def test_mcp_lists_tools(client: TestClient):
         "delete_item",
         "list_jobs",
         "update_job_status",
+        "get_profile",
+        "set_profile",
     }
 
 
@@ -310,3 +312,52 @@ def test_mcp_jobs_require_bearer_token(client: TestClient):
 
     bad = rpc(client, "tools/call", {"name": "update_job_status", "arguments": {"id": 1, "status": "hired"}})
     assert bad.json()["result"]["isError"] is True
+
+
+# --- profile and analyses (feature 08) ------------------------------------------------------------
+
+
+def scored(score: int):
+    from today.jobs.models import JobAnalysis
+
+    return JobAnalysis(
+        meets=["Python"], gaps=[], workplace="remote", location=None, company_summary="x",
+        seniority="junior", target_company=False, score=score, verdict="ok",
+    )  # fmt: skip
+
+
+def test_mcp_set_and_get_profile(client: TestClient):
+    def call(name: str, arguments: dict) -> dict:
+        result = rpc(client, "tools/call", {"name": name, "arguments": arguments}).json()["result"]
+        assert not result.get("isError"), result
+        return result["structuredContent"]
+
+    assert call("get_profile", {}) == {"body_md": "", "updated": False}
+    assert call("set_profile", {"body_md": "# Perfil\nPython"})["updated"] is True
+    assert call("get_profile", {})["body_md"] == "# Perfil\nPython"
+    bad = rpc(client, "tools/call", {"name": "set_profile", "arguments": {"body_md": "  "}})
+    assert bad.json()["result"]["isError"] is True
+
+
+def test_mcp_list_jobs_min_score(conn: sqlite3.Connection):
+    from today.jobs.analysis_repo import store_analysis
+
+    first, second = seed_jobs(conn)
+    store_analysis(conn, first, scored(65), "sonnet", NOW)
+    store_analysis(conn, second, scored(90), "sonnet", NOW)
+    unscored = JobPosting(
+        source="gupy", external_id="3", company="Acme", title="ML 3", location=None,
+        workplace=None, description=None, url="https://x", published_at=None,
+    )  # fmt: skip
+    upsert_jobs(conn, [unscored], NOW)
+
+    strong = mcp_server.list_jobs(conn, TZ, min_score=70)
+    assert [(j["id"], j["score"]) for j in strong] == [(second, 90)]
+    assert strong[0]["analysis"]["verdict"] == "ok" and strong[0]["status"] == "analyzed"
+
+    both = mcp_server.list_jobs(conn, TZ, min_score=60)
+    assert [j["score"] for j in both] == [90, 65]
+
+    every = mcp_server.list_jobs(conn, TZ, status="all")
+    assert {j["title"]: j["score"] for j in every}["ML 3"] is None
+    assert mcp_server.list_jobs(conn, TZ, min_score=60, status="interested") == []

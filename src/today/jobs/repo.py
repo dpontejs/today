@@ -35,9 +35,10 @@ class JobRow:
     first_seen_at: datetime
     status: str
     status_at: datetime
+    analysis_attempts: int = 0
 
 
-def _to_db(value: datetime | None) -> str | None:
+def to_db(value: datetime | None) -> str | None:
     return value.astimezone(UTC).isoformat() if value else None
 
 
@@ -45,7 +46,7 @@ def _from_db(value: str | None) -> datetime | None:
     return datetime.fromisoformat(value) if value else None
 
 
-def _row(row: sqlite3.Row) -> JobRow:
+def row_to_job(row: sqlite3.Row) -> JobRow:
     data = dict(row)
     for key in ("published_at", "first_seen_at", "status_at"):
         data[key] = _from_db(data[key])
@@ -77,9 +78,9 @@ def upsert_jobs(conn: sqlite3.Connection, jobs: list[JobPosting], now: datetime)
                 job.workplace,
                 job.description,
                 job.url,
-                _to_db(job.published_at),
-                _to_db(now),
-                _to_db(now),
+                to_db(job.published_at),
+                to_db(now),
+                to_db(now),
             ),
         )
         new += cursor.rowcount
@@ -94,14 +95,14 @@ def list_jobs(conn: sqlite3.Connection, status: str | None, limit: int) -> list[
     rows = conn.execute(
         f"SELECT * FROM jobs {where} ORDER BY first_seen_at DESC, id DESC LIMIT ?", (*args, limit)
     ).fetchall()
-    return [_row(r) for r in rows]
+    return [row_to_job(r) for r in rows]
 
 
 def set_status(conn: sqlite3.Connection, job_id: int, status: str, now: datetime) -> JobRow:
     if status not in JOB_STATUSES:
         raise ValueError(f"status must be one of {', '.join(JOB_STATUSES)}")
-    conn.execute("UPDATE jobs SET status = ?, status_at = ? WHERE id = ?", (status, _to_db(now), job_id))
+    conn.execute("UPDATE jobs SET status = ?, status_at = ? WHERE id = ?", (status, to_db(now), job_id))
     row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
     if row is None:
         raise ValueError(f"job {job_id} not found")
-    return _row(row)
+    return row_to_job(row)
