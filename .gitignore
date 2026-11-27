@@ -7,3 +7,5 @@ data/
 .pytest_cache/
 .ruff_cache/
 .worktrees/
+# semantic-release dry run output (CI)
+.next-version

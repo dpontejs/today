@@ -26,12 +26,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: read
+      contents: write # tags and GitHub releases (semantic-release)
       packages: write
+    # One run at a time per branch: two merges never compute the same version.
+    concurrency:
+      group: image-${{ github.ref }}
+      cancel-in-progress: false
     env:
       IMAGE: ghcr.io/dpontejs/today
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tags: semantic-release and git describe
 
       - name: Build image
         run: docker build -t $IMAGE:sha-$GITHUB_SHA .
@@ -49,6 +55,30 @@ jobs:
           curl -fsS http://127.0.0.1:8000/manifest.webmanifest | grep -q '"standalone"'
           curl -fsS -o /dev/null http://127.0.0.1:8000/static/icons/icon-180.png
 
+      # Versions (docs/features/deploys.md in the infra repo): feat → minor, fix → patch, breaking →
+      # minor while 0.x. The dry run only computes the next version (.next-version); the release itself
+      # happens after the push, so a broken image never gets one.
+      - if: github.ref == 'refs/heads/main'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Next version (semantic-release dry run)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx --yes -p semantic-release@26.0.1 -p @semantic-release/exec@7.1.0 -p conventional-changelog-conventionalcommits@10.4.1 semantic-release --dry-run
+      # 0.2.0 on a release commit; 0.2.0+2 two commits after it (no feat/fix in between).
+      - name: Version labels
+        run: |
+          if [ -f .next-version ]; then VERSION=$(cat .next-version)
+          else VERSION=$(git describe --tags --match 'v*' 2>/dev/null | sed -E 's/^v//; s/-([0-9]+)-g[0-9a-f]+$/+\1/'); fi
+          VERSION=${VERSION:-0.0.0+${GITHUB_SHA::7}}
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "FROM $IMAGE:sha-$GITHUB_SHA" | docker build -q -t $IMAGE:sha-$GITHUB_SHA \
+            --label org.opencontainers.image.version=$VERSION \
+            --label org.opencontainers.image.revision=$GITHUB_SHA \
+            --label org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ) -
+          echo "version $VERSION"
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -64,3 +94,12 @@ jobs:
           docker tag $IMAGE:sha-$GITHUB_SHA $IMAGE:main
           docker push $IMAGE:sha-$GITHUB_SHA
           docker push $IMAGE:main
+          if [ -f .next-version ]; then
+            docker tag $IMAGE:sha-$GITHUB_SHA $IMAGE:$VERSION
+            docker push $IMAGE:$VERSION
+          fi
+      - name: Release (tag + GitHub release with the commits)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx --yes -p semantic-release@26.0.1 -p @semantic-release/exec@7.1.0 -p conventional-changelog-conventionalcommits@10.4.1 semantic-release
