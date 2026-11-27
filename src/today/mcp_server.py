@@ -343,7 +343,7 @@ def build_mcp(app: FastAPI) -> MCPServer:
             "Personal reminders and to-dos of one user in America/Fortaleza. "
             "Times without an offset are local. Use source_key when importing from a document, "
             "so running the import again does not duplicate items. "
-            "Job openings (ML/AI roles) are collected at 07:00, 13:00 and 19:00: read them with list_jobs "
+            "Job openings (ML/AI roles) are collected every 2 days at 07:00: read them with list_jobs "
             "and triage with update_job_status; applying is always done by the user. "
             "After each collection every new role is scored 0-100 against the user's profile "
             "(get_profile/set_profile): list_jobs(min_score=70) returns the strong ones, best first. "

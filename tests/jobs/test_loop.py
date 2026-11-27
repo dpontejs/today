@@ -19,24 +19,44 @@ def local(hour: int, minute: int = 0) -> datetime:
     return datetime(2026, 11, 23, hour, minute, tzinfo=TZ)
 
 
-def test_loop_runs_each_slot_once_and_catches_up_after_restart(conn: sqlite3.Connection):
-    record_run(conn, "2026-11-23T07", local(7, 1), {})
-
-    assert due_slot(conn, local(13, 5), TZ) == "2026-11-23T13"  # restarted at 13:05: runs once on boot
-    record_run(conn, "2026-11-23T13", local(13, 5), {"gupy": SourceReport(3, 2, 2, None)})
-    assert due_slot(conn, local(13, 6), TZ) is None  # never twice
-    assert due_slot(conn, local(6, 59), TZ) is None  # nothing before the first slot of the day
+def day(d: int, hour: int, minute: int = 0) -> datetime:
+    return datetime(2026, 11, d, hour, minute, tzinfo=TZ)
 
 
-def test_loop_after_a_long_outage_runs_only_the_latest_slot(conn: sqlite3.Connection):
-    assert due_slot(conn, local(20), TZ) == "2026-11-23T19"
-    record_run(conn, "2026-11-23T19", local(20), {})
-    assert due_slot(conn, local(23, 59), TZ) is None
+def test_collects_every_other_day_at_seven(conn: sqlite3.Connection):
+    """Not applying in volume yet (2026-11-26): one collection at 07:00 every 2 days is enough."""
+    assert due_slot(conn, day(23, 6, 59), TZ) is None
+    assert due_slot(conn, day(23, 7, 5), TZ) == "2026-11-23T07"
+    record_run(conn, "2026-11-23T07", day(23, 7, 5), {"gupy": SourceReport(3, 2, 2, None)})
+
+    assert due_slot(conn, day(23, 20), TZ) is None  # never twice in a day
+    assert due_slot(conn, day(24, 9), TZ) is None  # the day in between is skipped
+    assert due_slot(conn, day(25, 6, 59), TZ) is None
+    assert due_slot(conn, day(25, 7), TZ) == "2026-11-25T07"
+
+
+def test_after_an_outage_collects_once_on_the_first_due_day(conn: sqlite3.Connection):
+    record_run(conn, "2026-11-23T07", day(23, 7), {})
+
+    assert due_slot(conn, day(27, 15), TZ) == "2026-11-27T07"
+    record_run(conn, "2026-11-27T07", day(27, 15), {})
+    assert due_slot(conn, day(28, 7), TZ) is None
+
+
+def test_old_three_a_day_slots_count_as_the_last_run(conn: sqlite3.Connection):
+    record_run(conn, "2026-11-24T19", day(24, 19), {})
+    assert due_slot(conn, day(25, 7), TZ) is None
+    assert due_slot(conn, day(26, 7), TZ) == "2026-11-26T07"
+
+
+def test_every_days_is_configurable(conn: sqlite3.Connection):
+    record_run(conn, "2026-11-23T07", day(23, 7), {})
+    assert due_slot(conn, day(24, 7), TZ, every_days=1) == "2026-11-24T07"
 
 
 def test_slot_key_is_local_date_even_when_utc_is_tomorrow(conn: sqlite3.Connection):
     # 22:00 in Fortaleza is 01:00 UTC on the 24th.
-    assert due_slot(conn, local(22).astimezone(ZoneInfo("UTC")), TZ) == "2026-11-23T19"
+    assert due_slot(conn, day(23, 22).astimezone(ZoneInfo("UTC")), TZ) == "2026-11-23T07"
 
 
 def test_record_run_stores_the_report_as_json(conn: sqlite3.Connection):

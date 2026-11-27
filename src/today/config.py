@@ -29,7 +29,8 @@ class Settings:
     analyst_model: str = "sonnet"
     projects_model: str = "opus"  # idea evaluation (feature 10): few calls, the answer matters more
     jobs_push_score: int = 75
-    analyze_limit: int = 20
+    analyze_limit: int = 40  # per collection; collections run every `jobs_every_days` days
+    jobs_every_days: int = 2
 
 
 def _required(name: str) -> str:
@@ -55,7 +56,8 @@ def load_settings() -> Settings:
         analyst_model=os.environ.get("ANALYST_MODEL") or "sonnet",
         projects_model=os.environ.get("PROJECTS_MODEL") or "opus",
         jobs_push_score=int(os.environ.get("JOBS_PUSH_SCORE") or 75),
-        analyze_limit=int(os.environ.get("ANALYZE_LIMIT") or 20),
+        analyze_limit=int(os.environ.get("ANALYZE_LIMIT") or 40),
+        jobs_every_days=int(os.environ.get("JOBS_EVERY_DAYS") or 2),
         **_vapid(),
     )
 

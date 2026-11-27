@@ -18,7 +18,7 @@ FastAPI app — one process, one container          (ADR 0001)
    ├─ notify     push subscriptions + 60 s reminder loop → Web Push (VAPID)
    ├─ mcp        /mcp tools for Claude & other MCP clients (ADR 0005)
    ├─ capture    text or voice → item drafts + reminders (Gemini)  (ADR 0003, 0006)
-   └─ jobs       collect at 07/13/19h → score vs. profile (claude -p)  (ADR 0007)
+   └─ jobs       collect every 2 days at 07h → score vs. profile (claude -p)  (ADR 0007)
 SQLite on a Docker volume                          (ADR 0002)
 ```
 
@@ -30,7 +30,7 @@ SQLite on a Docker volume                          (ADR 0002)
 4. Calendar tab, 7/14/30 days, pinned capture bar ✓
 5. Web push + reminder loop + daily summary — [docs/features/05-web-push.md](docs/features/05-web-push.md)
 6. Adaptive navigation: bottom bar on the phone, sidebar on desktop, ready for career sections — [docs/guide/07-adaptive-navigation.md](docs/guide/07-adaptive-navigation.md) ✓
-7. Job collection: ML/AI roles from 9 sources at 07/13/19h, read and triaged through MCP — [docs/features/07-job-collection.md](docs/features/07-job-collection.md)
+7. Job collection: ML/AI roles below senior, every 2 days at 07h; closed jobs detected; read and triaged through MCP — [docs/features/07-job-collection.md](docs/features/07-job-collection.md)
 8. Job pre-analysis: each new role scored 0–100 against my profile by Claude, strong matches pushed — [docs/features/08-job-pre-analysis.md](docs/features/08-job-pre-analysis.md), [guide](docs/guide/09-job-pre-analysis.md)
 9. Jobs tab: list + detail triage on desktop (to review, interested, applied, after the move, dismissed) — [guide](docs/guide/10-jobs-tab.md)
 10. Projects: idea evaluated against my profile and the gaps that repeat in the jobs I want; closed by the `/fechar-projeto` skill — [docs/features/10-projects.md](docs/features/10-projects.md), [guide](docs/guide/11-projects.md)

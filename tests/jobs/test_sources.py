@@ -216,7 +216,7 @@ def test_linkedin_parses_recorded_response():
     assert first.location == "Greater São Paulo Area"
     assert first.published_at == datetime(2026, 11, 23, tzinfo=UTC)
     assert first.description is None  # fetched by `collect`, only for postings that pass the filter
-    assert all(r.url.params["f_TPR"] == "r86400" for r in seen)
+    assert all(r.url.params["f_TPR"] == "r259200" for r in seen)  # 72 h: collection runs every 2 days
     assert all("Mozilla" in r.headers["user-agent"] for r in seen)
     assert all("cookie" not in r.headers for r in seen)
 

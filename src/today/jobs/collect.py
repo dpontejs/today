@@ -50,9 +50,37 @@ def collect(
                     for job in kept
                 ]
             new = repo.upsert_jobs(conn, kept, now)
+            if error is None and repo.is_board(name):  # only a complete listing proves a job is gone
+                repo.track_board(conn, name, {job.external_id for job in fetched}, now)
         except Exception as exc:  # any adapter failure is data for the report, not a crash
             log.warning("job source %s failed: %s", name, exc)
             report[name] = repo.SourceReport(fetched=0, kept=0, new=0, error=f"{type(exc).__name__}: {exc}")
             continue
         report[name] = repo.SourceReport(fetched=len(fetched), kept=len(kept), new=new, error=error)
     return report
+
+
+# A filled LinkedIn job still answers 200, with this banner instead of the apply button.
+CLOSED_MARKERS = ("No longer accepting applications", "Não aceita mais candidaturas", "Vaga encerrada")
+
+
+def check_interested_open(conn: sqlite3.Connection, client: httpx.Client, now: datetime) -> int:
+    """Interested jobs from search sources (no full listing to compare with): fetch each page and close the
+    ones that answer 404/410 or say they no longer accept applications. Returns how many pages it fetched."""
+    rows = conn.execute(
+        "SELECT id, source, url FROM jobs WHERE status = 'interested' AND closed_at IS NULL"
+    ).fetchall()
+    checked, gone = 0, []
+    for row in rows:
+        if repo.is_board(row["source"]):
+            continue
+        checked += 1
+        try:
+            response = client.get(row["url"], follow_redirects=True)
+        except httpx.HTTPError as exc:  # unknown, not closed
+            log.info("job %s page check failed: %s", row["id"], exc)
+            continue
+        if response.status_code in (404, 410) or any(m in response.text for m in CLOSED_MARKERS):
+            gone.append(row["id"])
+    repo.close_jobs(conn, gone, now)
+    return checked

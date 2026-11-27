@@ -37,7 +37,7 @@ def pending_jobs(conn: sqlite3.Connection, limit: int) -> list[JobRow]:
 
     Within one slot (same `first_seen_at`), the most recently published first, unknown dates last."""
     rows = conn.execute(
-        """SELECT * FROM jobs WHERE status = 'new' AND analysis_attempts < ?
+        """SELECT * FROM jobs WHERE status = 'new' AND analysis_attempts < ? AND closed_at IS NULL
            ORDER BY first_seen_at DESC, published_at IS NULL, published_at DESC, id DESC LIMIT ?""",
         (MAX_ATTEMPTS, limit),
     ).fetchall()
@@ -146,12 +146,17 @@ def _with_analysis(rows: list[sqlite3.Row]) -> list:
 
 _TIMING = "COALESCE(json_extract(a.analysis_json, '$.timing'), 'now')"
 # Each view of the Jobs tab, as a WHERE clause over `jobs j LEFT JOIN job_analyses a`.
+REVIEW_MIN_SCORE = 70  # below it, "low": still reachable, out of the way (2026-11-26)
+_OPEN = "j.closed_at IS NULL"
 VIEWS: dict[str, str] = {
     # Includes jobs whose analysis failed three times (analyzed, no row): listed last, never lost.
-    "review": f"j.status = 'analyzed' AND (a.job_id IS NULL OR {_TIMING} = 'now')",
-    "interested": "j.status = 'interested'",
-    "applied": "j.status = 'applied'",
-    "later": f"j.status = 'analyzed' AND a.job_id IS NOT NULL AND {_TIMING} = 'after_move'",
+    "review": f"j.status = 'analyzed' AND {_OPEN} AND (a.job_id IS NULL OR ({_TIMING} = 'now' "
+    f"AND a.score >= {REVIEW_MIN_SCORE}))",
+    "interested": f"j.status = 'interested' AND {_OPEN}",
+    "applied": "j.status = 'applied'",  # history: stays even after the job closes
+    "later": f"j.status = 'analyzed' AND {_OPEN} AND a.job_id IS NOT NULL AND {_TIMING} = 'after_move'",
+    "low": f"j.status = 'analyzed' AND {_OPEN} AND {_TIMING} = 'now' AND a.score < {REVIEW_MIN_SCORE}",
+    "closed": "j.closed_at IS NOT NULL AND j.status NOT IN ('applied', 'dismissed')",
     "dismissed": "j.status = 'dismissed'",
 }
 _FROM = "FROM jobs j LEFT JOIN job_analyses a ON a.job_id = j.id"
@@ -173,7 +178,8 @@ def view_counts(conn: sqlite3.Connection) -> dict[str, int]:
         for view, where in VIEWS.items()
     }
     counts["queued"] = conn.execute(
-        "SELECT COUNT(*) FROM jobs WHERE status = 'new' AND analysis_attempts < ?", (MAX_ATTEMPTS,)
+        "SELECT COUNT(*) FROM jobs WHERE status = 'new' AND analysis_attempts < ? AND closed_at IS NULL",
+        (MAX_ATTEMPTS,),
     ).fetchone()[0]
     return counts
 
