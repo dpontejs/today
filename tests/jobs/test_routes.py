@@ -88,19 +88,21 @@ def test_jobs_listed_under_more_on_the_nav(client: TestClient):
     assert 'href="/jobs"' in more and "VAGAS" in more
 
 
-def test_review_lists_analyzed_now_jobs_best_score_first(client: TestClient):
+def test_review_lists_analyzed_now_jobs_scoring_70_or_more_best_first(client: TestClient):
     conn = db(client)
-    add(conn, "Weak", 60)
+    add(conn, "Good", 72)
     add(conn, "Strong", 90)
+    add(conn, "Weak", 69)
     add(conn, "Later", 95, timing="after_move")
     add(conn, "Queued", None)
 
     html = client.get("/jobs").text
 
-    assert html.index("Strong") < html.index("Weak")
-    assert "Later" not in html and "Queued" not in html
+    assert html.index("Strong") < html.index("Good")
+    assert "Weak" not in html and "Later" not in html and "Queued" not in html
     assert 'data-view="review" aria-current="true"' in html
     assert 'data-count="review">2<' in html and 'data-count="later">1<' in html
+    assert 'data-count="low">1<' in html
     assert "1 na fila de análise" in html
     assert "split-has-detail" not in html  # the phone sees the list first
 
@@ -168,7 +170,7 @@ def test_detail_unknown_job_is_404(client: TestClient):
 def test_mark_opens_next_job_of_the_view(client: TestClient):
     conn = db(client)
     first = add(conn, "Strong", 90)
-    second = add(conn, "Weak", 60)
+    second = add(conn, "Good", 75)
 
     response = client.post(f"/jobs/{first}/status", data={"status": "interested", "view": "review"})
 
@@ -230,3 +232,39 @@ def test_job_whose_analysis_failed_stays_in_review(client: TestClient):
     assert html.index("Strong") < html.index("Broken")  # unscored jobs go last
     assert 'data-count="review">2<' in html
     assert "A análise desta vaga falhou." in client.get(f"/jobs/{job}").text
+
+
+def test_low_view_holds_jobs_under_70(client: TestClient):
+    conn = db(client)
+    add(conn, "Weak", 40)
+    add(conn, "Strong", 90)
+
+    html = client.get("/jobs?view=low").text
+
+    assert "Weak" in html and "Strong" not in html
+
+
+def test_closed_jobs_leave_every_view_but_applied_and_closed(client: TestClient):
+    conn = db(client)
+    gone = add(conn, "Gone", 90)
+    liked = add(conn, "Liked", 85)
+    sent = add(conn, "Sent", 80)
+    repo.set_status(conn, liked, "interested", NOW)
+    repo.set_status(conn, sent, "applied", NOW)
+    repo.close_jobs(conn, [gone, liked, sent], NOW)
+
+    for view in ("review", "interested"):
+        html = client.get(f"/jobs?view={view}").text
+        assert "Gone" not in html and "Liked" not in html, view
+    closed = client.get("/jobs?view=closed").text
+    assert "Gone" in closed and "Liked" in closed and "Sent" not in closed
+    applied = client.get("/jobs?view=applied").text
+    assert "Sent" in applied and "ENCERRADA" in applied  # your history stays, marked closed
+
+
+def test_closed_jobs_leave_the_analysis_queue(client: TestClient):
+    conn = db(client)
+    queued = add(conn, "Queued", None)
+    repo.close_jobs(conn, [queued], NOW)
+
+    assert ar.pending_jobs(conn, 10) == []

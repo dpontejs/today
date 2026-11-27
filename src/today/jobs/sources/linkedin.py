@@ -25,6 +25,9 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
+# Posted in the last 72 h: collection runs every 2 days, plus a day of slack for a late or missed run.
+WINDOW = "r259200"
+
 _CARD = re.compile(r'data-entity-urn="urn:li:jobPosting:(\d+)"(.*?)(?=data-entity-urn=|\Z)', re.DOTALL)
 _TITLE = re.compile(r'class="base-search-card__title"[^>]*>(.*?)</h3>', re.DOTALL)
 _COMPANY = re.compile(r'class="base-search-card__subtitle"[^>]*>(.*?)</h4>', re.DOTALL)
@@ -90,7 +93,7 @@ def fetch(
             if not first:
                 sleep(random.uniform(3, 7))
             first = False
-            params = {"keywords": term, "location": "Brazil", "f_TPR": "r86400", "start": page * PAGE}
+            params = {"keywords": term, "location": "Brazil", "f_TPR": WINDOW, "start": page * PAGE}
             response = _get(client, SEARCH, params=params)
             if response.status_code in BLOCKED:
                 kept = dedupe(jobs)

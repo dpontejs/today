@@ -1,7 +1,6 @@
-"""Collection slots at 07:00, 13:00 and 19:00 local (ADR 0001: an asyncio task in the app process).
-
-Each slot runs once, recorded in `job_runs`. After a restart or an outage only the latest slot of the day
-that is still missing runs, so a restart at 13:05 collects once and never twice."""
+"""One collection at 07:00 local every `JOBS_EVERY_DAYS` days, 2 by default (ADR 0001: an asyncio task in
+the app process). Each run is recorded in `job_runs`; after a restart or an outage the collection runs once,
+on the first due day, never twice."""
 
 import asyncio
 import dataclasses
@@ -9,7 +8,7 @@ import json
 import logging
 import sqlite3
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import date, datetime
 from functools import partial
 from zoneinfo import ZoneInfo
 
@@ -17,7 +16,7 @@ from starlette.concurrency import run_in_threadpool
 
 from today import notify
 from today.jobs.analyze import analyze_pending
-from today.jobs.collect import collect
+from today.jobs.collect import check_interested_open, collect
 from today.jobs.models import Fetch
 from today.jobs.repo import SourceReport
 from today.jobs.sources import SOURCES, make_client
@@ -25,19 +24,22 @@ from today.llm.analyst import Analyst
 
 log = logging.getLogger(__name__)
 
-SLOT_HOURS = (7, 13, 19)
+SLOT_HOUR = 7
+EVERY_DAYS = 2
 LOOP_SECONDS = 60
 
 
-def due_slot(conn: sqlite3.Connection, now: datetime, tz: ZoneInfo) -> str | None:
-    """The key ('2026-11-23T13') of today's latest slot at or before `now`, unless it already ran."""
+def due_slot(
+    conn: sqlite3.Connection, now: datetime, tz: ZoneInfo, every_days: int = EVERY_DAYS
+) -> str | None:
+    """Today's key ('2026-11-25T07') from 07:00 on, when the last run is `every_days` old or more."""
     local = now.astimezone(tz)
-    passed = [h for h in SLOT_HOURS if h <= local.hour]
-    if not passed:
+    if local.hour < SLOT_HOUR:
         return None
-    slot = f"{local.date().isoformat()}T{passed[-1]:02d}"
-    done = conn.execute("SELECT 1 FROM job_runs WHERE slot = ?", (slot,)).fetchone()
-    return None if done else slot
+    last = conn.execute("SELECT MAX(slot) FROM job_runs").fetchone()[0]
+    if last and (local.date() - date.fromisoformat(last[:10])).days < every_days:
+        return None
+    return f"{local.date().isoformat()}T{SLOT_HOUR:02d}"
 
 
 def record_run(
@@ -75,7 +77,11 @@ def run_slot(
     """Collect, record the slot, then (with an analyst) analyze pending jobs and push the strong ones."""
     with make_client() as client:
         report = collect(conn, client, sources, now)
-    record_run(conn, slot, now, report)
+        record_run(conn, slot, now, report)
+        try:  # after record_run: a failure here must not leave the slot due (it would recollect each minute)
+            check_interested_open(conn, client, now)
+        except Exception:
+            log.exception("job slot %s: interested-jobs page check failed", slot)
     log.info("job slot %s: %s", slot, {name: (r.new, r.error) for name, r in report.items()})
     if analyst is None:
         return
@@ -97,7 +103,7 @@ async def run_jobs_loop(app) -> None:
         try:
             state = app.state
             now = state.clock()
-            slot = due_slot(state.conn, now, state.settings.tz)
+            slot = due_slot(state.conn, now, state.settings.tz, state.settings.jobs_every_days)
             if slot:
                 settings = state.settings
                 run = partial(

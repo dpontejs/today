@@ -36,6 +36,8 @@ class JobRow:
     status: str
     status_at: datetime
     analysis_attempts: int = 0
+    missed_runs: int = 0
+    closed_at: datetime | None = None
 
 
 def to_db(value: datetime | None) -> str | None:
@@ -48,8 +50,9 @@ def _from_db(value: str | None) -> datetime | None:
 
 def row_to_job(row: sqlite3.Row) -> JobRow:
     data = dict(row)
-    for key in ("published_at", "first_seen_at", "status_at"):
-        data[key] = _from_db(data[key])
+    for key in ("published_at", "first_seen_at", "status_at", "closed_at"):
+        if key in data:
+            data[key] = _from_db(data[key])
     return JobRow(**data)
 
 
@@ -96,6 +99,43 @@ def list_jobs(conn: sqlite3.Connection, status: str | None, limit: int) -> list[
         f"SELECT * FROM jobs {where} ORDER BY first_seen_at DESC, id DESC LIMIT ?", (*args, limit)
     ).fetchall()
     return [row_to_job(r) for r in rows]
+
+
+# Sources that list every open job of one company: absence there means the job closed (feature 07).
+BOARD_PREFIXES = ("greenhouse:", "lever:", "ashby:")
+MISSES_TO_CLOSE = 2
+
+
+def is_board(source: str) -> bool:
+    return source.startswith(BOARD_PREFIXES)
+
+
+def track_board(conn: sqlite3.Connection, source: str, seen_ids: set[str], now: datetime) -> int:
+    """After a complete fetch of a board: reopen and reset the jobs seen, count one more miss for the open
+    jobs not seen, and close those missed MISSES_TO_CLOSE times in a row. Returns how many it closed."""
+    if not seen_ids:  # an empty listing (bad token, ATS migration, incident) proves nothing
+        return 0
+    rows = conn.execute("SELECT id, external_id, closed_at FROM jobs WHERE source = ?", (source,)).fetchall()
+    seen = [r["id"] for r in rows if r["external_id"] in seen_ids]
+    missed = [r["id"] for r in rows if r["external_id"] not in seen_ids and r["closed_at"] is None]
+    # Back on the board means open: a job closed by two glitchy runs does not stay buried.
+    conn.executemany("UPDATE jobs SET missed_runs = 0, closed_at = NULL WHERE id = ?", [(i,) for i in seen])
+    conn.executemany("UPDATE jobs SET missed_runs = missed_runs + 1 WHERE id = ?", [(i,) for i in missed])
+    gone = [
+        r["id"]
+        for r in conn.execute(
+            "SELECT id FROM jobs WHERE source = ? AND closed_at IS NULL AND missed_runs >= ?",
+            (source, MISSES_TO_CLOSE),
+        )
+    ]
+    return close_jobs(conn, gone, now)
+
+
+def close_jobs(conn: sqlite3.Connection, job_ids: list[int], now: datetime) -> int:
+    conn.executemany(
+        "UPDATE jobs SET closed_at = ? WHERE id = ? AND closed_at IS NULL", [(to_db(now), i) for i in job_ids]
+    )
+    return len(job_ids)
 
 
 def set_status(conn: sqlite3.Connection, job_id: int, status: str, now: datetime) -> JobRow:

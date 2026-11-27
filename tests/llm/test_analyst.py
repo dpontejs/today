@@ -136,7 +136,7 @@ def test_settings_analyst_env(monkeypatch):
         None,
         "sonnet",
         75,
-        20,
+        40,  # every-other-day collections (2026-11-26)
     )
 
     monkeypatch.setenv("ANALYST", "claude_cli")

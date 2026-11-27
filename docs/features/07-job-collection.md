@@ -78,3 +78,14 @@ Then, deployed: after the next slot, `list_jobs` through Claude returns real rol
 
 - Gupy may cap a search at 100 results: use one request per term, which stays under the cap.
 - Shapes of unofficial endpoints (Gupy portal, Eightfold, Oracle) can change; the report makes that visible.
+
+## Update 2026-11-26
+
+- Cadence: one collection every `JOBS_EVERY_DAYS` (default 2) days at 07:00 local; LinkedIn window widened to
+  72 h (`f_TPR=r259200`); `ANALYZE_LIMIT` default 40 per collection.
+- Titles senior and above are dropped by the filter (PR #18).
+- Closed jobs (migration 008, `missed_runs`, `closed_at`): board sources (`greenhouse:`, `lever:`, `ashby:`) list
+  every open job, so a stored job absent from two successful fetches in a row is closed. Search sources never
+  close by absence; only their `interested` jobs are checked on their own page (404/410 or a "no longer
+  accepting applications" banner). Closed jobs leave the queue and every view except `applied` and `closed`.
+- Jobs tab: `review` shows score ≥ 70; the rest go to `low`.

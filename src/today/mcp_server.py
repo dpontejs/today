@@ -79,6 +79,9 @@ class JobOut(BaseModel):
     status: Literal["new", "analyzed", "dismissed", "interested", "applied"]
     score: int | None = Field(default=None, description="0-100 fit against the profile; None if not analyzed")
     analysis: JobAnalysis | None = None
+    closed_at: str | None = Field(
+        default=None, description="When the job was found closed (ISO 8601); None: open"
+    )
 
 
 class Profile(BaseModel):
@@ -229,6 +232,7 @@ def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo, analysis: JobAnalysis | None =
         "status": job.status,
         "score": analysis.score if analysis else None,
         "analysis": analysis.model_dump() if analysis else None,
+        "closed_at": job.closed_at.astimezone(tz).isoformat() if job.closed_at else None,
     }
 
 
@@ -343,7 +347,7 @@ def build_mcp(app: FastAPI) -> MCPServer:
             "Personal reminders and to-dos of one user in America/Fortaleza. "
             "Times without an offset are local. Use source_key when importing from a document, "
             "so running the import again does not duplicate items. "
-            "Job openings (ML/AI roles) are collected at 07:00, 13:00 and 19:00: read them with list_jobs "
+            "Job openings (ML/AI roles) are collected every 2 days at 07:00: read them with list_jobs "
             "and triage with update_job_status; applying is always done by the user. "
             "After each collection every new role is scored 0-100 against the user's profile "
             "(get_profile/set_profile): list_jobs(min_score=70) returns the strong ones, best first. "

@@ -138,3 +138,135 @@ def test_partial_source_saves_jobs_and_reports_the_error(conn: sqlite3.Connectio
         fetched=1, kept=1, new=1, error="blocked (HTTP 429) after 1 postings"
     )
     assert count(conn) == 1
+
+
+# --- closed jobs ---------------------------------------------------------------------------------------
+
+
+def closed_at(conn: sqlite3.Connection, external_id: str):
+    return conn.execute("SELECT closed_at FROM jobs WHERE external_id = ?", (external_id,)).fetchone()[0]
+
+
+def run(conn: sqlite3.Connection, name: str, ids: list[str], days: int) -> None:
+    jobs = [posting(i, source=name) for i in ids]
+    collect(conn, OFFLINE, {name: static(*jobs)}, NOW + timedelta(days=days), describers={})
+
+
+def test_board_job_missing_twice_is_closed(conn: sqlite3.Connection):
+    """Greenhouse/Lever/Ashby list every open job of the company: absent twice in a row means closed."""
+    run(conn, "greenhouse:acme", ["1", "2"], 0)
+
+    run(conn, "greenhouse:acme", ["1"], 2)
+    assert closed_at(conn, "2") is None  # one miss can be a glitch
+
+    run(conn, "greenhouse:acme", ["1"], 4)
+    assert closed_at(conn, "2") is not None and closed_at(conn, "1") is None
+
+
+def test_board_job_seen_again_resets_misses(conn: sqlite3.Connection):
+    for ids, days in ((["1", "2"], 0), (["1"], 2), (["1", "2"], 4), (["1"], 6)):
+        run(conn, "lever:acme", ids, days)
+
+    assert closed_at(conn, "2") is None
+
+
+def test_search_sources_never_close_by_absence(conn: sqlite3.Connection):
+    """A search (Gupy portal, LinkedIn, Remotar...) not returning a job says nothing about it being closed."""
+    run(conn, "gupy", ["1"], 0)
+    for days in (2, 4, 6):
+        run(conn, "gupy", [], days)
+
+    assert closed_at(conn, "1") is None
+
+
+def test_failed_board_fetch_closes_nothing(conn: sqlite3.Connection):
+    name = "ashby:acme"
+    run(conn, name, ["1"], 0)
+
+    def broken(_client):
+        raise httpx.ConnectError("down")
+
+    for days in (2, 4):
+        collect(conn, OFFLINE, {name: broken}, NOW + timedelta(days=days), describers={})
+
+    assert closed_at(conn, "1") is None
+
+
+def test_interested_search_job_closed_when_its_page_is_gone(conn: sqlite3.Connection):
+    from today.jobs.collect import check_interested_open
+
+    for key, source in (("gone", "gupy"), ("filled", "linkedin"), ("open", "remotar"), ("liked", "gupy")):
+        repo.upsert_jobs(conn, [posting(key, source=source)], NOW)
+    for row in repo.list_jobs(conn, None, 10):
+        if row.external_id in ("gone", "filled", "open"):
+            repo.set_status(conn, row.id, "interested", NOW)
+
+    def page(request: httpx.Request) -> httpx.Response:
+        key = request.url.path.rsplit("/", 1)[-1]
+        if key == "gone":
+            return httpx.Response(404)
+        if key == "filled":
+            return httpx.Response(200, text="<p>No longer accepting applications</p>")
+        return httpx.Response(200, text="<p>Apply now</p>")
+
+    client = httpx.Client(transport=httpx.MockTransport(page))
+    checked = check_interested_open(conn, client, NOW, sleep=lambda _s: None)
+
+    assert checked == 3  # only interested jobs from search sources are fetched
+    assert closed_at(conn, "gone") and closed_at(conn, "filled")
+    assert closed_at(conn, "open") is None and closed_at(conn, "liked") is None
+
+
+def test_board_job_listed_again_reopens(conn: sqlite3.Connection):
+    """Two glitchy runs must not bury a job for good: back on the board means open again."""
+    for ids, days in ((["1", "2"], 0), (["1"], 2), (["1"], 4)):
+        run(conn, "greenhouse:acme", ids, days)
+    assert closed_at(conn, "2") is not None
+
+    run(conn, "greenhouse:acme", ["1", "2"], 6)
+    assert closed_at(conn, "2") is None
+
+
+def test_empty_board_listing_closes_nothing(conn: sqlite3.Connection):
+    """200 with jobs: [] (bad token, ATS migration, incident) is not proof that every job closed."""
+    run(conn, "greenhouse:acme", ["1"], 0)
+    for days in (2, 4):
+        run(conn, "greenhouse:acme", [], days)
+
+    assert closed_at(conn, "1") is None
+
+
+def interested(conn: sqlite3.Connection, *jobs: JobPosting) -> None:
+    repo.upsert_jobs(conn, list(jobs), NOW)
+    for row in repo.list_jobs(conn, None, 10):
+        repo.set_status(conn, row.id, "interested", NOW)
+
+
+def test_linkedin_page_check_uses_browser_headers_and_pacing(conn: sqlite3.Connection):
+    from today.jobs.collect import check_interested_open
+
+    interested(conn, posting("a", source="linkedin"), posting("b", source="linkedin"))
+    agents: list[str] = []
+    slept: list[float] = []
+
+    def page(request: httpx.Request) -> httpx.Response:
+        agents.append(request.headers["user-agent"])
+        return httpx.Response(999)  # LinkedIn's "go away": unknown, not closed
+
+    client = httpx.Client(transport=httpx.MockTransport(page))
+    check_interested_open(conn, client, NOW, sleep=slept.append)
+
+    assert agents and all("Mozilla" in a for a in agents)
+    assert slept and all(3 <= s <= 7 for s in slept)
+    assert closed_at(conn, "a") is None and closed_at(conn, "b") is None
+
+
+def test_bad_stored_url_does_not_break_the_check(conn: sqlite3.Connection):
+    from today.jobs.collect import check_interested_open
+
+    interested(conn, posting("x", source="gupy").model_copy(update={"url": "http://"}))
+    client = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200)))
+
+    check_interested_open(conn, client, NOW, sleep=lambda _s: None)
+
+    assert closed_at(conn, "x") is None
