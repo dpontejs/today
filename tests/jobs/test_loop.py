@@ -154,6 +154,20 @@ def ready(conn, lang: str = "pt") -> Sender:
     return Sender()
 
 
+def test_page_check_failure_still_records_the_slot(conn: sqlite3.Connection, monkeypatch: pytest.MonkeyPatch):
+    """An unexpected error after collecting must not leave the slot due (it would recollect every minute)."""
+    from today.jobs import loop
+
+    def boom(*_args, **_kwargs):
+        raise RuntimeError("bad url")
+
+    monkeypatch.setattr(loop, "check_interested_open", boom)
+
+    run_slot(conn, "2026-11-23T07", static_source(90), NOW)
+
+    assert conn.execute("SELECT slot FROM job_runs").fetchone()[0] == "2026-11-23T07"
+
+
 def test_strong_match_pushes_once_per_slot(conn: sqlite3.Connection):
     send = ready(conn)
 

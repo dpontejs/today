@@ -79,6 +79,9 @@ class JobOut(BaseModel):
     status: Literal["new", "analyzed", "dismissed", "interested", "applied"]
     score: int | None = Field(default=None, description="0-100 fit against the profile; None if not analyzed")
     analysis: JobAnalysis | None = None
+    closed_at: str | None = Field(
+        default=None, description="When the job was found closed (ISO 8601); None: open"
+    )
 
 
 class Profile(BaseModel):
@@ -229,6 +232,7 @@ def _job_out(job: jobs_repo.JobRow, tz: ZoneInfo, analysis: JobAnalysis | None =
         "status": job.status,
         "score": analysis.score if analysis else None,
         "analysis": analysis.model_dump() if analysis else None,
+        "closed_at": job.closed_at.astimezone(tz).isoformat() if job.closed_at else None,
     }
 
 

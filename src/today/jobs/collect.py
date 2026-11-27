@@ -1,7 +1,9 @@
 """One collection run: every source, filtered, stored. A failing source is reported; the others still run."""
 
 import logging
+import random
 import sqlite3
+import time
 from collections.abc import Callable, Mapping
 from datetime import datetime
 
@@ -50,7 +52,7 @@ def collect(
                     for job in kept
                 ]
             new = repo.upsert_jobs(conn, kept, now)
-            if error is None and repo.is_board(name):  # only a complete listing proves a job is gone
+            if error is None and repo.is_board(name):  # only a complete board listing proves a job gone
                 repo.track_board(conn, name, {job.external_id for job in fetched}, now)
         except Exception as exc:  # any adapter failure is data for the report, not a crash
             log.warning("job source %s failed: %s", name, exc)
@@ -64,20 +66,33 @@ def collect(
 CLOSED_MARKERS = ("No longer accepting applications", "Não aceita mais candidaturas", "Vaga encerrada")
 
 
-def check_interested_open(conn: sqlite3.Connection, client: httpx.Client, now: datetime) -> int:
+def check_interested_open(
+    conn: sqlite3.Connection,
+    client: httpx.Client,
+    now: datetime,
+    sleep: Callable[[float], None] = time.sleep,
+) -> int:
     """Interested jobs from search sources (no full listing to compare with): fetch each page and close the
-    ones that answer 404/410 or say they no longer accept applications. Returns how many pages it fetched."""
+    ones that answer 404/410 or say they no longer accept applications. Anything else (429, 999, authwall,
+    a bad URL) is unknown, never closed. LinkedIn pages go with its browser headers and 3-7 s apart.
+    Returns how many pages it fetched."""
     rows = conn.execute(
         "SELECT id, source, url FROM jobs WHERE status = 'interested' AND closed_at IS NULL"
     ).fetchall()
-    checked, gone = 0, []
+    checked, gone, asked_linkedin = 0, [], False
     for row in rows:
         if repo.is_board(row["source"]):
             continue
         checked += 1
         try:
-            response = client.get(row["url"], follow_redirects=True)
-        except httpx.HTTPError as exc:  # unknown, not closed
+            if row["source"] == "linkedin":
+                if asked_linkedin:
+                    sleep(random.uniform(3, 7))
+                asked_linkedin = True
+                response = linkedin._get(client, row["url"])
+            else:
+                response = client.get(row["url"], follow_redirects=True)
+        except Exception as exc:  # unknown, not closed
             log.info("job %s page check failed: %s", row["id"], exc)
             continue
         if response.status_code in (404, 410) or any(m in response.text for m in CLOSED_MARKERS):

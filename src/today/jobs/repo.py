@@ -111,14 +111,15 @@ def is_board(source: str) -> bool:
 
 
 def track_board(conn: sqlite3.Connection, source: str, seen_ids: set[str], now: datetime) -> int:
-    """After a complete fetch of a board: reset misses of the jobs seen, count one more miss for the open
+    """After a complete fetch of a board: reopen and reset the jobs seen, count one more miss for the open
     jobs not seen, and close those missed MISSES_TO_CLOSE times in a row. Returns how many it closed."""
-    rows = conn.execute(
-        "SELECT id, external_id FROM jobs WHERE source = ? AND closed_at IS NULL", (source,)
-    ).fetchall()
+    if not seen_ids:  # an empty listing (bad token, ATS migration, incident) proves nothing
+        return 0
+    rows = conn.execute("SELECT id, external_id, closed_at FROM jobs WHERE source = ?", (source,)).fetchall()
     seen = [r["id"] for r in rows if r["external_id"] in seen_ids]
-    missed = [r["id"] for r in rows if r["external_id"] not in seen_ids]
-    conn.executemany("UPDATE jobs SET missed_runs = 0 WHERE id = ?", [(i,) for i in seen])
+    missed = [r["id"] for r in rows if r["external_id"] not in seen_ids and r["closed_at"] is None]
+    # Back on the board means open: a job closed by two glitchy runs does not stay buried.
+    conn.executemany("UPDATE jobs SET missed_runs = 0, closed_at = NULL WHERE id = ?", [(i,) for i in seen])
     conn.executemany("UPDATE jobs SET missed_runs = missed_runs + 1 WHERE id = ?", [(i,) for i in missed])
     gone = [
         r["id"]

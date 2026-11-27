@@ -401,3 +401,15 @@ def test_mcp_projects_gap_stats_and_voice_samples(client: TestClient):
     samples = call("list_voice_samples", {"kind": "linkedin_post", "limit": 1})["result"]
     assert [s["body"] for s in samples] == ["Segundo post"]
     assert error("add_voice_sample", {"kind": "linkedin_post", "body": "   "})
+
+
+def test_mcp_list_jobs_shows_when_a_job_closed(conn: sqlite3.Connection):
+    from today.jobs import repo as jobs_repo
+
+    first, second = seed_jobs(conn)
+    jobs_repo.close_jobs(conn, [first], NOW)
+
+    by_id = {j["id"]: j for j in mcp_server.list_jobs(conn, TZ, status="all", limit=30)}
+
+    assert by_id[first]["closed_at"] == "2026-11-10T09:00:00-03:00"
+    assert by_id[second]["closed_at"] is None

@@ -209,8 +209,64 @@ def test_interested_search_job_closed_when_its_page_is_gone(conn: sqlite3.Connec
             return httpx.Response(200, text="<p>No longer accepting applications</p>")
         return httpx.Response(200, text="<p>Apply now</p>")
 
-    checked = check_interested_open(conn, httpx.Client(transport=httpx.MockTransport(page)), NOW)
+    client = httpx.Client(transport=httpx.MockTransport(page))
+    checked = check_interested_open(conn, client, NOW, sleep=lambda _s: None)
 
     assert checked == 3  # only interested jobs from search sources are fetched
     assert closed_at(conn, "gone") and closed_at(conn, "filled")
     assert closed_at(conn, "open") is None and closed_at(conn, "liked") is None
+
+
+def test_board_job_listed_again_reopens(conn: sqlite3.Connection):
+    """Two glitchy runs must not bury a job for good: back on the board means open again."""
+    for ids, days in ((["1", "2"], 0), (["1"], 2), (["1"], 4)):
+        run(conn, "greenhouse:acme", ids, days)
+    assert closed_at(conn, "2") is not None
+
+    run(conn, "greenhouse:acme", ["1", "2"], 6)
+    assert closed_at(conn, "2") is None
+
+
+def test_empty_board_listing_closes_nothing(conn: sqlite3.Connection):
+    """200 with jobs: [] (bad token, ATS migration, incident) is not proof that every job closed."""
+    run(conn, "greenhouse:acme", ["1"], 0)
+    for days in (2, 4):
+        run(conn, "greenhouse:acme", [], days)
+
+    assert closed_at(conn, "1") is None
+
+
+def interested(conn: sqlite3.Connection, *jobs: JobPosting) -> None:
+    repo.upsert_jobs(conn, list(jobs), NOW)
+    for row in repo.list_jobs(conn, None, 10):
+        repo.set_status(conn, row.id, "interested", NOW)
+
+
+def test_linkedin_page_check_uses_browser_headers_and_pacing(conn: sqlite3.Connection):
+    from today.jobs.collect import check_interested_open
+
+    interested(conn, posting("a", source="linkedin"), posting("b", source="linkedin"))
+    agents: list[str] = []
+    slept: list[float] = []
+
+    def page(request: httpx.Request) -> httpx.Response:
+        agents.append(request.headers["user-agent"])
+        return httpx.Response(999)  # LinkedIn's "go away": unknown, not closed
+
+    client = httpx.Client(transport=httpx.MockTransport(page))
+    check_interested_open(conn, client, NOW, sleep=slept.append)
+
+    assert agents and all("Mozilla" in a for a in agents)
+    assert slept and all(3 <= s <= 7 for s in slept)
+    assert closed_at(conn, "a") is None and closed_at(conn, "b") is None
+
+
+def test_bad_stored_url_does_not_break_the_check(conn: sqlite3.Connection):
+    from today.jobs.collect import check_interested_open
+
+    interested(conn, posting("x", source="gupy").model_copy(update={"url": "http://"}))
+    client = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200)))
+
+    check_interested_open(conn, client, NOW, sleep=lambda _s: None)
+
+    assert closed_at(conn, "x") is None

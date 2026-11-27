@@ -77,8 +77,11 @@ def run_slot(
     """Collect, record the slot, then (with an analyst) analyze pending jobs and push the strong ones."""
     with make_client() as client:
         report = collect(conn, client, sources, now)
-        check_interested_open(conn, client, now)
-    record_run(conn, slot, now, report)
+        record_run(conn, slot, now, report)
+        try:  # after record_run: a failure here must not leave the slot due (it would recollect each minute)
+            check_interested_open(conn, client, now)
+        except Exception:
+            log.exception("job slot %s: interested-jobs page check failed", slot)
     log.info("job slot %s: %s", slot, {name: (r.new, r.error) for name, r in report.items()})
     if analyst is None:
         return
